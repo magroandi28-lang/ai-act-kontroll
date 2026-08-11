@@ -1,13 +1,13 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Libre+Franklin:wght@500;600&family=Playfair+Display:wght@500;600&display=swap");
 
 :root {
-  --plum: #302239;
-  --plum-soft: #6f596f;
-  --terracotta: #c66e57;
-  --terracotta-dark: #ad5946;
-  --pearl: #faf7f4;
-  --stone: #e2d9d6;
-  --muted: #776e79;
+  --ink: #25252b;
+  --slate: #4f4b56;
+  --accent: #a55542;
+  --accent-dark: #854132;
+  --pearl: #f6f4f1;
+  --stone: #d7d2ce;
+  --muted: #716d74;
 }
 
 * { box-sizing: border-box; }
@@ -16,8 +16,8 @@ html, body { min-height: 100%; }
 
 body {
   margin: 0;
-  color: var(--plum);
-  background: #e9e3e8;
+  color: var(--ink);
+  background: #dedbd8;
   font-family: "DM Sans", Arial, sans-serif;
 }
 
@@ -29,9 +29,9 @@ button, input { font: inherit; }
   overflow: hidden;
   isolation: isolate;
   background:
-    radial-gradient(circle at 82% 14%, rgba(229, 192, 180, .58), transparent 31%),
-    radial-gradient(circle at 48% 72%, rgba(196, 187, 211, .72), transparent 43%),
-    linear-gradient(135deg, #f4efec 0%, #eee8ec 46%, #d9d0dd 100%);
+    radial-gradient(circle at 83% 15%, rgba(183, 173, 170, .34), transparent 30%),
+    radial-gradient(circle at 49% 72%, rgba(158, 153, 165, .3), transparent 43%),
+    linear-gradient(135deg, #f2f0ed 0%, #e9e6e4 48%, #d8d4d7 100%);
 }
 
 .login-page::after {
@@ -40,7 +40,7 @@ button, input { font: inherit; }
   inset: auto -10% -28% -8%;
   height: 58%;
   z-index: -1;
-  opacity: .42;
+  opacity: .22;
   background: repeating-radial-gradient(ellipse at 40% 10%, transparent 0 10px, rgba(255,255,255,.72) 11px 12px, transparent 13px 22px);
   transform: rotate(-7deg);
   mask-image: linear-gradient(to top, #000, transparent 83%);
@@ -58,11 +58,11 @@ header {
   display: inline-flex;
   align-items: center;
   gap: 13px;
-  color: var(--plum);
-  font: 600 22px/1 "Libre Franklin", sans-serif;
+  color: var(--ink);
+  font: 600 20px/1 "Libre Franklin", sans-serif;
 }
 
-.brand-mark { width: 48px; height: 48px; color: var(--terracotta); }
+.brand-mark { width: 43px; height: 43px; color: var(--accent); }
 
 .hero {
   width: min(1320px, calc(100% - 128px));
@@ -70,27 +70,27 @@ header {
   margin: 0 auto;
   padding: 28px 0 64px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 430px;
+  grid-template-columns: minmax(0, 1fr) 410px;
   align-items: center;
-  gap: 110px;
+  gap: 120px;
 }
 
 .hero-copy { position: relative; z-index: 1; max-width: 680px; }
 
 h1 {
-  margin: 0 0 42px;
-  color: var(--plum);
-  font: 500 clamp(58px, 5.1vw, 86px)/1.02 "Playfair Display", Georgia, serif;
-  letter-spacing: -.045em;
+  margin: 0 0 36px;
+  color: var(--ink);
+  font: 500 clamp(48px, 4.25vw, 70px)/1.06 "Playfair Display", Georgia, serif;
+  letter-spacing: -.035em;
 }
 
-h1 span { display: block; color: var(--terracotta); }
+h1 span { display: block; color: var(--accent); }
 
 .hero-copy p {
   margin: 0;
-  color: #433649;
-  font-size: clamp(19px, 1.55vw, 25px);
-  line-height: 1.55;
+  color: #48464d;
+  font-size: clamp(18px, 1.35vw, 22px);
+  line-height: 1.6;
 }
 
 .neural-network {
@@ -100,42 +100,42 @@ h1 span { display: block; color: var(--terracotta); }
   height: min(900px, 100vh);
   left: 21%;
   top: 2%;
-  opacity: .55;
-  filter: drop-shadow(0 0 10px rgba(255,255,255,.65));
+  opacity: .31;
+  filter: none;
 }
 
 .network-lines path {
   fill: none;
-  stroke: rgba(255, 255, 255, .78);
-  stroke-width: 1.35;
+  stroke: rgba(92, 86, 98, .46);
+  stroke-width: 1.05;
 }
 
 .network-nodes circle {
-  fill: #fff;
-  stroke: rgba(194, 151, 153, .44);
-  stroke-width: 3;
+  fill: #f8f6f3;
+  stroke: rgba(118, 99, 103, .48);
+  stroke-width: 2;
 }
 
 .login-card {
   position: relative;
   z-index: 2;
   width: 100%;
-  padding: 42px 42px 34px;
-  border: 1px solid rgba(94, 73, 91, .2);
-  border-radius: 24px;
-  background: rgba(250, 247, 244, .94);
-  box-shadow: 0 28px 65px rgba(68, 49, 68, .18);
+  padding: 38px 38px 30px;
+  border: 1px solid rgba(58, 55, 61, .17);
+  border-radius: 16px;
+  background: rgba(246, 244, 241, .97);
+  box-shadow: 0 24px 55px rgba(45, 42, 47, .14);
 }
 
 .login-card h2 {
   margin: 0 0 30px;
-  font: 600 36px/1.1 "Playfair Display", Georgia, serif;
+  font: 600 32px/1.1 "Playfair Display", Georgia, serif;
 }
 
 .login-card > label:not(.privacy-row) {
   display: block;
   margin: 22px 0 9px;
-  color: #362b3d;
+  color: #333138;
   font-weight: 500;
 }
 
@@ -156,17 +156,17 @@ h1 span { display: block; color: var(--terracotta); }
   width: 100%;
   height: 58px;
   padding: 0 50px;
-  color: var(--plum);
-  border: 1px solid #d5cbca;
-  border-radius: 10px;
+  color: var(--ink);
+  border: 1px solid #cbc7c4;
+  border-radius: 7px;
   outline: none;
   background: rgba(255,255,255,.53);
   transition: border-color .2s, box-shadow .2s;
 }
 
 .input-wrap input:focus {
-  border-color: var(--terracotta);
-  box-shadow: 0 0 0 3px rgba(198,110,87,.13);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(165,85,66,.11);
 }
 
 .eye-button {
@@ -198,10 +198,10 @@ h1 span { display: block; color: var(--terracotta); }
   width: 18px;
   height: 18px;
   margin: 0;
-  accent-color: var(--terracotta);
+  accent-color: var(--accent);
 }
 
-a { color: var(--terracotta-dark); }
+a { color: var(--accent-dark); }
 
 .form-message {
   margin: -10px 0 18px;
@@ -216,16 +216,16 @@ a { color: var(--terracotta-dark); }
   color: #fff;
   border: 0;
   border-radius: 10px;
-  background: var(--terracotta);
-  box-shadow: 0 10px 25px rgba(173,89,70,.18);
+  background: var(--accent);
+  box-shadow: 0 9px 22px rgba(100,60,51,.15);
   font-size: 18px;
   font-weight: 600;
   cursor: pointer;
   transition: background .2s, transform .2s;
 }
 
-.primary-button:hover { background: var(--terracotta-dark); transform: translateY(-1px); }
-.primary-button:focus-visible, .eye-button:focus-visible, a:focus-visible { outline: 3px solid rgba(198,110,87,.32); outline-offset: 3px; }
+.primary-button:hover { background: var(--accent-dark); transform: translateY(-1px); }
+.primary-button:focus-visible, .eye-button:focus-visible, a:focus-visible { outline: 3px solid rgba(165,85,66,.25); outline-offset: 3px; }
 
 .divider { height: 1px; margin: 27px 0 23px; background: #d9d0ce; }
 
