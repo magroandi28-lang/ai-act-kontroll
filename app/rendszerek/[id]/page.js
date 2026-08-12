@@ -1,8 +1,6 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { createClient } from "../../lib/supabase/server";
-
-const PAGE_SIZE = 5;
+import { notFound, redirect } from "next/navigation";
+import { createClient } from "../../../lib/supabase/server";
 
 const roleLabels = {
   provider: "Szolgáltató", deployer: "Alkalmazó", importer: "Importőr",
@@ -15,91 +13,54 @@ const lifecycleLabels = {
   pilot: "Próbaüzem", production: "Éles üzemben", suspended: "Felfüggesztett", retired: "Kivezetett",
 };
 
-const assessmentLabels = {
-  not_started: "Nincs elkezdve", in_progress: "Folyamatban",
-  completed: "Befejezve", needs_review: "Felülvizsgálat szükséges",
-};
-
-export default async function SystemsPage({ searchParams }) {
+export default async function SystemDetailPage({ params }) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/");
 
-  const requestedPage = Number.parseInt(searchParams?.oldal || "1", 10);
-  const currentPage = Number.isFinite(requestedPage) && requestedPage > 0 ? requestedPage : 1;
-
-  const { data: membership } = await supabase
-    .from("aic_organisation_members")
-    .select("organisation_id, aic_organisations(name)")
-    .eq("user_id", user.id)
+  const { data: system } = await supabase
+    .from("aic_ai_systems")
+    .select("id, name, description, intended_purpose, provider_name, organisation_role, deployment_context, lifecycle_stage, assessment_status, created_at, aic_system_type_templates(name_hu), aic_organisations(name)")
+    .eq("id", params.id)
     .maybeSingle();
 
-  if (!membership) redirect("/vezerlopult");
-
-  const from = (currentPage - 1) * PAGE_SIZE;
-  const to = from + PAGE_SIZE - 1;
-  const { data: systems, count } = await supabase
-    .from("aic_ai_systems")
-    .select("id, name, intended_purpose, organisation_role, lifecycle_stage, assessment_status, created_at, aic_system_type_templates(name_hu)", { count: "exact" })
-    .eq("organisation_id", membership.organisation_id)
-    .eq("inventory_status", "active")
-    .order("created_at", { ascending: false })
-    .range(from, to);
-
-  const total = count || 0;
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  if (currentPage > totalPages && total > 0) redirect(`/rendszerek?oldal=${totalPages}`);
+  if (!system) notFound();
 
   return (
-    <main className="systems-page">
-      <section className="systems-shell">
-        <div className="systems-topbar">
+    <main className="system-detail-page">
+      <section className="system-detail-shell">
+        <Link className="back-link" href="/rendszerek">← Vissza a mentett rendszerekhez</Link>
+
+        <header className="system-detail-header">
           <div>
-            <Link className="back-link" href="/vezerlopult">← Vissza az irányítópultra</Link>
-            <p className="system-form-eyebrow">{membership.aic_organisations?.name}</p>
-            <h1>Mentett MI-rendszerek</h1>
-            <p>{total} nyilvántartott rendszer</p>
+            <p className="system-form-eyebrow">{system.aic_organisations?.name}</p>
+            <span className="system-detail-type">{system.aic_system_type_templates?.name_hu}</span>
+            <h1>{system.name}</h1>
+            <p>{system.intended_purpose}</p>
           </div>
-          <Link className="systems-add-button" href="/rendszerek/uj">+ Új MI-rendszer</Link>
+          <span className="assessment-badge assessment-badge-pending">Értékelés nincs elkezdve</span>
+        </header>
+
+        <div className="system-detail-grid">
+          <section className="system-detail-card">
+            <h2>Rendszeradatok</h2>
+            <dl className="detail-list">
+              <div><dt>Szerep</dt><dd>{roleLabels[system.organisation_role] || "Még nem ismert"}</dd></div>
+              <div><dt>Életciklus</dt><dd>{lifecycleLabels[system.lifecycle_stage] || system.lifecycle_stage}</dd></div>
+              <div><dt>Szolgáltató</dt><dd>{system.provider_name || "Nincs megadva"}</dd></div>
+              <div><dt>Alkalmazási környezet</dt><dd>{system.deployment_context || "Nincs megadva"}</dd></div>
+            </dl>
+            {system.description && <p className="system-detail-description">{system.description}</p>}
+          </section>
+
+          <section className="assessment-start-card">
+            <div className="assessment-orbit" aria-hidden="true"><span /></div>
+            <p className="system-form-eyebrow">Következő lépés</p>
+            <h2>Szabályozási vizsgálat</h2>
+            <p>Válaszolj a rendszerre szabott kérdésekre. Az alkalmazás ezek alapján választja ki a vonatkozó AI Act-szabályokat.</p>
+            <Link className="assessment-start-button" href={`/rendszerek/${system.id}/vizsgalat`}>Vizsgálat indítása →</Link>
+          </section>
         </div>
-
-        {searchParams?.letrehozva === "1" && (
-          <p className="systems-success" role="status">Az MI-rendszer mentése sikerült.</p>
-        )}
-
-        {systems?.length ? (
-          <div className="systems-list">
-            {systems.map((system) => (
-              <Link className="system-row" href={`/rendszerek/${system.id}`} key={system.id}>
-                <div className="system-row-main">
-                  <span>{system.aic_system_type_templates?.name_hu || "Egyéb MI-rendszer"}</span>
-                  <h2>{system.name}</h2>
-                  <p>{system.intended_purpose}</p>
-                </div>
-                <dl className="system-row-meta">
-                  <div><dt>Szerep</dt><dd>{roleLabels[system.organisation_role] || "Még nem ismert"}</dd></div>
-                  <div><dt>Állapot</dt><dd>{lifecycleLabels[system.lifecycle_stage] || system.lifecycle_stage}</dd></div>
-                  <div><dt>Értékelés</dt><dd>{assessmentLabels[system.assessment_status] || system.assessment_status}</dd></div>
-                </dl>
-                <span className="system-row-arrow" aria-hidden="true">→</span>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <div className="systems-empty">
-            <h2>Még nincs mentett MI-rendszer</h2>
-            <p>Az első rendszer rögzítésével megkezdheted a szabályozási vizsgálatot.</p>
-            <Link className="systems-add-button" href="/rendszerek/uj">Új MI-rendszer rögzítése</Link>
-          </div>
-        )}
-
-        {totalPages > 1 && (
-          <nav className="pagination" aria-label="Lapozás">
-            {currentPage > 1 ? <Link href={`/rendszerek?oldal=${currentPage - 1}`}>← Előző</Link> : <span />}
-            <span>{currentPage} / {totalPages}. oldal</span>
-            {currentPage < totalPages ? <Link href={`/rendszerek?oldal=${currentPage + 1}`}>Következő →</Link> : <span />}
-          </nav>
-        )}
       </section>
     </main>
   );
