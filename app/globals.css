@@ -754,6 +754,23 @@ input:disabled {
 .assessment-orbit::after { inset: 62px; }
 .assessment-orbit span { position: absolute; width: 8px; height: 8px; left: 24px; top: 104px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 14px var(--cyan); }
 
+.assessment-page { min-height: 100vh; padding: 48px 20px 70px; background: radial-gradient(circle at 15% 18%,rgba(0,189,218,.07),transparent 28%),var(--navy-950); }
+.assessment-shell { width: min(100%,820px); margin: 0 auto; }
+.assessment-shell h1 { margin: 16px 0 12px; font-size: clamp(40px,6vw,60px); }
+.assessment-intro { margin: 0 0 32px; color: #aebbc4; font-size: 16px; line-height: 1.65; }
+.assessment-form { display: grid; gap: 14px; }
+.assessment-question { padding: 22px 24px; display: grid; grid-template-columns: 42px minmax(0,1fr) auto; align-items: center; gap: 18px; border: 1px solid var(--line); border-radius: 13px; background: rgba(8,29,44,.72); transition: border-color .2s,background .2s; }
+.assessment-question:has(.selected) { border-color: rgba(0,189,218,.38); background: rgba(9,33,50,.92); }
+.assessment-question > span { color: var(--cyan); font-size: 12px; font-weight: 700; }
+.assessment-question h2 { margin: 0; font-size: 17px; line-height: 1.5; }
+.binary-choice { display: flex; gap: 8px; }
+.binary-choice button { min-width: 70px; height: 42px; color: #b9c6cd; border: 1px solid var(--line); border-radius: 8px; background: rgba(255,255,255,.03); cursor: pointer; }
+.binary-choice button.selected { color: #04141f; border-color: var(--cyan); background: var(--cyan); font-weight: 800; }
+.assessment-message { margin: 4px 0 0; padding: 13px 16px; color: #ffc0af; border-radius: 8px; background: rgba(255,84,45,.07); }
+.assessment-message.success { color: #b9f1d8; background: rgba(118,228,182,.08); }
+.assessment-save-button { min-height: 54px; margin-top: 10px; color: #fff; border: 0; border-radius: 9px; background: var(--orange); font-weight: 800; cursor: pointer; }
+.assessment-save-button:disabled { opacity: .65; cursor: wait; }
+
 @media (max-width: 640px) {
   .auth-panel,
   .dashboard-panel,
@@ -772,4 +789,6 @@ input:disabled {
   .system-detail-header { flex-direction: column; }
   .system-detail-grid { grid-template-columns: 1fr; }
   .detail-list { grid-template-columns: 1fr; }
+  .assessment-question { grid-template-columns: 34px minmax(0,1fr); }
+  .binary-choice { grid-column: 2; }
 }
