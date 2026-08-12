@@ -1,8 +1,10 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "../../../../lib/supabase/client";
 
 export default function AssessmentForm({ systemId, userId, questions, defaultFacts, savedFacts }) {
+  const router = useRouter();
   const [answers, setAnswers] = useState(savedFacts);
   const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
@@ -17,9 +19,22 @@ export default function AssessmentForm({ systemId, userId, questions, defaultFac
     const facts = { ...defaultFacts, ...visibleAnswers, law_enforcement_exception_applies: false };
     const supabase = createClient();
     const { error } = await supabase.from("aic_system_facts").upsert({ system_id: systemId, facts, completion_status: "complete", updated_by: userId, updated_at: new Date().toISOString() }, { onConflict: "system_id" });
-    if (!error) await supabase.from("aic_ai_systems").update({ assessment_status: "in_progress", updated_by: userId }).eq("id", systemId);
-    setSaving(false);
-    setMessage(error ? "A válaszok mentése nem sikerült." : "A válaszokat elmentettük. Következik a szabályok kiértékelése.");
+    if (error) {
+      setSaving(false);
+      setMessage("A válaszok mentése nem sikerült.");
+      return;
+    }
+    await supabase.from("aic_ai_systems").update({ assessment_status: "in_progress", updated_by: userId }).eq("id", systemId);
+    setMessage("A válaszokat elmentettük. A szabályok kiértékelése folyamatban…");
+    const response = await fetch(`/api/rendszerek/${systemId}/ertekeles`, { method: "POST" });
+    const result = await response.json();
+    if (!response.ok) {
+      setSaving(false);
+      setMessage(result.error || "A szabályok kiértékelése nem sikerült.");
+      return;
+    }
+    router.push(`/rendszerek/${systemId}/eredmeny`);
+    router.refresh();
   }
 
   return <div className="assessment-form">
@@ -28,6 +43,6 @@ export default function AssessmentForm({ systemId, userId, questions, defaultFac
       <div className="binary-choice"><button className={answers[question.fact_key] === true ? "selected" : ""} type="button" onClick={() => choose(question.fact_key, true)}>Igen</button><button className={answers[question.fact_key] === false ? "selected" : ""} type="button" onClick={() => choose(question.fact_key, false)}>Nem</button></div>
     </section>)}
     {message && <p className={message.startsWith("A válaszokat") ? "assessment-message success" : "assessment-message"} role="status">{message}</p>}
-    <button className="assessment-save-button" type="button" onClick={saveAssessment} disabled={saving}>{saving ? "Mentés…" : "Válaszok mentése"}</button>
+    <button className="assessment-save-button" type="button" onClick={saveAssessment} disabled={saving}>{saving ? "Kiértékelés…" : "Mentés és kiértékelés"}</button>
   </div>;
 }
