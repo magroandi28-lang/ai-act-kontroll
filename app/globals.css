@@ -763,6 +763,7 @@ input:disabled {
 .assessment-question:has(.selected) { border-color: rgba(0,189,218,.38); background: rgba(9,33,50,.92); }
 .assessment-question > span { color: var(--cyan); font-size: 12px; font-weight: 700; }
 .assessment-question h2 { margin: 0; font-size: 17px; line-height: 1.5; }
+.assessment-question h2 + p { margin: 7px 0 0; color: #8297a2; font-size: 12px; line-height: 1.5; }
 .binary-choice { display: flex; gap: 8px; }
 .binary-choice button { min-width: 70px; height: 42px; color: #b9c6cd; border: 1px solid var(--line); border-radius: 8px; background: rgba(255,255,255,.03); cursor: pointer; }
 .binary-choice button.selected { color: #04141f; border-color: var(--cyan); background: var(--cyan); font-weight: 800; }
