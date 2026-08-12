@@ -70,7 +70,7 @@ export default async function SystemsPage({ searchParams }) {
         {systems?.length ? (
           <div className="systems-list">
             {systems.map((system) => (
-              <article className="system-row" key={system.id}>
+              <Link className="system-row" href={`/rendszerek/${system.id}`} key={system.id}>
                 <div className="system-row-main">
                   <span>{system.aic_system_type_templates?.name_hu || "Egyéb MI-rendszer"}</span>
                   <h2>{system.name}</h2>
@@ -81,7 +81,8 @@ export default async function SystemsPage({ searchParams }) {
                   <div><dt>Állapot</dt><dd>{lifecycleLabels[system.lifecycle_stage] || system.lifecycle_stage}</dd></div>
                   <div><dt>Értékelés</dt><dd>{assessmentLabels[system.assessment_status] || system.assessment_status}</dd></div>
                 </dl>
-              </article>
+                <span className="system-row-arrow" aria-hidden="true">→</span>
+              </Link>
             ))}
           </div>
         ) : (
