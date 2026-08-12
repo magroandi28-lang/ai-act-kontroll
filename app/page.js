@@ -7,7 +7,11 @@ import { createClient } from "../lib/supabase/client";
 function Logo() {
   return (
     <div className="brand" aria-label="EnergiaAI Kontroll">
-      <svg className="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+      <svg
+        className="brand-mark"
+        viewBox="0 0 64 64"
+        aria-hidden="true"
+      >
         <path
           d="M32 3 56 17v30L32 61 8 47V17L32 3Z"
           fill="none"
@@ -22,6 +26,7 @@ function Logo() {
           strokeLinecap="round"
         />
       </svg>
+
       <span>EnergiaAI Kontroll</span>
     </div>
   );
@@ -65,7 +70,14 @@ function NeuralBackground() {
         ].map((node) => {
           const [cx, cy, r] = node.split(",");
 
-          return <circle key={node} cx={cx} cy={cy} r={r} />;
+          return (
+            <circle
+              key={node}
+              cx={cx}
+              cy={cy}
+              r={r}
+            />
+          );
         })}
       </g>
     </svg>
@@ -94,6 +106,7 @@ function EyeIcon({ hidden }) {
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6S2 12 2 12Z" />
       <circle cx="12" cy="12" r="2.5" />
+
       {hidden && <path d="m4 4 16 16" />}
     </svg>
   );
@@ -105,6 +118,21 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+
+  function rememberPrivacyChoice(event) {
+    const form = event.currentTarget.closest("form");
+
+    if (form?.elements?.privacy?.checked) {
+      sessionStorage.setItem(
+        "energiaai_privacy_accepted",
+        "true"
+      );
+    } else {
+      sessionStorage.removeItem(
+        "energiaai_privacy_accepted"
+      );
+    }
+  }
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -123,10 +151,15 @@ export default function LoginPage() {
 
     const supabase = createClient();
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email: String(data.get("email") || "").trim(),
-      password: String(data.get("password") || ""),
-    });
+    const { error } =
+      await supabase.auth.signInWithPassword({
+        email: String(
+          data.get("email") || ""
+        ).trim(),
+        password: String(
+          data.get("password") || ""
+        ),
+      });
 
     if (error) {
       setLoading(false);
@@ -146,7 +179,10 @@ export default function LoginPage() {
         <Logo />
       </header>
 
-      <section className="hero" aria-labelledby="hero-title">
+      <section
+        className="hero"
+        aria-labelledby="hero-title"
+      >
         <div className="hero-copy">
           <h1 id="hero-title">
             Vállalati
@@ -170,7 +206,9 @@ export default function LoginPage() {
         >
           <h2>Belépés</h2>
 
-          <label htmlFor="email">E-mail-cím</label>
+          <label htmlFor="email">
+            E-mail-cím
+          </label>
 
           <div className="input-wrap">
             <MailIcon />
@@ -186,7 +224,9 @@ export default function LoginPage() {
             />
           </div>
 
-          <label htmlFor="password">Jelszó</label>
+          <label htmlFor="password">
+            Jelszó
+          </label>
 
           <div className="input-wrap">
             <LockIcon />
@@ -194,7 +234,11 @@ export default function LoginPage() {
             <input
               id="password"
               name="password"
-              type={showPassword ? "text" : "password"}
+              type={
+                showPassword
+                  ? "text"
+                  : "password"
+              }
               placeholder="Jelszó"
               autoComplete="current-password"
               required
@@ -205,7 +249,9 @@ export default function LoginPage() {
               className="eye-button"
               type="button"
               onClick={() =>
-                setShowPassword((value) => !value)
+                setShowPassword(
+                  (value) => !value
+                )
               }
               aria-label={
                 showPassword
@@ -233,7 +279,10 @@ export default function LoginPage() {
           </label>
 
           {message && (
-            <p className="form-message" role="alert">
+            <p
+              className="form-message"
+              role="alert"
+            >
               {message}
             </p>
           )}
@@ -243,7 +292,9 @@ export default function LoginPage() {
             type="submit"
             disabled={loading}
           >
-            {loading ? "Belépés…" : "Belépés"}
+            {loading
+              ? "Belépés…"
+              : "Belépés"}
           </button>
 
           <div className="divider" />
@@ -251,6 +302,7 @@ export default function LoginPage() {
           <a
             className="register-link"
             href="/regisztracio"
+            onClick={rememberPrivacyChoice}
           >
             Regisztráció
           </a>
