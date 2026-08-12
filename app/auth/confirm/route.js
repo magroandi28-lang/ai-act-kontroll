@@ -5,22 +5,35 @@ import { createInitialAccountData } from "../../../lib/auth/bootstrap";
 export async function GET(request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
+  const tokenHash =
+    requestUrl.searchParams.get("token_hash");
+  const type = requestUrl.searchParams.get("type");
   const origin = requestUrl.origin;
 
-  if (!code) {
+  const supabase = createClient();
+  let confirmationError;
+
+  if (tokenHash && type) {
+    const result = await supabase.auth.verifyOtp({
+      token_hash: tokenHash,
+      type,
+    });
+
+    confirmationError = result.error;
+  } else if (code) {
+    const result =
+      await supabase.auth.exchangeCodeForSession(code);
+
+    confirmationError = result.error;
+  } else {
     return NextResponse.redirect(
-      `${origin}/?hiba=ervenytelen-megerosites`
+      `${origin}/auth/hiba`
     );
   }
 
-  const supabase = createClient();
-
-  const { error: exchangeError } =
-    await supabase.auth.exchangeCodeForSession(code);
-
-  if (exchangeError) {
+  if (confirmationError) {
     return NextResponse.redirect(
-      `${origin}/?hiba=ervenytelen-megerosites`
+      `${origin}/auth/hiba`
     );
   }
 
@@ -30,7 +43,7 @@ export async function GET(request) {
 
   if (!user) {
     return NextResponse.redirect(
-      `${origin}/?hiba=ervenytelen-megerosites`
+      `${origin}/auth/hiba`
     );
   }
 
@@ -38,7 +51,7 @@ export async function GET(request) {
     await createInitialAccountData(supabase, user);
   } catch {
     return NextResponse.redirect(
-      `${origin}/?hiba=fiok-adatok`
+      `${origin}/auth/hiba?ok=fiok-adatok`
     );
   }
 
