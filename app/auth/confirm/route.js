@@ -49,9 +49,17 @@ export async function GET(request) {
 
   try {
     await createInitialAccountData(supabase, user);
-  } catch {
+  } catch (error) {
+    // Az e-mail megerősítése ettől még sikeres volt.
+    // Az induló fiókadatok hibája nem teheti
+    // hibássá a megerősítő linket.
+    console.error(
+      "Az induló fiókadatok létrehozása nem sikerült:",
+      error
+    );
+
     return NextResponse.redirect(
-      `${origin}/auth/hiba?ok=fiok-adatok`
+      `${origin}/vezerlopult?fiok_adatok=hiba`
     );
   }
 
