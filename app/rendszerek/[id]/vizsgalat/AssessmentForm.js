@@ -2,27 +2,19 @@
 import { useState } from "react";
 import { createClient } from "../../../../lib/supabase/client";
 
-const questions = [
-  ["ai_interaction_obvious", "Egyértelműen jelzi a chatbot, hogy a felhasználó MI-rendszerrel kommunikál?"],
-  ["materially_influences_decision", "Hoz vagy érdemben befolyásol a chatbot az ügyfélre vonatkozó döntést?"],
-  ["annex_iii_biometrics_use_case", "Használ a chatbot biometrikus azonosítást vagy biometrikus elemzést?"],
-  ["infers_natural_person_emotions", "Próbál a chatbot érzelmeket felismerni vagy kikövetkeztetni?"],
-  ["generates_synthetic_content", "Generál a chatbot új szöveget, hangot, képet vagy más tartalmat?"],
-];
-
-export default function AssessmentForm({ systemId, userId, defaultFacts, savedFacts }) {
+export default function AssessmentForm({ systemId, userId, questions, defaultFacts, savedFacts }) {
   const [answers, setAnswers] = useState(savedFacts);
   const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
   const choose = (key, value) => { setAnswers((current) => ({ ...current, [key]: value })); setMessage(""); };
-  const visible = [...questions];
-  if (answers.materially_influences_decision === true) visible.splice(2, 0, ["annex_iii_ai_assisted_significant_individual_decision", "Lehet a döntésnek jogi vagy hasonlóan jelentős hatása az ügyfélre?"]);
-  const complete = visible.every(([key]) => typeof answers[key] === "boolean");
+  const visible = questions.filter((question) => !question.show_when || answers[question.show_when.fact_key] === question.show_when.equals);
+  const complete = visible.filter((question) => question.required).every((question) => typeof answers[question.fact_key] === "boolean");
 
   async function saveAssessment() {
     if (!complete) { setMessage("Válaszolj minden látható kérdésre."); return; }
     setSaving(true); setMessage("");
-    const facts = { ...defaultFacts, ...answers, law_enforcement_exception_applies: false };
+    const visibleAnswers = Object.fromEntries(visible.map((question) => [question.fact_key, answers[question.fact_key]]));
+    const facts = { ...defaultFacts, ...visibleAnswers, law_enforcement_exception_applies: false };
     const supabase = createClient();
     const { error } = await supabase.from("aic_system_facts").upsert({ system_id: systemId, facts, completion_status: "complete", updated_by: userId, updated_at: new Date().toISOString() }, { onConflict: "system_id" });
     if (!error) await supabase.from("aic_ai_systems").update({ assessment_status: "in_progress", updated_by: userId }).eq("id", systemId);
@@ -31,9 +23,9 @@ export default function AssessmentForm({ systemId, userId, defaultFacts, savedFa
   }
 
   return <div className="assessment-form">
-    {visible.map(([key, text], index) => <section className="assessment-question" key={key}>
-      <span>{String(index + 1).padStart(2, "0")}</span><h2>{text}</h2>
-      <div className="binary-choice"><button className={answers[key] === true ? "selected" : ""} type="button" onClick={() => choose(key, true)}>Igen</button><button className={answers[key] === false ? "selected" : ""} type="button" onClick={() => choose(key, false)}>Nem</button></div>
+    {visible.map((question, index) => <section className="assessment-question" key={question.id}>
+      <span>{String(index + 1).padStart(2, "0")}</span><div><h2>{question.question_text_hu}</h2>{question.help_text_hu && <p>{question.help_text_hu}</p>}</div>
+      <div className="binary-choice"><button className={answers[question.fact_key] === true ? "selected" : ""} type="button" onClick={() => choose(question.fact_key, true)}>Igen</button><button className={answers[question.fact_key] === false ? "selected" : ""} type="button" onClick={() => choose(question.fact_key, false)}>Nem</button></div>
     </section>)}
     {message && <p className={message.startsWith("A válaszokat") ? "assessment-message success" : "assessment-message"} role="status">{message}</p>}
     <button className="assessment-save-button" type="button" onClick={saveAssessment} disabled={saving}>{saving ? "Mentés…" : "Válaszok mentése"}</button>
