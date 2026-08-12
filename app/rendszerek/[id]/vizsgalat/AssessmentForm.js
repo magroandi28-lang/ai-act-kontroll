@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "../../../../lib/supabase/client";
+import { evaluateSystem } from "./actions";
 
 export default function AssessmentForm({ systemId, userId, questions, defaultFacts, savedFacts }) {
   const router = useRouter();
@@ -26,11 +27,10 @@ export default function AssessmentForm({ systemId, userId, questions, defaultFac
     }
     await supabase.from("aic_ai_systems").update({ assessment_status: "in_progress", updated_by: userId }).eq("id", systemId);
     setMessage("A válaszokat elmentettük. A szabályok kiértékelése folyamatban…");
-    const response = await fetch(`/api/rendszerek/${systemId}/ertekeles`, { method: "POST" });
-    const result = await response.json();
-    if (!response.ok) {
+    const result = await evaluateSystem(systemId);
+    if (result.error) {
       setSaving(false);
-      setMessage(result.error || "A szabályok kiértékelése nem sikerült.");
+      setMessage(result.error);
       return;
     }
     router.push(`/rendszerek/${systemId}/eredmeny`);
