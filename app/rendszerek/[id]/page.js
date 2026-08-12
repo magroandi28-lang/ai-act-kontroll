@@ -13,6 +13,13 @@ const lifecycleLabels = {
   pilot: "Próbaüzem", production: "Éles üzemben", suspended: "Felfüggesztett", retired: "Kivezetett",
 };
 
+const assessmentLabels = {
+  not_started: "Értékelés nincs elkezdve",
+  in_progress: "Értékelés folyamatban",
+  needs_review: "Pontosítás szükséges",
+  completed: "Értékelés elkészült",
+};
+
 export default async function SystemDetailPage({ params }) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -38,7 +45,9 @@ export default async function SystemDetailPage({ params }) {
             <h1>{system.name}</h1>
             <p>{system.intended_purpose}</p>
           </div>
-          <span className="assessment-badge assessment-badge-pending">Értékelés nincs elkezdve</span>
+          <span className={`assessment-badge assessment-badge-${system.assessment_status || "not_started"}`}>
+            {assessmentLabels[system.assessment_status] || assessmentLabels.not_started}
+          </span>
         </header>
 
         <div className="system-detail-grid">
@@ -55,10 +64,14 @@ export default async function SystemDetailPage({ params }) {
 
           <section className="assessment-start-card">
             <div className="assessment-orbit" aria-hidden="true"><span /></div>
-            <p className="system-form-eyebrow">Következő lépés</p>
+            <p className="system-form-eyebrow">{["completed", "needs_review"].includes(system.assessment_status) ? "Elkészült" : "Következő lépés"}</p>
             <h2>Szabályozási vizsgálat</h2>
-            <p>Válaszolj a rendszerre szabott kérdésekre. Az alkalmazás ezek alapján választja ki a vonatkozó AI Act-szabályokat.</p>
-            <Link className="assessment-start-button" href={`/rendszerek/${system.id}/vizsgalat`}>Vizsgálat indítása →</Link>
+            <p>Az alkalmazás a rendszer tényei alapján, determinisztikus szabályokkal választja ki a vonatkozó AI Act-követelményeket.</p>
+            {["completed", "needs_review"].includes(system.assessment_status) ? (
+              <Link className="assessment-start-button" href={`/rendszerek/${system.id}/eredmeny`}>Eredmény megnyitása →</Link>
+            ) : (
+              <Link className="assessment-start-button" href={`/rendszerek/${system.id}/vizsgalat`}>Vizsgálat indítása →</Link>
+            )}
           </section>
         </div>
       </section>
