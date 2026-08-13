@@ -16,32 +16,26 @@ export default async function PolicyPage({ params }) {
 
   if (!system) notFound();
 
-  let { data: policy } = await supabase
-    .from("aic_generated_policies")
-    .select("id,title,executive_summary,document_sections,version,status,created_at,updated_at")
-    .eq("ai_system_id", system.id)
-    .order("version", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
   let generationError = null;
+  let policy = null;
 
-  if (!policy) {
-    const { data: policyId, error } = await supabase.rpc("aic_generate_policy", {
-      p_ai_system_id: system.id,
-    });
+  // Minden megnyitáskor ellenőrzi a forrásmodulokat, de csak valódi
+  // tartalmi változás esetén hoz létre új dokumentumverziót.
+  const { data: generation, error: generationRequestError } = await supabase.rpc(
+    "aic_generate_policy_if_changed",
+    { p_ai_system_id: system.id }
+  );
 
-    if (error) {
-      generationError = error.message;
-    } else {
-      const result = await supabase
-        .from("aic_generated_policies")
-        .select("id,title,executive_summary,document_sections,version,status,created_at,updated_at")
-        .eq("id", policyId)
-        .maybeSingle();
-      policy = result.data;
-      generationError = result.error?.message || null;
-    }
+  if (generationRequestError) {
+    generationError = generationRequestError.message;
+  } else if (generation?.policy_id) {
+    const result = await supabase
+      .from("aic_generated_policies")
+      .select("id,title,executive_summary,document_sections,version,status,created_at,updated_at")
+      .eq("id", generation.policy_id)
+      .maybeSingle();
+    policy = result.data;
+    generationError = result.error?.message || null;
   }
 
   if (!policy) {

@@ -10,6 +10,20 @@ function normalise(value) {
     .toLocaleLowerCase("hu-HU");
 }
 
+function legalReferenceLabel(reference) {
+  const sourceTitle = reference.source_title || "Hivatalos jogforrás";
+  if (!reference.article_number) return `${sourceTitle} – ${reference.heading || "kapcsolódó rendelkezés"}`;
+  const suffix = /AI Act|Data Protection Regulation|GDPR/i.test(sourceTitle) ? "cikk" :
+    /melléklet/i.test(reference.article_number) ? "" : "§";
+  return `${sourceTitle} – ${reference.article_number}${suffix ? `. ${suffix}` : ""}`;
+}
+
+function moduleKindLabel(moduleKind) {
+  if (moduleKind === "legal_requirement") return "Kötelező jogi követelmény";
+  if (moduleKind === "internal_control") return "Belső működési kontroll";
+  return "Alkalmazási útmutató";
+}
+
 export default function SearchablePolicy({ policy, system, generatedDate }) {
   const [query, setQuery] = useState("");
   const sections = Array.isArray(policy.document_sections) ? policy.document_sections : [];
@@ -51,11 +65,11 @@ export default function SearchablePolicy({ policy, system, generatedDate }) {
       <article className="policy-document">
         <header className="policy-cover">
           <p>ENERGIAAI KONTROLL</p>
-          <h1>{policy.title}</h1>
+          <h1>{system.name} alkalmazandó szabályozási és megfelelőségi követelményei</h1>
           <dl>
             <div><dt>Szervezet</dt><dd>{system.aic_organisations?.name || "Nincs megadva"}</dd></div>
             <div><dt>MI-rendszer</dt><dd>{system.name}</dd></div>
-            <div><dt>Szabályzat verziója</dt><dd>{policy.version}. verzió</dd></div>
+            <div><dt>Dokumentum verziója</dt><dd>{policy.version}. verzió</dd></div>
             <div><dt>Frissítés dátuma</dt><dd>{generatedDate}</dd></div>
           </dl>
         </header>
@@ -65,7 +79,7 @@ export default function SearchablePolicy({ policy, system, generatedDate }) {
           <p>{policy.executive_summary}</p>
         </section>
 
-        <nav className="policy-toc policy-section" aria-label="A szabályzat tartalomjegyzéke">
+        <nav className="policy-toc policy-section" aria-label="A követelménydokumentum tartalomjegyzéke">
           <h2>Tartalomjegyzék</h2>
           <ol>
             {sections.map((section, index) => (
@@ -77,13 +91,16 @@ export default function SearchablePolicy({ policy, system, generatedDate }) {
         </nav>
 
         <section className="policy-section">
-          <h2>A szabályzat rendelkezései</h2>
+          <h2>Alkalmazandó követelmények és kontrollok</h2>
           {sections.map((section, index) => (
             <section
               className={`policy-chapter policy-generated-chapter ${matches[index] ? "" : "is-search-hidden"}`}
               id={`fejezet-${section.number || index + 1}`}
               key={section.section_key || index}
             >
+              <span className={`policy-kind policy-kind-${section.module_kind || "guidance"}`}>
+                {moduleKindLabel(section.module_kind)}
+              </span>
               <h3>{section.number || index + 1}. {section.title}</h3>
               <p>{section.content}</p>
               {section.legal_references?.length > 0 && (
@@ -94,10 +111,10 @@ export default function SearchablePolicy({ policy, system, generatedDate }) {
                       {referenceIndex ? "; " : ""}
                       {reference.official_url ? (
                         <a href={reference.official_url} target="_blank" rel="noreferrer">
-                          {reference.article_number ? `AI Act ${reference.article_number}. cikk` : reference.heading}
+                          {legalReferenceLabel(reference)}
                         </a>
                       ) : (
-                        reference.article_number ? `AI Act ${reference.article_number}. cikk` : reference.heading
+                        legalReferenceLabel(reference)
                       )}
                     </span>
                   ))}
@@ -108,7 +125,7 @@ export default function SearchablePolicy({ policy, system, generatedDate }) {
         </section>
 
         <footer className="policy-footer">
-          <p>A szabályzatot az EnergiaAI Kontroll determinisztikus szabálymotorja állította össze. A dokumentum nem minősül egyedi jogi tanácsadásnak.</p>
+          <p>A követelménydokumentumot az EnergiaAI Kontroll determinisztikus szabálymotorja állította össze. A kötelező jogi követelményeket, a belső működési kontrollokat és az alkalmazási útmutatókat elkülönítve jeleníti meg. A dokumentum nem minősül egyedi jogi tanácsadásnak.</p>
         </footer>
       </article>
     </main>
