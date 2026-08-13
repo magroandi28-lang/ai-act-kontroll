@@ -827,6 +827,10 @@ input:disabled {
 .policy-toc a, .policy-legal-reference a { color: #087d94; }
 .policy-generated-chapter { scroll-margin-top: 24px; }
 .policy-generated-chapter > p:first-of-type { white-space: pre-line; }
+.policy-kind { display: inline-block; margin-bottom: 8px; padding: 3px 8px; border-radius: 999px; font-size: 9px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.policy-kind-legal_requirement { color: #07576a; background: #e3f5f8; }
+.policy-kind-internal_control { color: #70421e; background: #fff1df; }
+.policy-kind-guidance { color: #4f4f67; background: #eeeeF5; }
 .is-search-muted { opacity: .38; }
 .is-search-hidden { display: none; }
 .policy-generation-error { width: min(100%,900px); margin: 0 auto; padding: 36px; color: #17222b; border-radius: 10px; background: #fff; box-shadow: 0 20px 55px rgba(0,0,0,.12); }
