@@ -11,8 +11,11 @@
 | RUN-DASH-002 | DASH-NAV-001 | Vercel, Chrome, Windows | **Sikeres** | – | Nem szükséges |
 | RUN-DASH-003 | DASH-NAV-002 | Vercel, Chrome, Windows | **Sikeres** | – | Nem szükséges |
 | RUN-POLICY-BUILD-001 | Projekt build | Helyi Next.js 14.2.35 | **Sikeres** | – | Nem szükséges |
-| RUN-POLICY-001 | POLICY-001 | Vercel, Chrome, Windows | **Tesztelésre vár** | – | Szükséges |
-| RUN-POLICY-002 | POLICY-002 | Vercel, Chrome, Windows | **Tesztelésre vár** | – | Szükséges |
+| RUN-POLICY-001 | POLICY-001 | Vercel, Chrome, Windows | **Sikeres** | – | Nem szükséges |
+| RUN-POLICY-002 | POLICY-002 | Vercel, Chrome, Windows | **Sikeres** | – | Nem szükséges |
+| RUN-CATALOG-BUILD-001 | Projekt build | Helyi Next.js 14.2.35 | **Sikeres** | – | Nem szükséges |
+| RUN-CATALOG-001 | SYSTEM-CATALOG-001 | Vercel, Chrome, Windows | **Tesztelésre vár** | – | Szükséges |
+| RUN-CATALOG-002 | SYSTEM-CATALOG-002 | Vercel, Chrome, Windows | **Tesztelésre vár** | – | Szükséges |
 
 ## RUN-AUTH-001 részletei
 
@@ -41,3 +44,11 @@ Az irányítópult fejlesztése után a bejelentkezés ismét sikeres volt, ezé
 ## RUN-POLICY-BUILD-001 részletei
 
 Az audit utáni alkalmazáskód `npm run build` paranccsal sikeresen lefordult. A Next.js fordítás, lintelés és típusellenőrzés hibát nem jelzett. A Vercel-környezetben végzendő felületi teszteket csak a fájlok feltöltése után lehet lezárni.
+
+## RUN-POLICY-001 és RUN-POLICY-002 részletei
+
+A mentett ügyfélszolgálati chatbot kártyájáról köztes oldal nélkül megnyílt az alkalmazandó szabályozási és megfelelőségi követelménydokumentum. A 2. verzió 26 fejezetet tartalmazott, a teljes útvonal működött, a dokumentum listázható, kereshető és PDF-ként menthető volt. A PDF 11 A4-oldalon, olvashatóan jelent meg; levágott vagy egymásra csúszó tartalmat nem találtunk. A jogi követelmények és belső kontrollok elkülönítve, a jogforrásokkal együtt jelentek meg.
+
+## RUN-CATALOG-BUILD-001 részletei
+
+Az iparág- és képességkatalógussal bővített alkalmazás sikeresen lefordult. Az adatbázis-ellenőrzés 1 aktív iparágat, 10 aktív képességet, a meglévő chatbotnál 6 visszakövethető képességkapcsolatot és működő atomi mentési függvényt igazolt. Az új adatbáziselemekhez kapcsolódó Supabase biztonsági és teljesítménytanácsadó nem jelzett új problémát.
