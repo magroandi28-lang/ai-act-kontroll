@@ -1,13 +1,40 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "../../../lib/supabase/client";
 
-export default function NewSystemForm({ organisationId, userId, templates }) {
+export default function NewSystemForm({ organisationId, templates, industries, capabilities }) {
   const router = useRouter();
   const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
+  const [industryCode, setIndustryCode] = useState("");
+  const [systemTypeId, setSystemTypeId] = useState("");
+  const [selectedCapabilities, setSelectedCapabilities] = useState([]);
+
+  const selectedTemplate = templates.find((template) => template.id === systemTypeId);
+  const availableCapabilities = useMemo(() => capabilities.filter((capability) => {
+    const typeMatches = !capability.system_type_codes?.length || capability.system_type_codes.includes(selectedTemplate?.type_code);
+    const industryMatches = !capability.industry_codes?.length || capability.industry_codes.includes(industryCode);
+    return typeMatches && industryMatches;
+  }), [capabilities, industryCode, selectedTemplate?.type_code]);
+
+  function changeContext(nextIndustry, nextSystemTypeId) {
+    const nextTemplate = templates.find((template) => template.id === nextSystemTypeId);
+    setSelectedCapabilities((current) => current.filter((code) => {
+      const capability = capabilities.find((item) => item.code === code);
+      if (!capability) return false;
+      const typeMatches = !capability.system_type_codes?.length || capability.system_type_codes.includes(nextTemplate?.type_code);
+      const industryMatches = !capability.industry_codes?.length || capability.industry_codes.includes(nextIndustry);
+      return typeMatches && industryMatches;
+    }));
+  }
+
+  function toggleCapability(code) {
+    setSelectedCapabilities((current) => current.includes(code)
+      ? current.filter((item) => item !== code)
+      : [...current, code]);
+  }
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -15,27 +42,30 @@ export default function NewSystemForm({ organisationId, userId, templates }) {
     const data = new FormData(event.currentTarget);
     const name = String(data.get("name") || "").trim().replace(/\s+/g, " ");
     const intendedPurpose = String(data.get("intendedPurpose") || "").trim();
-    const systemTypeId = String(data.get("systemTypeId") || "");
 
-    if (!name || !intendedPurpose || !systemTypeId) {
-      setMessage("A rendszer neve, típusa és rendeltetési célja kötelező.");
+    if (!name || !intendedPurpose || !systemTypeId || !industryCode) {
+      setMessage("A rendszer neve, iparága, típusa és rendeltetési célja kötelező.");
+      return;
+    }
+    if (selectedTemplate?.type_code === "CUSTOMER_CHATBOT" && selectedCapabilities.length === 0) {
+      setMessage("Válassz legalább egy, a dokumentációban szereplő chatbotképességet.");
       return;
     }
 
     setSaving(true);
     const supabase = createClient();
-    const { error } = await supabase.from("aic_ai_systems").insert({
-      organisation_id: organisationId,
-      name,
-      system_type_id: systemTypeId,
-      description: String(data.get("description") || "").trim() || null,
-      intended_purpose: intendedPurpose,
-      provider_name: String(data.get("providerName") || "").trim() || null,
-      organisation_role: String(data.get("organisationRole") || "unknown"),
-      deployment_context: String(data.get("deploymentContext") || "").trim() || null,
-      lifecycle_stage: String(data.get("lifecycleStage") || "planned"),
-      created_by: userId,
-      updated_by: userId,
+    const { error } = await supabase.rpc("aic_create_ai_system", {
+      p_organisation_id: organisationId,
+      p_name: name,
+      p_system_type_id: systemTypeId,
+      p_industry_code: industryCode,
+      p_intended_purpose: intendedPurpose,
+      p_description: String(data.get("description") || "").trim() || null,
+      p_provider_name: String(data.get("providerName") || "").trim() || null,
+      p_organisation_role: String(data.get("organisationRole") || "unknown"),
+      p_deployment_context: String(data.get("deploymentContext") || "").trim() || null,
+      p_lifecycle_stage: String(data.get("lifecycleStage") || "planned"),
+      p_capability_codes: selectedCapabilities,
     });
     setSaving(false);
 
@@ -57,11 +87,61 @@ export default function NewSystemForm({ organisationId, userId, templates }) {
       <label htmlFor="systemName">Rendszer neve *</label>
       <input id="systemName" name="name" disabled={saving} />
 
+      <label htmlFor="industry">Iparág *</label>
+      <select
+        id="industry"
+        name="industryCode"
+        value={industryCode}
+        disabled={saving}
+        onChange={(event) => {
+          const nextIndustry = event.target.value;
+          setIndustryCode(nextIndustry);
+          changeContext(nextIndustry, systemTypeId);
+        }}
+      >
+        <option value="" disabled>Válassz iparágat</option>
+        {industries.map((industry) => <option key={industry.code} value={industry.code}>{industry.name_hu}</option>)}
+      </select>
+      {industryCode && <p className="field-help">{industries.find((industry) => industry.code === industryCode)?.description_hu}</p>}
+
       <label htmlFor="systemType">Rendszertípus *</label>
-      <select id="systemType" name="systemTypeId" defaultValue="" disabled={saving}>
+      <select
+        id="systemType"
+        name="systemTypeId"
+        value={systemTypeId}
+        disabled={saving}
+        onChange={(event) => {
+          const nextSystemTypeId = event.target.value;
+          setSystemTypeId(nextSystemTypeId);
+          changeContext(industryCode, nextSystemTypeId);
+        }}
+      >
         <option value="" disabled>Válassz rendszertípust</option>
         {templates.map((template) => <option key={template.id} value={template.id}>{template.name_hu}</option>)}
       </select>
+      {selectedTemplate && <p className="field-help">{selectedTemplate.description_hu}</p>}
+
+      {industryCode && systemTypeId && (
+        <fieldset className="capability-selector">
+          <legend>Mit tud a rendszer? *</legend>
+          <p className="field-help">Csak olyan képességet jelölj, amelyet a rendszer dokumentációja egyértelműen igazol.</p>
+          {availableCapabilities.length ? availableCapabilities.map((capability) => (
+            <label className={`capability-option ${selectedCapabilities.includes(capability.code) ? "is-selected" : ""}`} key={capability.code}>
+              <input
+                type="checkbox"
+                checked={selectedCapabilities.includes(capability.code)}
+                onChange={() => toggleCapability(capability.code)}
+                disabled={saving}
+              />
+              <span>
+                <strong>{capability.name_hu}</strong>
+                <small>{capability.description_hu}</small>
+                <em>{capability.selection_hint_hu}</em>
+              </span>
+            </label>
+          )) : <p className="system-form-message">Ehhez a típushoz még nincs képességkatalógus. Az alapadatok ettől még rögzíthetők.</p>}
+        </fieldset>
+      )}
 
       <label htmlFor="intendedPurpose">Rendeltetési cél *</label>
       <textarea id="intendedPurpose" name="intendedPurpose" rows="3" disabled={saving} />
