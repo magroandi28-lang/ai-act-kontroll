@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "../../../../lib/supabase/client";
-import { evaluateSystem } from "./actions";
+import { evaluateRule } from "../../../../lib/rule-engine";
 
 export default function AssessmentForm({ systemId, userId, questions, defaultFacts, savedFacts }) {
   const router = useRouter();
@@ -17,7 +17,13 @@ export default function AssessmentForm({ systemId, userId, questions, defaultFac
     if (!complete) { setMessage("Válaszolj minden látható kérdésre."); return; }
     setSaving(true); setMessage("");
     const visibleAnswers = Object.fromEntries(visible.map((question) => [question.fact_key, answers[question.fact_key]]));
-    const facts = { ...defaultFacts, ...visibleAnswers, law_enforcement_exception_applies: false };
+    const baseFacts = { ...defaultFacts, ...visibleAnswers, law_enforcement_exception_applies: false };
+    const facts = {
+      ...baseFacts,
+      article_50_notice_required:
+        (baseFacts.direct_two_way_interaction === true && baseFacts.ai_interaction_obvious === false) ||
+        baseFacts.generates_synthetic_content === true,
+    };
     const supabase = createClient();
     const { error } = await supabase.from("aic_system_facts").upsert({ system_id: systemId, facts, completion_status: "complete", updated_by: userId, updated_at: new Date().toISOString() }, { onConflict: "system_id" });
     if (error) {
@@ -27,12 +33,41 @@ export default function AssessmentForm({ systemId, userId, questions, defaultFac
     }
     await supabase.from("aic_ai_systems").update({ assessment_status: "in_progress", updated_by: userId }).eq("id", systemId);
     setMessage("A válaszokat elmentettük. A szabályok kiértékelése folyamatban…");
-    const result = await evaluateSystem(systemId);
-    if (result.error) {
+    const { data: rules, error: rulesError } = await supabase
+      .from("aic_compliance_rules")
+      .select("id, condition_groups_operator, aic_rule_condition_groups(id, group_operator, aic_rule_conditions(fact_key, comparison_operator, expected_value))")
+      .in("lifecycle_status", ["approved", "under_review"]);
+    if (rulesError) {
       setSaving(false);
-      setMessage(result.error);
+      setMessage("A szabályok nem tölthetők be.");
       return;
     }
+
+    const results = rules.map((rule) => evaluateRule(rule, facts));
+    const matched = results.filter((item) => item.evaluation_status === "matched").length;
+    const insufficient = results.filter((item) => item.evaluation_status === "insufficient_data").length;
+    const status = insufficient ? "needs_review" : "completed";
+    const { data: assessment, error: assessmentError } = await supabase
+      .from("aic_assessments")
+      .insert({ system_id: systemId, status, facts_snapshot: facts, rules_evaluated: results.length, matched_count: matched, insufficient_count: insufficient, created_by: userId })
+      .select("id")
+      .single();
+    if (assessmentError) {
+      setSaving(false);
+      setMessage("Az értékelés nem menthető.");
+      return;
+    }
+
+    const { error: resultError } = await supabase
+      .from("aic_assessment_results")
+      .insert(results.map((result) => ({ assessment_id: assessment.id, ...result })));
+    if (resultError) {
+      setSaving(false);
+      setMessage("Az eredmények nem menthetők.");
+      return;
+    }
+
+    await supabase.from("aic_ai_systems").update({ assessment_status: status, updated_by: userId }).eq("id", systemId);
     router.push(`/rendszerek/${systemId}/eredmeny`);
     router.refresh();
   }
