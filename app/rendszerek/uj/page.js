@@ -26,21 +26,15 @@ export default async function NewSystemPage() {
     );
   }
 
-  const { data: templates } = await supabase
-    .from("aic_system_type_templates")
-    .select("id, type_code, name_hu, description_hu")
-    .eq("active", true)
-    .order("sort_order");
-
   const { data: industries } = await supabase
     .from("aic_industries")
     .select("code, name_hu, description_hu")
     .eq("active", true)
     .order("sort_order");
 
-  const { data: capabilities } = await supabase
-    .from("aic_capabilities")
-    .select("code, name_hu, description_hu, selection_hint_hu, system_type_codes, industry_codes")
+  const { data: profiles } = await supabase
+    .from("aic_usage_profiles")
+    .select("code, industry_code, system_type_code, name_hu, description_hu, required_assertions")
     .eq("active", true)
     .order("sort_order");
 
@@ -50,12 +44,11 @@ export default async function NewSystemPage() {
         <Link className="back-link" href="/vezerlopult">← Vissza az irányítópultra</Link>
         <p className="system-form-eyebrow">{membership.aic_organisations?.name}</p>
         <h1>Új MI-rendszer</h1>
-        <p className="system-form-intro">Válaszd ki az iparágat, a rendszer típusát és a dokumentált képességeit. Ezek alapján készül majd a követelménydokumentum.</p>
+        <p className="system-form-intro">Három rövid adat alapján rögzítheted a rendszert. A részletes besorolást és leírást a kiválasztott profil automatikusan elkészíti.</p>
         <NewSystemForm
           organisationId={membership.organisation_id}
-          templates={templates || []}
           industries={industries || []}
-          capabilities={capabilities || []}
+          profiles={profiles || []}
         />
       </section>
     </main>

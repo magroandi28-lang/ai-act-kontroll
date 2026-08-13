@@ -4,179 +4,118 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "../../../lib/supabase/client";
 
-export default function NewSystemForm({ organisationId, templates, industries, capabilities }) {
+export default function NewSystemForm({ organisationId, industries, profiles }) {
   const router = useRouter();
+  const [name, setName] = useState("");
+  const [industryCode, setIndustryCode] = useState("");
+  const [profileCode, setProfileCode] = useState("");
+  const [confirmed, setConfirmed] = useState(false);
   const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
-  const [industryCode, setIndustryCode] = useState("");
-  const [systemTypeId, setSystemTypeId] = useState("");
-  const [selectedCapabilities, setSelectedCapabilities] = useState([]);
 
-  const selectedTemplate = templates.find((template) => template.id === systemTypeId);
-  const availableCapabilities = useMemo(() => capabilities.filter((capability) => {
-    const typeMatches = !capability.system_type_codes?.length || capability.system_type_codes.includes(selectedTemplate?.type_code);
-    const industryMatches = !capability.industry_codes?.length || capability.industry_codes.includes(industryCode);
-    return typeMatches && industryMatches;
-  }), [capabilities, industryCode, selectedTemplate?.type_code]);
-
-  function changeContext(nextIndustry, nextSystemTypeId) {
-    const nextTemplate = templates.find((template) => template.id === nextSystemTypeId);
-    setSelectedCapabilities((current) => current.filter((code) => {
-      const capability = capabilities.find((item) => item.code === code);
-      if (!capability) return false;
-      const typeMatches = !capability.system_type_codes?.length || capability.system_type_codes.includes(nextTemplate?.type_code);
-      const industryMatches = !capability.industry_codes?.length || capability.industry_codes.includes(nextIndustry);
-      return typeMatches && industryMatches;
-    }));
-  }
-
-  function toggleCapability(code) {
-    setSelectedCapabilities((current) => current.includes(code)
-      ? current.filter((item) => item !== code)
-      : [...current, code]);
-  }
+  const availableProfiles = useMemo(
+    () => profiles.filter((profile) => profile.industry_code === industryCode),
+    [industryCode, profiles]
+  );
+  const selectedProfile = profiles.find((profile) => profile.code === profileCode);
 
   async function handleSubmit(event) {
     event.preventDefault();
     setMessage("");
-    const data = new FormData(event.currentTarget);
-    const name = String(data.get("name") || "").trim().replace(/\s+/g, " ");
-    const intendedPurpose = String(data.get("intendedPurpose") || "").trim();
+    const cleanName = name.trim().replace(/\s+/g, " ");
 
-    if (!name || !intendedPurpose || !systemTypeId || !industryCode) {
-      setMessage("A rendszer neve, iparága, típusa és rendeltetési célja kötelező.");
+    if (!cleanName || !industryCode || !profileCode) {
+      setMessage("Add meg a rendszer nevét, majd válaszd ki az iparágat és a használati profilt.");
       return;
     }
-    if (selectedTemplate?.type_code === "CUSTOMER_CHATBOT" && selectedCapabilities.length === 0) {
-      setMessage("Válassz legalább egy, a dokumentációban szereplő chatbotképességet.");
+    if (!confirmed) {
+      setMessage("A mentéshez erősítsd meg, hogy a profil feltételei igazak a rendszerre.");
       return;
     }
 
     setSaving(true);
     const supabase = createClient();
-    const { error } = await supabase.rpc("aic_create_ai_system", {
+    const { data: systemId, error } = await supabase.rpc("aic_create_ai_system_from_profile", {
       p_organisation_id: organisationId,
-      p_name: name,
-      p_system_type_id: systemTypeId,
-      p_industry_code: industryCode,
-      p_intended_purpose: intendedPurpose,
-      p_description: String(data.get("description") || "").trim() || null,
-      p_provider_name: String(data.get("providerName") || "").trim() || null,
-      p_organisation_role: String(data.get("organisationRole") || "unknown"),
-      p_deployment_context: String(data.get("deploymentContext") || "").trim() || null,
-      p_lifecycle_stage: String(data.get("lifecycleStage") || "planned"),
-      p_capability_codes: selectedCapabilities,
+      p_name: cleanName,
+      p_profile_code: profileCode,
+      p_conditions_confirmed: confirmed,
     });
     setSaving(false);
 
     if (error?.code === "23505") {
-      setMessage(`A szervezetnél már létezik „${name}” nevű MI-rendszer.`);
+      setMessage(`A szervezetnél már létezik „${cleanName}” nevű MI-rendszer.`);
       return;
     }
     if (error) {
-      setMessage("A rendszer mentése nem sikerült. Ellenőrizd az adatokat, majd próbáld újra.");
+      setMessage(error.message || "A rendszer mentése nem sikerült.");
       return;
     }
 
-    router.push("/rendszerek?letrehozva=1");
+    router.push(`/rendszerek/${systemId}`);
     router.refresh();
   }
 
   return (
-    <form className="system-form" onSubmit={handleSubmit} noValidate>
-      <label htmlFor="systemName">Rendszer neve *</label>
-      <input id="systemName" name="name" disabled={saving} />
-
-      <label htmlFor="industry">Iparág *</label>
-      <select
-        id="industry"
-        name="industryCode"
-        value={industryCode}
-        disabled={saving}
-        onChange={(event) => {
-          const nextIndustry = event.target.value;
-          setIndustryCode(nextIndustry);
-          changeContext(nextIndustry, systemTypeId);
-        }}
-      >
-        <option value="" disabled>Válassz iparágat</option>
-        {industries.map((industry) => <option key={industry.code} value={industry.code}>{industry.name_hu}</option>)}
-      </select>
-      {industryCode && <p className="field-help">{industries.find((industry) => industry.code === industryCode)?.description_hu}</p>}
-
-      <label htmlFor="systemType">Rendszertípus *</label>
-      <select
-        id="systemType"
-        name="systemTypeId"
-        value={systemTypeId}
-        disabled={saving}
-        onChange={(event) => {
-          const nextSystemTypeId = event.target.value;
-          setSystemTypeId(nextSystemTypeId);
-          changeContext(industryCode, nextSystemTypeId);
-        }}
-      >
-        <option value="" disabled>Válassz rendszertípust</option>
-        {templates.map((template) => <option key={template.id} value={template.id}>{template.name_hu}</option>)}
-      </select>
-      {selectedTemplate && <p className="field-help">{selectedTemplate.description_hu}</p>}
-
-      {industryCode && systemTypeId && (
-        <fieldset className="capability-selector">
-          <legend>Mit tud a rendszer? *</legend>
-          <p className="field-help">Csak olyan képességet jelölj, amelyet a rendszer dokumentációja egyértelműen igazol.</p>
-          {availableCapabilities.length ? availableCapabilities.map((capability) => (
-            <label className={`capability-option ${selectedCapabilities.includes(capability.code) ? "is-selected" : ""}`} key={capability.code}>
-              <input
-                type="checkbox"
-                checked={selectedCapabilities.includes(capability.code)}
-                onChange={() => toggleCapability(capability.code)}
-                disabled={saving}
-              />
-              <span>
-                <strong>{capability.name_hu}</strong>
-                <small>{capability.description_hu}</small>
-                <em>{capability.selection_hint_hu}</em>
-              </span>
-            </label>
-          )) : <p className="system-form-message">Ehhez a típushoz még nincs képességkatalógus. Az alapadatok ettől még rögzíthetők.</p>}
-        </fieldset>
-      )}
-
-      <label htmlFor="intendedPurpose">Rendeltetési cél *</label>
-      <textarea id="intendedPurpose" name="intendedPurpose" rows="3" disabled={saving} />
-
-      <label htmlFor="description">Rövid leírás</label>
-      <textarea id="description" name="description" rows="3" disabled={saving} />
-
-      <div className="system-form-grid">
+    <form className="quick-system-form" onSubmit={handleSubmit} noValidate>
+      <div className="quick-form-step">
+        <span>01</span>
         <div>
-          <label htmlFor="providerName">Szolgáltató neve</label>
-          <input id="providerName" name="providerName" disabled={saving} />
+          <label htmlFor="systemName">Mi a rendszer neve?</label>
+          <input id="systemName" value={name} onChange={(event) => setName(event.target.value)} placeholder="Például: EnergiaChat" disabled={saving} />
         </div>
+      </div>
+
+      <div className="quick-form-step">
+        <span>02</span>
         <div>
-          <label htmlFor="organisationRole">A szervezet szerepe</label>
-          <select id="organisationRole" name="organisationRole" defaultValue="deployer" disabled={saving}>
-            <option value="deployer">Alkalmazó</option><option value="provider">Szolgáltató</option>
-            <option value="importer">Importőr</option><option value="distributor">Forgalmazó</option>
-            <option value="multiple">Több szerep</option><option value="unknown">Még nem ismert</option>
+          <label htmlFor="industry">Melyik iparágban használják?</label>
+          <select id="industry" value={industryCode} disabled={saving} onChange={(event) => {
+            setIndustryCode(event.target.value);
+            setProfileCode("");
+            setConfirmed(false);
+          }}>
+            <option value="" disabled>Válassz iparágat</option>
+            {industries.map((industry) => <option key={industry.code} value={industry.code}>{industry.name_hu}</option>)}
           </select>
         </div>
       </div>
 
-      <label htmlFor="deploymentContext">Alkalmazási környezet</label>
-      <textarea id="deploymentContext" name="deploymentContext" rows="2" disabled={saving} />
+      <div className="quick-form-step">
+        <span>03</span>
+        <div>
+          <label htmlFor="usageProfile">Mire használják?</label>
+          <select id="usageProfile" value={profileCode} disabled={!industryCode || saving} onChange={(event) => {
+            setProfileCode(event.target.value);
+            setConfirmed(false);
+          }}>
+            <option value="" disabled>Válassz használati profilt</option>
+            {availableProfiles.map((profile) => <option key={profile.code} value={profile.code}>{profile.name_hu}</option>)}
+          </select>
+          {industryCode && availableProfiles.length === 0 && <p className="quick-form-note">Ehhez az iparághoz még nincs elkészült használati profil.</p>}
+        </div>
+      </div>
 
-      <label htmlFor="lifecycleStage">Életciklus-állapot</label>
-      <select id="lifecycleStage" name="lifecycleStage" defaultValue="production" disabled={saving}>
-        <option value="planned">Tervezett</option><option value="development">Fejlesztés alatt</option>
-        <option value="testing">Tesztelés alatt</option><option value="pilot">Próbaüzem</option>
-        <option value="production">Éles üzemben</option><option value="suspended">Felfüggesztett</option>
-        <option value="retired">Kivezetett</option>
-      </select>
+      {selectedProfile && (
+        <section className="profile-confirmation">
+          <p className="profile-label">Kiválasztott profil</p>
+          <h2>{selectedProfile.name_hu}</h2>
+          <p>{selectedProfile.description_hu}</p>
+          <h3>Ez a profil akkor használható, ha:</h3>
+          <ul>
+            {(selectedProfile.required_assertions || []).map((assertion) => <li key={assertion}>{assertion}</li>)}
+          </ul>
+          <label className="profile-confirm-check">
+            <input type="checkbox" checked={confirmed} onChange={(event) => setConfirmed(event.target.checked)} disabled={saving} />
+            <span>A rendszer dokumentációja alapján minden felsorolt feltétel igaz.</span>
+          </label>
+        </section>
+      )}
 
       {message && <p className="system-form-message" role="alert">{message}</p>}
-      <button className="primary-button" type="submit" disabled={saving}>{saving ? "Mentés…" : "Rendszer mentése"}</button>
+      <button className="primary-button" type="submit" disabled={saving || !selectedProfile || !confirmed}>
+        {saving ? "Mentés…" : "Rendszer mentése"}
+      </button>
     </form>
   );
 }
