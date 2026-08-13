@@ -6,6 +6,13 @@
 | RUN-AUTH-002 | AUTH-REG-001 | Vercel, Chrome, Windows | **Sikeres** | BUG-AUTH-001 | Sikeres |
 | RUN-AUTH-003 | AUTH-LOGIN-001 | Vercel, Chrome, Windows | **Sikeres** | – | Nem szükséges |
 | RUN-AUTH-004 | AUTH-LOGOUT-001 | Vercel, Chrome, Windows | **Sikeres** | – | Nem szükséges |
+| RUN-AUTH-005 | AUTH-LOGIN-001 | Vercel, Chrome, Windows | **Sikeres** | – | Regressziós teszt |
+| RUN-DASH-001 | DASH-001 | Vercel, Chrome, Windows | **Sikeres** | – | Nem szükséges |
+| RUN-DASH-002 | DASH-NAV-001 | Vercel, Chrome, Windows | **Sikeres** | – | Nem szükséges |
+| RUN-DASH-003 | DASH-NAV-002 | Vercel, Chrome, Windows | **Sikeres** | – | Nem szükséges |
+| RUN-POLICY-BUILD-001 | Projekt build | Helyi Next.js 14.2.35 | **Sikeres** | – | Nem szükséges |
+| RUN-POLICY-001 | POLICY-001 | Vercel, Chrome, Windows | **Tesztelésre vár** | – | Szükséges |
+| RUN-POLICY-002 | POLICY-002 | Vercel, Chrome, Windows | **Tesztelésre vár** | – | Szükséges |
 
 ## RUN-AUTH-001 részletei
 
@@ -26,3 +33,11 @@ A megerősített felhasználó helyes e-mail-címmel és jelszóval, az adatkeze
 ## RUN-AUTH-004 részletei
 
 A **Kijelentkezés** gomb kiválasztása után a rendszer sikeresen visszairányította a felhasználót a belépési oldalra. Ezután a `/vezerlopult` címet közvetlenül megnyitva a védett oldal nem jelent meg, a rendszer ismét a belépési oldalra irányított. A munkamenet megszűnt, a kijelentkezési teszt sikeres.
+
+## Irányítópult futtatási eredményei
+
+Az irányítópult fejlesztése után a bejelentkezés ismét sikeres volt, ezért a regressziós teszt megfelelt. Az új irányítópult hiba nélkül megjelent. Mindkét műveleti kártya kattintható volt, a megfelelő tájékoztató céloldal nyílt meg, és a visszalépési hivatkozások is működtek.
+
+## RUN-POLICY-BUILD-001 részletei
+
+Az audit utáni alkalmazáskód `npm run build` paranccsal sikeresen lefordult. A Next.js fordítás, lintelés és típusellenőrzés hibát nem jelzett. A Vercel-környezetben végzendő felületi teszteket csak a fájlok feltöltése után lehet lezárni.

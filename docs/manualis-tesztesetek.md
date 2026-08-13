@@ -68,3 +68,57 @@ A felhasználó be van jelentkezve, és a vezérlőpult látható.
 |---:|---|---|
 | 1 | A **Kijelentkezés** gomb kiválasztása. | A rendszer visszairányítja a felhasználót a belépési oldalra. |
 | 2 | A `/vezerlopult` cím közvetlen megnyitása bejelentkezés nélkül. | A védett oldal nem nyílik meg; a rendszer visszairányítja a belépési oldalra. |
+
+## DASH-001 – Irányítópult megjelenítése
+
+**Kapcsolódó követelmény:** DASH-REQ-001  
+**Előfeltétel:** A felhasználó kijelentkezett.  
+**Prioritás:** Magas
+
+| # | Lépés | Elvárt eredmény |
+|---:|---|---|
+| 1 | Bejelentkezés érvényes adatokkal. | Megnyílik az irányítópult. |
+| 2 | Az oldal tartalmának ellenőrzése. | Megjelenik a köszöntés, a két műveleti kártya, a kijelentkezés és a jogi figyelmeztetés. |
+
+## DASH-NAV-001 – Új MI-rendszer oldalának megnyitása
+
+**Kapcsolódó követelmények:** DASH-REQ-002, DASH-REQ-004  
+**Előfeltétel:** A felhasználó bejelentkezett, és az irányítópulton van.
+
+| # | Lépés | Elvárt eredmény |
+|---:|---|---|
+| 1 | Az **Új MI-rendszer vizsgálata** kártya kiválasztása. | Megnyílik a `/rendszerek/uj` oldal hiba nélkül. |
+| 2 | A visszalépési hivatkozás kiválasztása. | Ismét megnyílik az irányítópult. |
+
+## DASH-NAV-002 – Mentett MI-rendszerek oldalának megnyitása
+
+**Kapcsolódó követelmények:** DASH-REQ-003, DASH-REQ-004  
+**Előfeltétel:** A felhasználó bejelentkezett, és az irányítópulton van.
+
+| # | Lépés | Elvárt eredmény |
+|---:|---|---|
+| 1 | A **Mentett MI-rendszerek** kártya kiválasztása. | Megnyílik a `/rendszerek` oldal hiba nélkül. |
+| 2 | A visszalépési hivatkozás kiválasztása. | Ismét megnyílik az irányítópult. |
+
+## POLICY-001 – Aktuális követelménydokumentum megnyitása
+
+**Kapcsolódó vizsgakövetelmények:** adatok listázása, adatok lementése felületről  
+**Előfeltétel:** A felhasználó bejelentkezett, és az ügyfélszolgálati chatbot szerepel a mentett rendszerek között.
+
+| # | Lépés | Elvárt eredmény |
+|---:|---|---|
+| 1 | A **Mentett MI-rendszerek** oldalon az ügyfélszolgálati chatbot hosszú kártyájának kiválasztása. | Köztes oldal nélkül megnyílik a chatbot követelménydokumentuma. |
+| 2 | A dokumentum címének és tartalomjegyzékének ellenőrzése. | A cím „alkalmazandó szabályozási és megfelelőségi követelményei”; 26 fejezet jelenik meg. |
+| 3 | Az oldal újbóli megnyitása változatlan forrásadatok mellett. | Ugyanaz a dokumentumverzió jelenik meg; nem készül felesleges új verzió. |
+| 4 | Keresés a „képzés” kifejezésre. | Csak az egyező fejezetek maradnak kiemelten láthatók, és megjelenik a találatok száma. |
+| 5 | A **Nyomtatás / Mentés PDF-ként** gomb kiválasztása. | Megnyílik a böngésző nyomtatási nézete; a dokumentum PDF-ként menthető. |
+
+## POLICY-002 – Jogforrások és dokumentumtípusok megjelenítése
+
+**Előfeltétel:** A POLICY-001 teszt dokumentuma meg van nyitva.
+
+| # | Lépés | Elvárt eredmény |
+|---:|---|---|
+| 1 | Több fejezet típusjelzésének ellenőrzése. | A jogi követelmény, belső kontroll és alkalmazási útmutató elkülönítve jelenik meg. |
+| 2 | Egy AI Act-, egy GDPR- és egy magyar jogszabály-hivatkozás ellenőrzése. | A hivatkozások helyes forráscímmel és „cikk”, illetve „§” jelöléssel jelennek meg. |
+| 3 | Egy hivatkozás kiválasztása. | A hivatalos jogforrás új böngészőlapon nyílik meg. |
