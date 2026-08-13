@@ -737,6 +737,34 @@ input:disabled {
 .systems-topbar h1 { margin: 16px 0 8px; font-size: clamp(38px, 6vw, 58px); }
 .systems-topbar > div > p:last-child { margin: 0; color: #9fb0ba; }
 .systems-add-button { display: inline-flex; min-height: 48px; padding: 0 20px; align-items: center; justify-content: center; color: #fff; border-radius: 8px; background: var(--orange); font-weight: 700; text-decoration: none; white-space: nowrap; }
+.systems-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+.systems-import-button { display: inline-flex; min-height: 48px; padding: 0 18px; align-items: center; justify-content: center; color: #dce8ed; border: 1px solid var(--line); border-radius: 8px; background: rgba(8,29,44,.72); font-weight: 700; text-decoration: none; white-space: nowrap; }
+.systems-import-button:hover { border-color: var(--cyan); color: #fff; }
+.import-shell { width: min(100%,980px); margin: 0 auto; }
+.import-shell > h1 { margin: 20px 0 12px; font-size: clamp(38px,6vw,56px); }
+.import-workflow { display: grid; gap: 16px; }
+.import-step-card { padding: 24px; display: grid; grid-template-columns: 48px minmax(0,1fr); gap: 16px; border: 1px solid var(--line); border-radius: 14px; background: rgba(8,29,44,.72); }
+.import-step-card h2 { margin: 0 0 7px; font-size: 21px; }
+.import-step-card p { margin: 0 0 17px; color: #aebbc4; line-height: 1.55; }
+.import-step-number { color: var(--cyan); font-weight: 800; }
+.import-step-card input[type="file"] { width: 100%; margin: 0 0 14px; padding: 13px; color: #dce8ed; border: 1px dashed var(--line); border-radius: 9px; background: rgba(2,14,25,.42); }
+.import-step-card .primary-button { min-height: 46px; }
+.import-download { display: inline-flex; width: auto; min-height: 44px; padding: 0 17px; align-items: center; text-decoration: none; }
+.import-message { margin: 0; padding: 14px 17px; border: 1px solid rgba(255,91,55,.3); border-radius: 9px; background: rgba(255,91,55,.08); }
+.import-preview { padding: 24px; border: 1px solid var(--line); border-radius: 14px; background: rgba(8,29,44,.72); }
+.import-preview-header h2 { margin: 4px 0 20px; }
+.import-table-wrap { overflow-x: auto; }
+.import-preview table { width: 100%; border-collapse: collapse; }
+.import-preview th,.import-preview td { padding: 13px 12px; text-align: left; border-bottom: 1px solid rgba(184,215,229,.13); vertical-align: top; }
+.import-preview th { color: #8fa4af; font-size: 11px; text-transform: uppercase; }
+.import-preview td { color: #dce5e9; font-size: 13px; line-height: 1.45; }
+.import-preview tr.is-valid td:last-child { color: #8fe2bc; }
+.import-preview tr.is-error td:last-child { color: #ffc0af; }
+.import-confirmation { margin-top: 22px; display: grid; gap: 16px; }
+.import-confirmation label { display: grid; grid-template-columns: 20px minmax(0,1fr); gap: 10px; color: #dce5e9; line-height: 1.5; }
+.import-confirmation input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--cyan); }
+.import-confirmation .primary-button { min-height: 50px; }
+.import-fix-note { margin: 20px 0 0; padding: 13px 15px; color: #ffc0af; border-radius: 8px; background: rgba(255,91,55,.08); }
 .systems-success { margin: 0 0 18px; padding: 14px 17px; color: #b9f1d8; border: 1px solid rgba(118,228,182,.28); border-radius: 9px; background: rgba(118,228,182,.08); }
 .systems-list { display: grid; gap: 14px; }
 .system-row { padding: 24px; display: grid; grid-template-columns: minmax(0,1.5fr) minmax(360px,1fr); gap: 32px; border: 1px solid var(--line); border-radius: 14px; background: rgba(8,29,44,.72); }
@@ -897,6 +925,8 @@ input:disabled {
   .system-form-grid { grid-template-columns: 1fr; gap: 0; }
   .systems-topbar { align-items: stretch; flex-direction: column; }
   .systems-add-button { align-self: stretch; }
+  .systems-actions { display: grid; justify-content: stretch; }
+  .import-step-card { grid-template-columns: 1fr; }
   .system-row { grid-template-columns: 1fr; gap: 22px; }
   .system-row-meta { grid-template-columns: 1fr; }
   .system-detail-header { flex-direction: column; }
