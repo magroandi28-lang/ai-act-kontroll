@@ -69,7 +69,7 @@ export default async function SystemsPage({ searchParams }) {
         {systems?.length ? (
           <div className="systems-list">
             {systems.map((system) => (
-              <Link className="system-row" href={`/rendszerek/${system.id}/eredmeny`} key={system.id}>
+              <Link className="system-row" href={`/rendszerek/${system.id}/szabalyzat`} key={system.id}>
                 <div className="system-row-main">
                   <span>{system.aic_system_type_templates?.name_hu || "Egyéb MI-rendszer"}</span>
                   <h2>{system.name}</h2>
