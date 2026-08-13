@@ -60,10 +60,17 @@ export default async function SystemsPage({ searchParams }) {
             <h1>Mentett MI-rendszerek</h1>
             <p>{total} nyilvántartott rendszer</p>
           </div>
+          <div className="systems-actions">
+            <Link className="systems-import-button" href="/rendszerek/importalas">Több rendszer feltöltése</Link>
+            <Link className="systems-add-button" href="/rendszerek/uj">+ Új MI-rendszer</Link>
+          </div>
         </div>
 
         {searchParams?.letrehozva === "1" && (
           <p className="systems-success" role="status">Az MI-rendszer mentése sikerült.</p>
+        )}
+        {Number.parseInt(searchParams?.importalva || "0", 10) > 0 && (
+          <p className="systems-success" role="status">{searchParams.importalva} MI-rendszer importálása sikerült.</p>
         )}
 
         {systems?.length ? (
