@@ -766,6 +766,14 @@ input:disabled {
 .import-confirmation .primary-button { min-height: 50px; }
 .import-fix-note { margin: 20px 0 0; padding: 13px 15px; color: #ffc0af; border-radius: 8px; background: rgba(255,91,55,.08); }
 .systems-success { margin: 0 0 18px; padding: 14px 17px; color: #b9f1d8; border: 1px solid rgba(118,228,182,.28); border-radius: 9px; background: rgba(118,228,182,.08); }
+.systems-search { margin: 0 0 22px; padding: 18px; border: 1px solid var(--line); border-radius: 12px; background: rgba(8,29,44,.55); }
+.systems-search > label { display: block; margin-bottom: 10px; color: #dce7eb; font-size: 14px; font-weight: 700; }
+.systems-search > div { display: flex; gap: 9px; }
+.systems-search input { min-width: 0; min-height: 46px; padding: 0 14px; flex: 1; color: #eef4f6; border: 1px solid rgba(177,203,216,.34); border-radius: 8px; outline: none; background: rgba(2,14,25,.56); }
+.systems-search input:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0,189,218,.1); }
+.systems-search button,.systems-search a { min-height: 46px; padding: 0 17px; display: inline-flex; align-items: center; justify-content: center; color: #fff; border: 0; border-radius: 8px; background: #087d94; font-weight: 700; text-decoration: none; cursor: pointer; white-space: nowrap; }
+.systems-search a { color: #dce7eb; border: 1px solid var(--line); background: transparent; }
+.systems-search > p { margin: 9px 0 0; color: #8197a2; font-size: 12px; }
 .systems-list { display: grid; gap: 14px; }
 .system-row { padding: 24px; display: grid; grid-template-columns: minmax(0,1.5fr) minmax(360px,1fr); gap: 32px; border: 1px solid var(--line); border-radius: 14px; background: rgba(8,29,44,.72); }
 .system-row { position: relative; color: var(--text); text-decoration: none; transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease, background .22s ease; }
@@ -926,6 +934,7 @@ input:disabled {
   .systems-topbar { align-items: stretch; flex-direction: column; }
   .systems-add-button { align-self: stretch; }
   .systems-actions { display: grid; justify-content: stretch; }
+  .systems-search > div { flex-direction: column; }
   .import-step-card { grid-template-columns: 1fr; }
   .system-row { grid-template-columns: 1fr; gap: 22px; }
   .system-row-meta { grid-template-columns: 1fr; }
