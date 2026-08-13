@@ -73,7 +73,7 @@ export default function ImportForm() {
               <tbody>
                 {preview.rows.map((row) => (
                   <tr key={row.rowNumber} className={row.valid ? "is-valid" : "is-error"}>
-                    <td>{row.rowNumber}</td><td>{row.name || "—"}</td><td>{row.profileName || "—"}</td>
+                    <td>{row.rowNumber}</td><td>{row.name || "—"}</td><td>{row.profile_name || "—"}</td>
                     <td>{row.valid ? "Rendben" : row.errors.join(" ")}</td>
                   </tr>
                 ))}
