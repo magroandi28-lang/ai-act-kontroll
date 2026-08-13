@@ -54,13 +54,15 @@ function parseCsv(text) {
 function findDataRows(rows) {
   const headerIndex = rows.findIndex((row) => {
     const values = row.map(normalize);
-    return values.includes("rendszer neve") && values.includes("használati profil");
+    const hasName = values.includes("rendszer neve") || values.includes("a chatbot saját neve");
+    const hasUsage = values.includes("használati profil") || values.includes("mire használják?") || values.includes("mire használják");
+    return hasName && hasUsage;
   });
-  if (headerIndex < 0) throw new Error("Nem található a „Rendszer neve” és „Használati profil” fejléc.");
+  if (headerIndex < 0) throw new Error("Nem található az „A chatbot saját neve” és „Mire használják?” fejléc.");
 
   const headers = rows[headerIndex].map(normalize);
-  const nameIndex = headers.indexOf("rendszer neve");
-  const profileIndex = headers.indexOf("használati profil");
+  const nameIndex = headers.findIndex((value) => value === "rendszer neve" || value === "a chatbot saját neve");
+  const profileIndex = headers.findIndex((value) => value === "használati profil" || value === "mire használják?" || value === "mire használják");
   return rows.slice(headerIndex + 1).map((row, offset) => ({
     rowNumber: headerIndex + offset + 2,
     name: cellText(row[nameIndex]),
@@ -140,8 +142,8 @@ export async function previewImport(formData) {
       const nameKey = normalize(cleanName);
       const profile = profileMap.get(normalize(row.enteredProfile));
       if (!cleanName) errors.push("Hiányzik a rendszer neve.");
-      if (!row.enteredProfile.trim()) errors.push("Hiányzik a használati profil.");
-      else if (!profile) errors.push("Ismeretlen használati profil.");
+      if (!row.enteredProfile.trim()) errors.push("Hiányzik, hogy mire használják a chatbotot.");
+      else if (!profile) errors.push("A megadott működés nem választható.");
       if (nameKey && fileNames.get(nameKey) > 1) errors.push("A név többször szerepel a fájlban.");
       if (nameKey && existingNames.has(nameKey)) errors.push("Ilyen nevű rendszer már létezik.");
 

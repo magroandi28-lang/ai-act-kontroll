@@ -45,7 +45,7 @@ export default function ImportForm() {
         <span className="import-step-number">01</span>
         <div>
           <h2>Töltsd le és töltsd ki a sablont</h2>
-          <p>A használati profil legördülő listából választható. A kitöltött fájlt mentsd XLSX formátumban.</p>
+          <p>Minden sorban adj nevet egy chatbotnak, majd válaszd ki, mire használják. A kitöltött fájlt mentsd XLSX formátumban.</p>
           <a className="secondary-button import-download" href="/energiaai-rendszerimport-sablon.xlsx" download> XLSX-sablon letöltése</a>
         </div>
       </section>
@@ -69,7 +69,7 @@ export default function ImportForm() {
           </div>
           <div className="import-table-wrap">
             <table>
-              <thead><tr><th>Sor</th><th>Rendszer neve</th><th>Használati profil</th><th>Állapot</th></tr></thead>
+              <thead><tr><th>Sor</th><th>Chatbot neve</th><th>Mire használják?</th><th>Állapot</th></tr></thead>
               <tbody>
                 {preview.rows.map((row) => (
                   <tr key={row.rowNumber} className={row.valid ? "is-valid" : "is-error"}>
