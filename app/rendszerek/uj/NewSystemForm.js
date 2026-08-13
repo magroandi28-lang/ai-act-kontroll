@@ -35,7 +35,7 @@ export default function NewSystemForm({ organisationId, industries, profiles }) 
 
     setSaving(true);
     const supabase = createClient();
-    const { data: systemId, error } = await supabase.rpc("aic_create_ai_system_from_profile", {
+    const { error } = await supabase.rpc("aic_create_ai_system_from_profile", {
       p_organisation_id: organisationId,
       p_name: cleanName,
       p_profile_code: profileCode,
@@ -52,7 +52,7 @@ export default function NewSystemForm({ organisationId, industries, profiles }) 
       return;
     }
 
-    router.push(`/rendszerek/${systemId}`);
+    router.push("/rendszerek?letrehozva=1");
     router.refresh();
   }
 
