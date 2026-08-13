@@ -700,6 +700,17 @@ input:disabled {
 .system-form-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 18px; }
 .system-form-message { margin: 20px 0 0; color: #ffc0af; font-size: 13px; line-height: 1.5; }
 .system-form .primary-button { margin-top: 24px; }
+.field-help { margin: 7px 0 0; color: #8297a2; font-size: 12px; line-height: 1.55; }
+.capability-selector { min-width: 0; margin: 28px 0 6px; padding: 22px; border: 1px solid rgba(177,203,216,.22); border-radius: 12px; }
+.capability-selector legend { padding: 0 8px; color: var(--cyan); font-size: 15px; font-weight: 800; }
+.capability-selector > .field-help { margin: 0 0 15px; }
+.system-form .capability-option { margin: 10px 0 0; padding: 15px; display: grid; grid-template-columns: 22px minmax(0,1fr); gap: 12px; color: #dbe3e8; border: 1px solid rgba(177,203,216,.18); border-radius: 10px; background: rgba(2,14,25,.26); cursor: pointer; transition: border-color .18s,background .18s; }
+.system-form .capability-option:hover,.system-form .capability-option.is-selected { border-color: rgba(0,189,218,.55); background: rgba(0,189,218,.07); }
+.system-form .capability-option input { width: 18px; min-height: 18px; margin: 2px 0 0; padding: 0; accent-color: var(--cyan); }
+.capability-option span,.capability-option strong,.capability-option small,.capability-option em { display: block; }
+.capability-option strong { font-size: 14px; }
+.capability-option small { margin-top: 5px; color: #aebbc4; font-size: 12px; font-weight: 400; line-height: 1.5; }
+.capability-option em { margin-top: 7px; color: #7fa9b5; font-size: 11px; font-weight: 400; line-height: 1.45; }
 
 .systems-page { min-height: 100vh; padding: 48px 20px; background: var(--navy-950); }
 .systems-shell { width: min(100%, 1080px); margin: 0 auto; }
