@@ -45,8 +45,8 @@ export default function ImportForm() {
         <span className="import-step-number">01</span>
         <div>
           <h2>Töltsd le és töltsd ki a sablont</h2>
-          <p>Minden sorban adj nevet egy chatbotnak, majd válaszd ki, mire használják. A kitöltött fájlt mentsd XLSX formátumban.</p>
-          <a className="secondary-button import-download" href="/energiaai-rendszerimport-sablon.xlsx" download> XLSX-sablon letöltése</a>
+          <p>A sablon 10 kitöltött mintarendszert tartalmaz. Feltöltéskor az alkalmazás a működési adatokból automatikusan választ szabályzati profilt.</p>
+          <a className="secondary-button import-download" href="/energiaai-rendszerleltar-10-minta.xlsx" download>10 mintarendszer letöltése</a>
         </div>
       </section>
 
@@ -69,11 +69,11 @@ export default function ImportForm() {
           </div>
           <div className="import-table-wrap">
             <table>
-              <thead><tr><th>Sor</th><th>Chatbot neve</th><th>Mire használják?</th><th>Állapot</th></tr></thead>
+              <thead><tr><th>Sor</th><th>Rendszer neve</th><th>Automatikus besorolás</th><th>Állapot</th></tr></thead>
               <tbody>
                 {preview.rows.map((row) => (
                   <tr key={row.rowNumber} className={row.valid ? "is-valid" : "is-error"}>
-                    <td>{row.rowNumber}</td><td>{row.name || "—"}</td><td>{row.profileName || row.enteredProfile || "—"}</td>
+                    <td>{row.rowNumber}</td><td>{row.name || "—"}</td><td>{row.profileName || "—"}</td>
                     <td>{row.valid ? "Rendben" : row.errors.join(" ")}</td>
                   </tr>
                 ))}
@@ -83,7 +83,7 @@ export default function ImportForm() {
 
           {preview.errorCount === 0 ? (
             <div className="import-confirmation">
-              <label><input type="checkbox" checked={confirmed} onChange={(event) => setConfirmed(event.target.checked)} disabled={busy} /><span>Megerősítem, hogy a kiválasztott használati profilok feltételei igazak a rendszerekre.</span></label>
+              <label><input type="checkbox" checked={confirmed} onChange={(event) => setConfirmed(event.target.checked)} disabled={busy} /><span>Megerősítem, hogy a táblázatban megadott működési adatok megfelelnek a rendszerek tényleges működésének.</span></label>
               <button className="primary-button" type="button" onClick={handleImport} disabled={!confirmed || busy}>{busy ? "Importálás…" : `${preview.validCount} rendszer importálása`}</button>
             </div>
           ) : <p className="import-fix-note">Javítsd a jelzett sorokat a fájlban, majd ellenőrizd újra. Hibás fájl nem importálható.</p>}

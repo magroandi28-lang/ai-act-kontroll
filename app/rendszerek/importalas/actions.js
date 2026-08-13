@@ -51,23 +51,53 @@ function parseCsv(text) {
   return rows;
 }
 
+const factColumns = {
+  "számla és fogyasztás": "handles_billing_consumption",
+  "mérőállás fogadása": "accepts_meter_reading",
+  "panaszfelvétel": "accepts_complaints",
+  "tartozás és kikapcsolás": "handles_debt_disconnection",
+  "védendő fogyasztók": "handles_vulnerable_customers",
+  "generatív válasz": "generates_content",
+  "személyes ügyféladat": "processes_personal_data",
+  "emberi átadás": "requires_human_handoff",
+  "joghatású döntés": "makes_legally_effective_decisions",
+};
+
+function parseBoolean(value) {
+  const normalized = normalize(value);
+  if (["igen", "yes", "true", "1"].includes(normalized)) return true;
+  if (["nem", "no", "false", "0"].includes(normalized)) return false;
+  return null;
+}
+
 function findDataRows(rows) {
   const headerIndex = rows.findIndex((row) => {
     const values = row.map(normalize);
-    const hasName = values.includes("rendszer neve") || values.includes("a chatbot saját neve");
-    const hasUsage = values.includes("használati profil") || values.includes("mire használják?") || values.includes("mire használják");
-    return hasName && hasUsage;
+    return values.includes("rendszer neve") && values.includes("számla és fogyasztás");
   });
-  if (headerIndex < 0) throw new Error("Nem található az „A chatbot saját neve” és „Mire használják?” fejléc.");
+  if (headerIndex < 0) throw new Error("A feltöltött fájl nem az EnergiaAI Kontroll rendszerleltár-sablonja.");
 
   const headers = rows[headerIndex].map(normalize);
-  const nameIndex = headers.findIndex((value) => value === "rendszer neve" || value === "a chatbot saját neve");
-  const profileIndex = headers.findIndex((value) => value === "használati profil" || value === "mire használják?" || value === "mire használják");
-  return rows.slice(headerIndex + 1).map((row, offset) => ({
-    rowNumber: headerIndex + offset + 2,
-    name: cellText(row[nameIndex]),
-    enteredProfile: cellText(row[profileIndex]),
-  })).filter((row) => row.name.trim() || row.enteredProfile.trim());
+  const nameIndex = headers.indexOf("rendszer neve");
+  return rows.slice(headerIndex + 1).map((row, offset) => {
+    const facts = {
+      industry_code: "energy",
+      system_type_code: "CUSTOMER_CHATBOT",
+    };
+    const inputErrors = [];
+    for (const [header, factKey] of Object.entries(factColumns)) {
+      const columnIndex = headers.indexOf(header);
+      const parsed = parseBoolean(cellText(row[columnIndex]));
+      if (parsed === null) inputErrors.push(`A „${header}” mező csak Igen vagy Nem lehet.`);
+      else facts[factKey] = parsed;
+    }
+    return {
+      rowNumber: headerIndex + offset + 2,
+      name: cellText(row[nameIndex]).trim().replace(/\s+/g, " "),
+      facts,
+      inputErrors,
+    };
+  }).filter((row) => row.name || Object.values(row.facts).some((value) => value === true));
 }
 
 async function readRows(file) {
@@ -79,13 +109,13 @@ async function readRows(file) {
 
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.load(Buffer.from(await file.arrayBuffer()));
-  const sheet = workbook.getWorksheet("Rendszerek") || workbook.worksheets[0];
+  const sheet = workbook.getWorksheet("Rendszerleltár") || workbook.worksheets[0];
   if (!sheet) throw new Error("A munkafüzet nem tartalmaz feldolgozható lapot.");
 
   const rows = [];
   sheet.eachRow({ includeEmpty: true }, (sheetRow) => {
     const values = [];
-    for (let column = 1; column <= Math.max(sheetRow.cellCount, 2); column += 1) {
+    for (let column = 1; column <= Math.max(sheetRow.cellCount, 10); column += 1) {
       values.push(sheetRow.getCell(column).value);
     }
     rows.push(values);
@@ -118,17 +148,11 @@ export async function previewImport(formData) {
     if (sourceRows.length > MAX_ROWS) return { error: `Egyszerre legfeljebb ${MAX_ROWS} rendszer ellenőrizhető.` };
 
     const { supabase, organisationId } = await getContext();
-    const [{ data: profiles, error: profileError }, { data: systems, error: systemError }] = await Promise.all([
-      supabase.from("aic_usage_profiles").select("code, name_hu").eq("active", true),
+    const [{ data: classified, error: classificationError }, { data: systems, error: systemError }] = await Promise.all([
+      supabase.rpc("aic_preview_energy_chatbot_import", { p_rows: sourceRows }),
       supabase.from("aic_ai_systems").select("name").eq("organisation_id", organisationId).eq("inventory_status", "active"),
     ]);
-    if (profileError || systemError) throw new Error("Az ellenőrzéshez szükséges adatok nem tölthetők be.");
-
-    const profileMap = new Map();
-    for (const profile of profiles || []) {
-      profileMap.set(normalize(profile.code), profile);
-      profileMap.set(normalize(profile.name_hu), profile);
-    }
+    if (classificationError || systemError) throw new Error("Az automatikus besorolás nem hajtható végre.");
     const existingNames = new Set((systems || []).map((system) => normalize(system.name)));
     const fileNames = new Map();
     for (const row of sourceRows) {
@@ -136,23 +160,15 @@ export async function previewImport(formData) {
       if (key) fileNames.set(key, (fileNames.get(key) || 0) + 1);
     }
 
-    const rows = sourceRows.map((row) => {
-      const errors = [];
-      const cleanName = row.name.trim().replace(/\s+/g, " ");
-      const nameKey = normalize(cleanName);
-      const profile = profileMap.get(normalize(row.enteredProfile));
-      if (!cleanName) errors.push("Hiányzik a rendszer neve.");
-      if (!row.enteredProfile.trim()) errors.push("Hiányzik, hogy mire használják a chatbotot.");
-      else if (!profile) errors.push("A megadott működés nem választható.");
+    const rows = (classified || []).map((row) => {
+      const errors = [...(row.inputErrors || []), ...(row.errors || [])];
+      const nameKey = normalize(row.name);
+      if (!row.name) errors.push("Hiányzik a rendszer neve.");
       if (nameKey && fileNames.get(nameKey) > 1) errors.push("A név többször szerepel a fájlban.");
       if (nameKey && existingNames.has(nameKey)) errors.push("Ilyen nevű rendszer már létezik.");
 
       return {
-        rowNumber: row.rowNumber,
-        name: cleanName,
-        enteredProfile: row.enteredProfile.trim(),
-        profileCode: profile?.code || "",
-        profileName: profile?.name_hu || "",
+        ...row,
         valid: errors.length === 0,
         errors,
       };
@@ -168,12 +184,12 @@ export async function importSystems(rows, confirmed) {
   try {
     if (!confirmed) return { error: "Az importálás előtt erősítsd meg a profilfeltételeket." };
     if (!Array.isArray(rows) || rows.length === 0 || rows.length > MAX_ROWS) return { error: "Nincs importálható adatsor." };
-    if (rows.some((row) => !row.valid || !row.name || !row.profileCode)) return { error: "A hibás sorokat az importálás előtt javítani kell." };
+    if (rows.some((row) => !row.valid || !row.name || !row.facts)) return { error: "A hibás sorokat az importálás előtt javítani kell." };
 
     const { supabase, organisationId } = await getContext();
-    const { data, error } = await supabase.rpc("aic_import_ai_systems_from_profiles", {
+    const { data, error } = await supabase.rpc("aic_import_ai_systems_from_facts", {
       p_organisation_id: organisationId,
-      p_rows: rows.map((row) => ({ name: row.name, profile_code: row.profileCode })),
+      p_rows: rows.map((row) => ({ name: row.name, facts: row.facts })),
       p_conditions_confirmed: true,
     });
     if (error) return { error: error.message || "Az importálás nem sikerült." };
