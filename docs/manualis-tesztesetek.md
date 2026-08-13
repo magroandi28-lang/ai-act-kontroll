@@ -122,23 +122,3 @@ A felhasználó be van jelentkezve, és a vezérlőpult látható.
 | 1 | Több fejezet típusjelzésének ellenőrzése. | A jogi követelmény, belső kontroll és alkalmazási útmutató elkülönítve jelenik meg. |
 | 2 | Egy AI Act-, egy GDPR- és egy magyar jogszabály-hivatkozás ellenőrzése. | A hivatkozások helyes forráscímmel és „cikk”, illetve „§” jelöléssel jelennek meg. |
 | 3 | Egy hivatkozás kiválasztása. | A hivatalos jogforrás új böngészőlapon nyílik meg. |
-
-## SYSTEM-CATALOG-001 – MI-rendszer rögzítése katalógusból
-
-**Kapcsolódó vizsgakövetelmény:** új adat bevitel  
-**Előfeltétel:** A felhasználó bejelentkezett és megnyitotta az **Új MI-rendszer** oldalt.
-
-| # | Lépés | Elvárt eredmény |
-|---:|---|---|
-| 1 | Az **Energetika** iparág kiválasztása. | Megjelenik az iparág rövid magyarázata. |
-| 2 | Az **Ügyfélszolgálati chatbot** rendszertípus kiválasztása. | Megjelenik a típus leírása és a hozzá használható képességek listája. |
-| 3 | Több képesség – például általános tájékoztatás, számlázási tájékoztatás és fogyasztási adatok – kiválasztása. | A kiválasztott elemek vizuálisan kijelölt állapotba kerülnek; mindegyiknél látható, mikor választandó. |
-| 4 | A kötelező alapadatok kitöltése és a rendszer mentése. | A rendszer, az iparág, a képességek és az ezekből képzett determinisztikus tényprofil együtt mentődik; megnyílik a mentett rendszerek listája. |
-
-## SYSTEM-CATALOG-002 – Katalógus-validáció
-
-| # | Lépés | Elvárt eredmény |
-|---:|---|---|
-| 1 | Chatbot mentési kísérlete képesség kiválasztása nélkül. | A rendszer nem ment, és érthető hibaüzenetet jelenít meg. |
-| 2 | Az iparág vagy rendszertípus megváltoztatása egy korábban kiválasztott, már nem alkalmazható képesség mellett. | A nem alkalmazható képesség automatikusan kikerül a kiválasztásból. |
-| 3 | A már létező rendszer nevével újabb mentési kísérlet. | A duplikáció nem mentődik, és megjelenik a már létező rendszerre vonatkozó üzenet. |
