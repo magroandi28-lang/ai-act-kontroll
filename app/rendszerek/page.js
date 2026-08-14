@@ -91,13 +91,20 @@ export default async function SystemsPage({ searchParams }) {
         {Number.parseInt(searchParams?.importalva || "0", 10) > 0 && (
           <p className="systems-success" role="status">{searchParams.importalva} MI-rendszer importálása sikerült.</p>
         )}
+        {searchParams?.modositva === "1" && (
+          <p className="systems-success" role="status">A rendszer adatainak módosítása sikerült.</p>
+        )}
+        {searchParams?.torolve === "1" && (
+          <p className="systems-success" role="status">A rendszer törlése sikerült. Az előzményei archiválva megmaradtak.</p>
+        )}
 
         <SystemFinder systems={finderSystems} />
 
         {systems?.length ? (
           <div className="systems-list">
             {systems.map((system) => (
-              <Link className="system-row" id={`rendszer-${system.id}`} href={`/rendszerek/${system.id}/szabalyzat`} key={system.id}>
+              <article className="system-row-wrap" key={system.id}>
+              <Link className="system-row" id={`rendszer-${system.id}`} href={`/rendszerek/${system.id}/szabalyzat`}>
                 <div className="system-row-main">
                   <span>{system.aic_system_type_templates?.name_hu || "Egyéb MI-rendszer"}</span>
                   <h2>{system.name}</h2>
@@ -110,6 +117,8 @@ export default async function SystemsPage({ searchParams }) {
                 </dl>
                 <span className="system-row-arrow" aria-hidden="true">→</span>
               </Link>
+              <Link className="system-row-edit" href={`/rendszerek/${system.id}/szerkesztes`}>Szerkesztés</Link>
+              </article>
             ))}
           </div>
         ) : (
