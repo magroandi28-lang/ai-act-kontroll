@@ -3,13 +3,15 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "../../../lib/supabase/client";
+import FunctionCombobox from "../FunctionCombobox";
 
-export default function NewSystemForm({ organisationId, industries, profiles }) {
+export default function NewSystemForm({ organisationId, industries, profiles, capabilities }) {
   const router = useRouter();
   const [name, setName] = useState("");
   const [industryCode, setIndustryCode] = useState("");
   const [profileCode, setProfileCode] = useState("");
   const [confirmed, setConfirmed] = useState(false);
+  const [selectedCapabilities, setSelectedCapabilities] = useState([]);
   const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -18,6 +20,11 @@ export default function NewSystemForm({ organisationId, industries, profiles }) 
     [industryCode, profiles]
   );
   const selectedProfile = profiles.find((profile) => profile.code === profileCode);
+  const compatibleCapabilities = useMemo(() => capabilities.filter((capability) => {
+    const typeMatches = !capability.system_type_codes?.length || capability.system_type_codes.includes(selectedProfile?.system_type_code);
+    const industryMatches = !capability.industry_codes?.length || capability.industry_codes.includes(industryCode);
+    return typeMatches && industryMatches;
+  }), [capabilities, industryCode, selectedProfile]);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -40,6 +47,7 @@ export default function NewSystemForm({ organisationId, industries, profiles }) 
       p_name: cleanName,
       p_profile_code: profileCode,
       p_conditions_confirmed: confirmed,
+      p_capability_codes: selectedCapabilities,
     });
     setSaving(false);
 
@@ -73,6 +81,7 @@ export default function NewSystemForm({ organisationId, industries, profiles }) 
           <select id="industry" value={industryCode} disabled={saving} onChange={(event) => {
             setIndustryCode(event.target.value);
             setProfileCode("");
+            setSelectedCapabilities([]);
             setConfirmed(false);
           }}>
             <option value="" disabled>Válassz iparágat</option>
@@ -86,7 +95,9 @@ export default function NewSystemForm({ organisationId, industries, profiles }) 
         <div>
           <label htmlFor="usageProfile">Mire használják?</label>
           <select id="usageProfile" value={profileCode} disabled={!industryCode || saving} onChange={(event) => {
+            const nextProfile = profiles.find((profile) => profile.code === event.target.value);
             setProfileCode(event.target.value);
+            setSelectedCapabilities(nextProfile?.capability_codes || []);
             setConfirmed(false);
           }}>
             <option value="" disabled>Válassz használati profilt</option>
@@ -109,6 +120,16 @@ export default function NewSystemForm({ organisationId, industries, profiles }) 
             <input type="checkbox" checked={confirmed} onChange={(event) => setConfirmed(event.target.checked)} disabled={saving} />
             <span>A rendszer dokumentációja alapján minden felsorolt feltétel igaz.</span>
           </label>
+          <div className="profile-functions">
+            <h3>Funkciók</h3>
+            <p>A profil alapfunkciói automatikusan bekerültek. A kereshető listából további funkciókat adhatsz hozzá.</p>
+            <FunctionCombobox
+              capabilities={compatibleCapabilities}
+              selectedCodes={selectedCapabilities}
+              requiredCodes={selectedProfile.capability_codes || []}
+              onChange={setSelectedCapabilities}
+            />
+          </div>
         </section>
       )}
 
