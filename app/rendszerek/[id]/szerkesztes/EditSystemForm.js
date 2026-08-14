@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { archiveSystem, assignMissingProfile, updateSystem } from "./actions";
+import { archiveSystem, assignMissingProfile, updateCombinedCapabilities, updateSystem } from "./actions";
 
 const lifecycleOptions = [
   ["planned", "Tervezett"],
@@ -14,7 +14,7 @@ const lifecycleOptions = [
   ["retired", "Kivezetett"],
 ];
 
-export default function EditSystemForm({ system, compatibleProfiles }) {
+export default function EditSystemForm({ system, compatibleProfiles, configurableCapabilities }) {
   const router = useRouter();
   const [name, setName] = useState(system.name);
   const [lifecycleStage, setLifecycleStage] = useState(system.lifecycle_stage);
@@ -24,6 +24,10 @@ export default function EditSystemForm({ system, compatibleProfiles }) {
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [profileCode, setProfileCode] = useState("");
   const [profileConfirmed, setProfileConfirmed] = useState(false);
+  const [capabilityConfirmed, setCapabilityConfirmed] = useState(false);
+  const [selectedCapabilities, setSelectedCapabilities] = useState(
+    (system.aic_ai_system_capabilities || []).map((item) => item.capability_code)
+  );
   const selectedProfile = compatibleProfiles.find((profile) => profile.code === profileCode);
 
   async function handleSave(event) {
@@ -85,6 +89,34 @@ export default function EditSystemForm({ system, compatibleProfiles }) {
     router.refresh();
   }
 
+  function toggleCapability(code) {
+    setSelectedCapabilities((current) => current.includes(code)
+      ? current.filter((item) => item !== code)
+      : [...current, code]);
+    setCapabilityConfirmed(false);
+  }
+
+  async function handleCapabilitySave() {
+    const allowed = configurableCapabilities.map((item) => item.code);
+    const selected = selectedCapabilities.filter((code) => allowed.includes(code));
+    if (selected.length < 2 || !capabilityConfirmed) {
+      setMessage("A kombinált profilhoz válassz legalább két tényleges funkciót, majd erősítsd meg az adatokat.");
+      setMessageType("error");
+      return;
+    }
+    setSaving(true);
+    const result = await updateCombinedCapabilities(system.id, selected, capabilityConfirmed);
+    setSaving(false);
+    if (result?.error) {
+      setMessage(result.error);
+      setMessageType("error");
+      return;
+    }
+    setMessage("A funkciókat elmentettük. A szabályzat most már elkészíthető.");
+    setMessageType("success");
+    router.refresh();
+  }
+
   return (
     <>
       <form className="edit-system-form" onSubmit={handleSave}>
@@ -128,6 +160,29 @@ export default function EditSystemForm({ system, compatibleProfiles }) {
               </>
             )}
             {!compatibleProfiles.length && <p>Ehhez az iparághoz és rendszertípushoz még nincs használható profil.</p>}
+          </section>
+        )}
+
+        {system.aic_usage_profiles?.code === "ENERGY_CHAT_COMBINED" && (
+          <section className="profile-confirmation edit-profile-assignment">
+            <p className="profile-label">Kombinált profil pontosítása</p>
+            <h2>Milyen feladatokat végez ténylegesen?</h2>
+            <p>Legalább két funkció szükséges. Csak azt jelöld, amit a rendszer dokumentációja igazol.</p>
+            <div className="capability-options">
+              {configurableCapabilities.map((capability) => (
+                <label className={`capability-option ${selectedCapabilities.includes(capability.code) ? "is-selected" : ""}`} key={capability.code}>
+                  <input type="checkbox" checked={selectedCapabilities.includes(capability.code)} disabled={saving} onChange={() => toggleCapability(capability.code)} />
+                  <span><strong>{capability.name_hu}</strong><small>{capability.description_hu}</small></span>
+                </label>
+              ))}
+            </div>
+            <label className="profile-confirm-check">
+              <input type="checkbox" checked={capabilityConfirmed} disabled={saving} onChange={(event) => setCapabilityConfirmed(event.target.checked)} />
+              <span>A kijelölt funkciókat a rendszer dokumentációja vagy tényleges működése igazolja.</span>
+            </label>
+            <button className="primary-button" type="button" disabled={saving || selectedCapabilities.filter((code) => configurableCapabilities.some((item) => item.code === code)).length < 2 || !capabilityConfirmed} onClick={handleCapabilitySave}>
+              {saving ? "Mentés…" : "Funkciók mentése"}
+            </button>
           </section>
         )}
 

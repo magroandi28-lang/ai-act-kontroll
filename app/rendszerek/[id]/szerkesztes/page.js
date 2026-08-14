@@ -10,7 +10,7 @@ export default async function EditSystemPage({ params }) {
 
   const { data: system } = await supabase
     .from("aic_ai_systems")
-    .select("id,name,lifecycle_stage,inventory_status,industry_code,system_type_id,aic_organisations(industry),aic_system_type_templates(type_code),aic_usage_profiles(code,name_hu)")
+    .select("id,name,lifecycle_stage,inventory_status,industry_code,system_type_id,aic_organisations(industry),aic_system_type_templates(type_code),aic_usage_profiles(code,name_hu),aic_ai_system_capabilities(capability_code)")
     .eq("id", params.id)
     .eq("inventory_status", "active")
     .maybeSingle();
@@ -29,6 +29,15 @@ export default async function EditSystemPage({ params }) {
       .order("sort_order")
     : { data: [] };
 
+  const { data: configurableCapabilities } = system.aic_usage_profiles?.code === "ENERGY_CHAT_COMBINED"
+    ? await supabase
+      .from("aic_capabilities")
+      .select("code,name_hu,description_hu")
+      .in("code", ["BILLING_INFORMATION", "METER_READING_INTAKE", "COMPLAINT_INTAKE", "DEBT_DISCONNECTION_SUPPORT", "VULNERABLE_CUSTOMER_SUPPORT"])
+      .eq("active", true)
+      .order("sort_order")
+    : { data: [] };
+
   return (
     <main className="system-form-page">
       <section className="system-form-shell edit-system-shell">
@@ -36,7 +45,7 @@ export default async function EditSystemPage({ params }) {
         <p className="system-form-eyebrow">RENDSZERADATOK JAVÍTÁSA</p>
         <h1>{system.name}</h1>
         <p className="system-form-intro">Itt javíthatod az elírt nevet és az életciklus-állapotot. A módosítás után a szabályzat a helyes rendszernevet használja.</p>
-        <EditSystemForm system={system} compatibleProfiles={compatibleProfiles || []} />
+        <EditSystemForm system={system} compatibleProfiles={compatibleProfiles || []} configurableCapabilities={configurableCapabilities || []} />
       </section>
     </main>
   );

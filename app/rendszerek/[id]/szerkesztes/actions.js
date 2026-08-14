@@ -51,3 +51,20 @@ export async function assignMissingProfile(systemId, profileCode, conditionsConf
   revalidatePath(`/rendszerek/${systemId}/szabalyzat`);
   return { success: true };
 }
+
+export async function updateCombinedCapabilities(systemId, capabilityCodes, conditionsConfirmed) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "A funkciók módosításához bejelentkezés szükséges." };
+
+  const { error } = await supabase.rpc("aic_update_combined_profile_capabilities", {
+    p_system_id: systemId,
+    p_capability_codes: capabilityCodes,
+    p_conditions_confirmed: conditionsConfirmed,
+  });
+  if (error) return { error: error.message || "A funkciók mentése nem sikerült." };
+  revalidatePath("/rendszerek");
+  revalidatePath(`/rendszerek/${systemId}/szerkesztes`);
+  revalidatePath(`/rendszerek/${systemId}/szabalyzat`);
+  return { success: true };
+}
