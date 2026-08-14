@@ -781,7 +781,8 @@ input:disabled {
 .system-combobox-menu span { color: #91a7b2; font-size: 12px; line-height: 1.4; }
 .system-combobox-empty { margin: 0; padding: 18px 14px; color: #aebbc4; text-align: center; }
 .systems-list { display: grid; gap: 14px; }
-.system-row { padding: 24px; display: grid; grid-template-columns: minmax(0,1.5fr) minmax(360px,1fr); gap: 32px; border: 1px solid var(--line); border-radius: 14px; background: rgba(8,29,44,.72); }
+.system-row-wrap { position: relative; }
+.system-row { padding: 24px 24px 64px; display: grid; grid-template-columns: minmax(0,1.5fr) minmax(360px,1fr); gap: 32px; border: 1px solid var(--line); border-radius: 14px; background: rgba(8,29,44,.72); }
 .system-row { position: relative; color: var(--text); text-decoration: none; transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease, background .22s ease; }
 .system-row::before { content: ""; position: absolute; inset: 18px auto 18px 0; width: 2px; opacity: 0; background: linear-gradient(var(--cyan),var(--orange)); transition: opacity .22s ease; }
 .system-row:hover { transform: translateY(-3px); border-color: rgba(0,189,218,.62); background: rgba(9,33,50,.94); box-shadow: 0 18px 40px rgba(0,0,0,.2), 0 0 28px rgba(0,189,218,.05); }
@@ -796,12 +797,30 @@ input:disabled {
 .system-row-meta dd { margin: 0; color: #e5ebee; font-size: 13px; line-height: 1.4; }
 .system-row-arrow { position: absolute; right: 20px; top: 18px; color: #617984; font-size: 22px; transition: color .22s, transform .22s; }
 .system-row:hover .system-row-arrow { color: var(--cyan); transform: translateX(4px); }
+.system-row-edit { position: absolute; right: 22px; bottom: 16px; z-index: 2; min-height: 34px; padding: 0 12px; display: inline-flex; align-items: center; color: #b8c9d1; border: 1px solid rgba(177,203,216,.28); border-radius: 7px; background: rgba(2,14,25,.48); font-size: 12px; font-weight: 700; text-decoration: none; }
+.system-row-edit:hover { color: #fff; border-color: var(--cyan); }
 .systems-empty { padding: 52px 30px; text-align: center; border: 1px dashed var(--line); border-radius: 14px; background: rgba(8,29,44,.46); }
 .systems-empty h2 { margin: 0 0 10px; }
 .systems-empty p { margin: 0 0 24px; color: #aebbc4; }
 .pagination { margin-top: 24px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; color: #91a3ad; font-size: 13px; }
 .pagination a { color: var(--orange); text-decoration: none; }
 .pagination a:last-child { text-align: right; }
+
+.edit-system-shell { width: min(100%,760px); }
+.edit-system-form { margin-top: 28px; padding: 26px; display: grid; gap: 10px; border: 1px solid var(--line); border-radius: 14px; background: rgba(8,29,44,.72); }
+.edit-system-form > label { margin-top: 7px; color: #dce8ed; font-size: 13px; font-weight: 700; }
+.edit-system-form input,.edit-system-form select { width: 100%; min-height: 49px; padding: 0 13px; color: #eef4f6; border: 1px solid rgba(177,203,216,.34); border-radius: 8px; outline: none; background: rgba(2,14,25,.56); font: inherit; }
+.edit-system-form input:focus,.edit-system-form select:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0,189,218,.1); }
+.edit-system-readonly { margin: 12px 0 5px; padding: 16px; border: 1px solid rgba(177,203,216,.16); border-radius: 9px; background: rgba(2,14,25,.28); }
+.edit-system-readonly span { display: block; margin-bottom: 5px; color: #8197a2; font-size: 11px; text-transform: uppercase; }
+.edit-system-readonly p { margin: 7px 0 0; color: #91a4ae; font-size: 12px; line-height: 1.5; }
+.system-danger-zone { margin-top: 18px; padding: 22px 26px; border: 1px solid rgba(255,91,55,.3); border-radius: 14px; background: rgba(255,91,55,.055); }
+.system-danger-zone h2 { margin: 0 0 7px; font-size: 20px; }
+.system-danger-zone p { margin: 0 0 17px; color: #aebbc4; line-height: 1.55; }
+.system-danger-zone button { min-height: 40px; padding: 0 14px; color: #ffd4ca; border: 1px solid rgba(255,91,55,.44); border-radius: 7px; background: transparent; font-weight: 700; cursor: pointer; }
+.archive-confirmation { padding: 15px; border-radius: 9px; background: rgba(255,91,55,.1); }
+.archive-confirmation > div { margin-top: 13px; display: flex; gap: 9px; }
+.archive-confirmation .confirm-archive { color: #fff; background: #b83d25; }
 
 .system-detail-page { min-height: 100vh; padding: 48px 20px 70px; background: radial-gradient(circle at 82% 16%,rgba(0,189,218,.08),transparent 27%),var(--navy-950); }
 .system-detail-shell { width: min(100%,1080px); margin: 0 auto; }
