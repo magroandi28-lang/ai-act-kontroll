@@ -699,6 +699,7 @@ input:disabled {
 .system-form select option { color: #10202b; background: #fff; }
 .system-form-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 18px; }
 .system-form-message { margin: 20px 0 0; color: #ffc0af; font-size: 13px; line-height: 1.5; }
+.system-form-message.is-success { color: #71f6ce; }
 .system-form .primary-button { margin-top: 24px; }
 .field-help { margin: 7px 0 0; color: #8297a2; font-size: 12px; line-height: 1.55; }
 .capability-selector { min-width: 0; margin: 28px 0 6px; padding: 22px; border: 1px solid rgba(177,203,216,.22); border-radius: 12px; }
