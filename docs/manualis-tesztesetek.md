@@ -122,3 +122,59 @@ A felhasználó be van jelentkezve, és a vezérlőpult látható.
 | 1 | Több fejezet típusjelzésének ellenőrzése. | A jogi követelmény, belső kontroll és alkalmazási útmutató elkülönítve jelenik meg. |
 | 2 | Egy AI Act-, egy GDPR- és egy magyar jogszabály-hivatkozás ellenőrzése. | A hivatkozások helyes forráscímmel és „cikk”, illetve „§” jelöléssel jelennek meg. |
 | 3 | Egy hivatkozás kiválasztása. | A hivatalos jogforrás új böngészőlapon nyílik meg. |
+
+## SYSTEM-EDIT-001 – Mentett MI-rendszer nevének módosítása
+
+**Kapcsolódó vizsgakövetelmény:** meglévő adat módosítása  
+**Prioritás:** Magas  
+**Típus:** Pozitív, funkcionális és használhatósági  
+**Automatizálható:** Igen
+
+### Előfeltétel
+
+A felhasználó bejelentkezett, és legalább egy aktív MI-rendszer szerepel a mentett rendszerek között.
+
+### Lépések és elvárt eredmények
+
+| # | Lépés | Elvárt eredmény |
+|---:|---|---|
+| 1 | A **Mentett MI-rendszerek** oldalon egy rendszer megkeresése. | A keresett rendszer panelje megjelenik. |
+| 2 | A rendszerhez tartozó **Szerkesztés** gomb kiválasztása. | Megnyílik a kiválasztott rendszer szerkesztőoldala. |
+| 3 | A rendszer nevének kijavítása. | A mező elfogadja az új nevet. |
+| 4 | A **Módosítások mentése** gomb kiválasztása. | A módosított név mentődik, sikeres visszajelzés jelenik meg, és ugyanaz a rendszer marad megnyitva. |
+| 5 | Visszatérés a mentett rendszerekhez. | A panelen a javított név jelenik meg. |
+
+## IMPORT-XLSX-001 – Több MI-rendszer importálása XLSX-adatforrásból
+
+**Kapcsolódó vizsgakövetelmény:** ismételt és sorozatos adatbevitel adatforrásból  
+**Prioritás:** Kritikus  
+**Típus:** Pozitív, funkcionális  
+**Automatizálható:** Igen
+
+### Előfeltétel
+
+A felhasználó bejelentkezett, és rendelkezik a rendszer által biztosított, helyesen kitöltött XLSX-sablonnal.
+
+### Lépések és elvárt eredmények
+
+| # | Lépés | Elvárt eredmény |
+|---:|---|---|
+| 1 | A **Több rendszer feltöltése** oldal megnyitása. | Az importálófelület hiba nélkül megjelenik. |
+| 2 | A 10 adatsort tartalmazó XLSX-fájl kiválasztása. | A fájl kiválasztható és ellenőrzésre előkészül. |
+| 3 | A **Fájl ellenőrzése** gomb kiválasztása. | Mind a 10 sor megfelelőként jelenik meg, a rendszer minden sort használati profilba sorol. |
+| 4 | A jóváhagyott sorok importálása. | A 10 MI-rendszer mentődik az adatbázisba. |
+| 5 | A **Mentett MI-rendszerek** oldal megnyitása. | Az importált rendszerek külön panelként megjelennek és megnyithatók. |
+
+## IMPORT-XLSX-002 – Kötelező oszlop nélküli XLSX-fájl elutasítása
+
+**Kapcsolódó vizsgakövetelmény:** sorozatos adatbevitel adatforrásból  
+**Prioritás:** Magas  
+**Típus:** Negatív, adatvalidációs  
+**Automatizálható:** Igen
+
+### Lépések és elvárt eredmények
+
+| # | Lépés | Elvárt eredmény |
+|---:|---|---|
+| 1 | Egy kötelező oszlopot nem tartalmazó XLSX-fájl kiválasztása. | A fájl kiválasztható ellenőrzésre. |
+| 2 | A **Fájl ellenőrzése** gomb kiválasztása. | A rendszer megnevezi a hiányzó oszlopot, hibásnak jelöli a fájlt, és nem engedélyezi az importálást. |

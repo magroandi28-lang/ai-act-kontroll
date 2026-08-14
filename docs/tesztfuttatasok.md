@@ -13,6 +13,9 @@
 | RUN-POLICY-BUILD-001 | Projekt build | Helyi Next.js 14.2.35 | **Sikeres** | – | Nem szükséges |
 | RUN-POLICY-001 | POLICY-001 | Vercel, Chrome, Windows | **Sikeres** | – | Nem szükséges |
 | RUN-POLICY-002 | POLICY-002 | Vercel, Chrome, Windows | **Sikeres** | – | Nem szükséges |
+| RUN-SYSTEM-EDIT-001 | SYSTEM-EDIT-001 | Vercel, Chrome, Windows | **Sikertelen** | BUG-SYSTEM-001 | Szükséges |
+| RUN-IMPORT-XLSX-001 | IMPORT-XLSX-002 | Vercel, Chrome, Windows, Excel | **Sikertelen** | BUG-IMPORT-001 | Szükséges |
+| RUN-IMPORT-XLSX-002 | IMPORT-XLSX-001 | Vercel, Chrome, Windows, Excel | **Sikeres** | – | Regressziós teszt szükséges |
 
 ## RUN-AUTH-001 részletei
 
@@ -45,3 +48,21 @@ Az audit utáni alkalmazáskód `npm run build` paranccsal sikeresen lefordult. 
 ## RUN-POLICY-001 és RUN-POLICY-002 részletei
 
 A mentett ügyfélszolgálati chatbot kártyájáról köztes oldal nélkül megnyílt az alkalmazandó szabályozási és megfelelőségi követelménydokumentum. A 2. verzió 26 fejezetet tartalmazott, a teljes útvonal működött, a dokumentum listázható, kereshető és PDF-ként menthető volt. A PDF 11 A4-oldalon, olvashatóan jelent meg; levágott vagy egymásra csúszó tartalmat nem találtunk. A jogi követelmények és belső kontrollok elkülönítve, a jogforrásokkal együtt jelentek meg.
+
+## RUN-SYSTEM-EDIT-001 részletei
+
+A mentett MI-rendszert sikerült megkeresni, a szerkesztőoldal megnyílt, és a chatbot javított neve megfelelően mentődött. Mentés után azonban a rendszer visszairányított a teljes listához. A korábban kiválasztott chatbot nem maradt megnyitva, ezért ismét meg kellett keresni.
+
+**Eredmény:** az adatmódosítás sikeres volt, de a 4. lépés navigációs elvárása nem teljesült. A teljes teszteset ezért sikertelen, és javítás utáni újratesztelés szükséges.
+
+## RUN-IMPORT-XLSX-001 részletei
+
+Az első ellenőrzés során az importálófelület **10 megfelelő, 0 hibás sor** eredményt jelzett annak ellenére, hogy a táblázatból hiányzott egy teljes, a besoroláshoz szükséges oszlop. Az automatikus besorolás helyén csak „–” jelent meg. A fájl tehát nem volt megfelelő, de az ellenőrzés nem jelezte a szerkezeti hibát.
+
+**Eredmény:** sikertelen negatív teszt; a BUG-IMPORT-001 hibajegy megnyitva.
+
+## RUN-IMPORT-XLSX-002 részletei
+
+A javított XLSX-fájl ellenőrzése **10 megfelelő, 0 hibás sor** eredményt adott. Mind a 10 rendszer mellett megjelent az automatikus használatiprofil-besorolás. Az importálás után a rendszerek külön panelként megjelentek a **Mentett MI-rendszerek** oldalon, és megnyithatók voltak.
+
+**Eredmény:** a helyesen kitöltött adatforrás ellenőrzése és sorozatos importálása sikeres.
