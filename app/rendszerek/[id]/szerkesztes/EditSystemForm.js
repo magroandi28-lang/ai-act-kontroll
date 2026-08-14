@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { archiveSystem, updateSystem } from "./actions";
+import { archiveSystem, assignMissingProfile, updateSystem } from "./actions";
 
 const lifecycleOptions = [
   ["planned", "Tervezett"],
@@ -14,7 +14,7 @@ const lifecycleOptions = [
   ["retired", "Kivezetett"],
 ];
 
-export default function EditSystemForm({ system }) {
+export default function EditSystemForm({ system, compatibleProfiles }) {
   const router = useRouter();
   const [name, setName] = useState(system.name);
   const [lifecycleStage, setLifecycleStage] = useState(system.lifecycle_stage);
@@ -22,6 +22,9 @@ export default function EditSystemForm({ system }) {
   const [messageType, setMessageType] = useState("");
   const [saving, setSaving] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [profileCode, setProfileCode] = useState("");
+  const [profileConfirmed, setProfileConfirmed] = useState(false);
+  const selectedProfile = compatibleProfiles.find((profile) => profile.code === profileCode);
 
   async function handleSave(event) {
     event.preventDefault();
@@ -61,6 +64,27 @@ export default function EditSystemForm({ system }) {
     router.refresh();
   }
 
+  async function handleProfileAssignment() {
+    setMessage("");
+    setMessageType("");
+    if (!profileCode || !profileConfirmed) {
+      setMessage("Válassz profilt, és erősítsd meg a kötelező feltételeket.");
+      setMessageType("error");
+      return;
+    }
+    setSaving(true);
+    const result = await assignMissingProfile(system.id, profileCode, profileConfirmed);
+    setSaving(false);
+    if (result?.error) {
+      setMessage(result.error);
+      setMessageType("error");
+      return;
+    }
+    setMessage("A hiányzó használati profilt sikeresen hozzárendeltük.");
+    setMessageType("success");
+    router.refresh();
+  }
+
   return (
     <>
       <form className="edit-system-form" onSubmit={handleSave}>
@@ -72,11 +96,40 @@ export default function EditSystemForm({ system }) {
           {lifecycleOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
         </select>
 
-        <div className="edit-system-readonly">
-          <span>Használati profil</span>
-          <strong>{system.aic_usage_profiles?.name_hu || "Nincs profil megadva"}</strong>
-          <p>A profil módosítása új szakmai besorolást igényel, ezért ezen az oldalon nem írható át véletlenül.</p>
-        </div>
+        {system.aic_usage_profiles?.code ? (
+          <div className="edit-system-readonly">
+            <span>Használati profil</span>
+            <strong>{system.aic_usage_profiles.name_hu}</strong>
+            <p>A meglévő profil csak külön, naplózott újrabesorolással változtatható meg.</p>
+          </div>
+        ) : (
+          <section className="profile-confirmation edit-profile-assignment">
+            <p className="profile-label">Hiányzó besorolás pótlása</p>
+            <h2>Használati profil kiválasztása</h2>
+            <select value={profileCode} disabled={saving} onChange={(event) => {
+              setProfileCode(event.target.value);
+              setProfileConfirmed(false);
+            }}>
+              <option value="" disabled>Válassz kompatibilis profilt</option>
+              {compatibleProfiles.map((profile) => <option key={profile.code} value={profile.code}>{profile.name_hu}</option>)}
+            </select>
+            {selectedProfile && (
+              <>
+                <p>{selectedProfile.description_hu}</p>
+                <h3>Ez a profil akkor használható, ha:</h3>
+                <ul>{(selectedProfile.required_assertions || []).map((item) => <li key={item}>{item}</li>)}</ul>
+                <label className="profile-confirm-check">
+                  <input type="checkbox" checked={profileConfirmed} disabled={saving} onChange={(event) => setProfileConfirmed(event.target.checked)} />
+                  <span>A rendszer dokumentációja alapján minden felsorolt feltétel igaz.</span>
+                </label>
+                <button className="primary-button" type="button" disabled={saving || !profileConfirmed} onClick={handleProfileAssignment}>
+                  {saving ? "Mentés…" : "Profil hozzárendelése"}
+                </button>
+              </>
+            )}
+            {!compatibleProfiles.length && <p>Ehhez az iparághoz és rendszertípushoz még nincs használható profil.</p>}
+          </section>
+        )}
 
         {message && (
           <p

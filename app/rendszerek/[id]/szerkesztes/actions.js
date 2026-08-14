@@ -34,3 +34,20 @@ export async function archiveSystem(systemId) {
   revalidatePath("/rendszerek");
   return { success: true };
 }
+
+export async function assignMissingProfile(systemId, profileCode, conditionsConfirmed) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "A profil pótlásához bejelentkezés szükséges." };
+
+  const { error } = await supabase.rpc("aic_assign_missing_usage_profile", {
+    p_system_id: systemId,
+    p_profile_code: profileCode,
+    p_conditions_confirmed: conditionsConfirmed,
+  });
+  if (error) return { error: error.message || "A profil hozzárendelése nem sikerült." };
+  revalidatePath("/rendszerek");
+  revalidatePath(`/rendszerek/${systemId}/szerkesztes`);
+  revalidatePath(`/rendszerek/${systemId}/szabalyzat`);
+  return { success: true };
+}

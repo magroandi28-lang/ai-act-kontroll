@@ -10,12 +10,24 @@ export default async function EditSystemPage({ params }) {
 
   const { data: system } = await supabase
     .from("aic_ai_systems")
-    .select("id,name,lifecycle_stage,inventory_status,aic_usage_profiles(name_hu)")
+    .select("id,name,lifecycle_stage,inventory_status,industry_code,system_type_id,aic_organisations(industry),aic_system_type_templates(type_code),aic_usage_profiles(code,name_hu)")
     .eq("id", params.id)
     .eq("inventory_status", "active")
     .maybeSingle();
 
   if (!system) notFound();
+
+  const industryCode = system.industry_code || system.aic_organisations?.industry;
+  const typeCode = system.aic_system_type_templates?.type_code;
+  const { data: compatibleProfiles } = !system.aic_usage_profiles?.code
+    ? await supabase
+      .from("aic_usage_profiles")
+      .select("code,name_hu,description_hu,required_assertions")
+      .eq("active", true)
+      .eq("industry_code", industryCode)
+      .eq("system_type_code", typeCode)
+      .order("sort_order")
+    : { data: [] };
 
   return (
     <main className="system-form-page">
@@ -24,7 +36,7 @@ export default async function EditSystemPage({ params }) {
         <p className="system-form-eyebrow">RENDSZERADATOK JAVÍTÁSA</p>
         <h1>{system.name}</h1>
         <p className="system-form-intro">Itt javíthatod az elírt nevet és az életciklus-állapotot. A módosítás után a szabályzat a helyes rendszernevet használja.</p>
-        <EditSystemForm system={system} />
+        <EditSystemForm system={system} compatibleProfiles={compatibleProfiles || []} />
       </section>
     </main>
   );
