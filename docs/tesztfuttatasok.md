@@ -16,6 +16,7 @@
 | RUN-SYSTEM-EDIT-001 | SYSTEM-EDIT-001 | Vercel, Chrome, Windows | **Sikertelen** | BUG-SYSTEM-001 | Szükséges |
 | RUN-IMPORT-XLSX-001 | IMPORT-XLSX-002 | Vercel, Chrome, Windows, Excel | **Sikertelen** | BUG-IMPORT-001 | Szükséges |
 | RUN-IMPORT-XLSX-002 | IMPORT-XLSX-001 | Vercel, Chrome, Windows, Excel | **Sikeres** | – | Regressziós teszt szükséges |
+| RUN-SYSTEM-FIND-001 | SYSTEM-FIND-001 | Vercel, Chrome, Windows | **Sikertelen** | BUG-SYSTEM-002 | Szükséges |
 
 ## RUN-AUTH-001 részletei
 
@@ -66,3 +67,9 @@ Az első ellenőrzés során az importálófelület **10 megfelelő, 0 hibás so
 A javított XLSX-fájl ellenőrzése **10 megfelelő, 0 hibás sor** eredményt adott. Mind a 10 rendszer mellett megjelent az automatikus használatiprofil-besorolás. Az importálás után a rendszerek külön panelként megjelentek a **Mentett MI-rendszerek** oldalon, és megnyithatók voltak.
 
 **Eredmény:** a helyesen kitöltött adatforrás ellenőrzése és sorozatos importálása sikeres.
+
+## RUN-SYSTEM-FIND-001 részletei
+
+A kereső megtalálta a **Számla Segéd** rendszert, és arra a listaoldalra navigált, amelyen a panel szerepelt. A kiválasztott rendszer mellett azonban az oldal többi három panelje is látható maradt. A szerkesztés utáni visszatéréskor ugyanez történt: a megfelelő oldal jelent meg, de a rendszert ismét meg kellett keresni a többi panel között.
+
+**Eredmény:** a keresett rendszer elérhető volt, de a találati lista nem szűkült le a kiválasztott panelre. A teszteset sikertelen; BUG-SYSTEM-002 rögzítve.

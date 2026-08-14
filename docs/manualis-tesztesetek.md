@@ -178,3 +178,19 @@ A felhasználó bejelentkezett, és rendelkezik a rendszer által biztosított, 
 |---:|---|---|
 | 1 | Egy kötelező oszlopot nem tartalmazó XLSX-fájl kiválasztása. | A fájl kiválasztható ellenőrzésre. |
 | 2 | A **Fájl ellenőrzése** gomb kiválasztása. | A rendszer megnevezi a hiányzó oszlopot, hibásnak jelöli a fájlt, és nem engedélyezi az importálást. |
+
+## SYSTEM-FIND-001 – Mentett MI-rendszer kiválasztása a keresőből
+
+**Kapcsolódó vizsgakövetelmény:** adatok listázása és többoldalas lista bejárása  
+**Prioritás:** Magas  
+**Típus:** Funkcionális és használhatósági  
+**Automatizálható:** Igen
+
+### Lépések és elvárt eredmények
+
+| # | Lépés | Elvárt eredmény |
+|---:|---|---|
+| 1 | A mentett rendszerek keresőjében egy konkrét chatbot nevének megadása. | A kereső felajánlja az egyező rendszert. |
+| 2 | A találat – például a **Számla Segéd** – kiválasztása. | Kizárólag a kiválasztott rendszer panelje jelenik meg; a többi panel és a lapozó elrejtőzik. |
+| 3 | A kiválasztott rendszer szerkesztése, majd visszalépés. | Ugyanaz az egy kiválasztott panel marad látható. |
+| 4 | A keresőmező `×` gombjának kiválasztása. | Ismét a teljes, lapozható rendszerlista jelenik meg. |
