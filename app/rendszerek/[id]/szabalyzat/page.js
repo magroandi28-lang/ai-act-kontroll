@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "../../../../lib/supabase/server";
 import SearchablePolicy from "./SearchablePolicy";
 
-export default async function PolicyPage({ params }) {
+export default async function PolicyPage({ params, searchParams }) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/");
@@ -15,6 +15,18 @@ export default async function PolicyPage({ params }) {
     .maybeSingle();
 
   if (!system) notFound();
+
+  const { data: existingPolicy } = await supabase
+    .from("aic_generated_policies")
+    .select("id")
+    .eq("ai_system_id", system.id)
+    .order("version", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (!existingPolicy && searchParams?.inditas !== "1") {
+    redirect(`/rendszerek/${system.id}`);
+  }
 
   let generationError = null;
   let policy = null;
