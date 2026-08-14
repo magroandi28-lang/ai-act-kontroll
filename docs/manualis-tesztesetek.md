@@ -194,3 +194,29 @@ A felhasználó bejelentkezett, és rendelkezik a rendszer által biztosított, 
 | 2 | A találat – például a **Számla Segéd** – kiválasztása. | Kizárólag a kiválasztott rendszer panelje jelenik meg; a többi panel és a lapozó elrejtőzik. |
 | 3 | A kiválasztott rendszer szerkesztése, majd visszalépés. | Ugyanaz az egy kiválasztott panel marad látható. |
 | 4 | A keresőmező `×` gombjának kiválasztása. | Ismét a teljes, lapozható rendszerlista jelenik meg. |
+
+## POLICY-GATE-001 – Profil nélküli rendszer szabályzatgenerálásának blokkolása
+
+**Kapcsolódó követelmény:** szabályzat kizárólag érvényes használati profilból készülhet  
+**Prioritás:** Kritikus  
+**Típus:** Negatív, funkcionális és adatbiztonsági  
+**Automatizálható:** Igen
+
+### Lépések és elvárt eredmények
+
+| # | Lépés | Elvárt eredmény |
+|---:|---|---|
+| 1 | Profil nélküli vagy a profilkatalógusban nem szereplő rendszer szabályzatának megnyitása. | Nem készül és nem jelenik meg szabályzat. |
+| 2 | A hibaüzenet ellenőrzése. | Megjelenik: „A szabályzat nem készíthető el, mert a rendszerhez nincs érvényes használati profil rendelve.” |
+| 3 | Az adatbázis ellenőrzése. | A próbálkozás nem hozott létre új sort az `aic_generated_policies` táblában. |
+
+## POLICY-GATE-002 – Érvényes használati profil elfogadása
+
+**Prioritás:** Kritikus  
+**Típus:** Pozitív, funkcionális és regressziós  
+**Automatizálható:** Igen
+
+| # | Lépés | Elvárt eredmény |
+|---:|---|---|
+| 1 | Létező, aktív és a rendszertényekkel összhangban álló profilú chatbot szabályzatának megnyitása. | A profilkapu elfogadja a rendszert, és a szabályzat megjelenik. |
+| 2 | A dokumentum ismételt megnyitása változatlan adatokkal. | Nem készül felesleges új dokumentumverzió. |

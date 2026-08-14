@@ -127,3 +127,30 @@ A kiválasztott rendszer azonosítója bekerül az oldal címébe. A lista ilyen
 ### Javítás ellenőrzése
 
 Az újratesztelés során kizárólag a kiválasztott chatbot panelje jelent meg. A szerkesztésből történő visszatérés megőrizte a kiválasztást, az `×` gomb pedig visszaállította a teljes listát. A hiba nem jelentkezett újra, ezért a hibajegy lezárható.
+
+## BUG-POLICY-001 – Érvényes használati profil nélkül is készülhetett szabályzat
+
+| Mező | Érték |
+|---|---|
+| Modul | Determinisztikus szabálymotor / szabályzatgenerálás |
+| Kapcsolódó teszteset | POLICY-GATE-001, POLICY-GATE-002 |
+| Környezet | Supabase PostgreSQL, Vercel |
+| Súlyosság | Kritikus |
+| Prioritás | Kritikus |
+| Állapot | Javítva, felületi újratesztelésre vár |
+
+### Hiba
+
+A generátor az aktív rendszert és a rendszertípust ellenőrizte, de nem követelte meg a katalógusban szereplő aktív használati profilt. Emiatt hiányos vagy nem igazolt rendszeradatokból is létrejöhetett szabályzat.
+
+### Elvárt eredmény
+
+Szabályzat csak akkor készülhet, ha a rendszerhez rendelt profil létezik és aktív, az iparág és a rendszertípus egyezik, valamint a tárolt rendszertények teljesítik a profil kötelező tény- és képességfeltételeit.
+
+### Elvégzett javítás
+
+Központi adatbázis-függvény ellenőrzi a használati profil érvényességét. A generátor már a modulok kiválasztása előtt meghívja ezt a kaput. Az `aic_generated_policies` táblán működő trigger megakadályozza, hogy másik kódútvonal érvénytelen profilhoz szabályzatot mentsen. A korábbi, változatlan szabályzatok összehasonlítása nem hoz létre indokolatlan új verziót.
+
+### Adatellenőrzési megállapítás
+
+A profil nélküli régi **Ügyfélszolgálati chatbot** szabályzatkészítése blokkolódik. Az **EnergiaChat** profilja és rendszertényei nem egyeznek teljesen, ezért annak adatait külön felül kell vizsgálni. A további tíz profilozott aktív rendszer átment az adatbázis-ellenőrzésen.

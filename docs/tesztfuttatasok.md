@@ -18,6 +18,7 @@
 | RUN-IMPORT-XLSX-002 | IMPORT-XLSX-001 | Vercel, Chrome, Windows, Excel | **Sikeres** | – | Regressziós teszt szükséges |
 | RUN-SYSTEM-FIND-001 | SYSTEM-FIND-001 | Vercel, Chrome, Windows | **Sikertelen** | BUG-SYSTEM-002 | Szükséges |
 | RUN-SYSTEM-FIND-002 | SYSTEM-FIND-001 | Vercel, Chrome, Windows | **Sikeres** | BUG-SYSTEM-002 | Sikeres |
+| RUN-POLICY-GATE-DB-001 | POLICY-GATE-001, POLICY-GATE-002 | Supabase PostgreSQL | **Sikeres** | BUG-POLICY-001 | Felületi újratesztelés szükséges |
 
 ## RUN-AUTH-001 részletei
 
@@ -80,3 +81,11 @@ A kereső megtalálta a **Számla Segéd** rendszert, és arra a listaoldalra na
 A javítás után a keresőből kiválasztott chatbot önálló találatként jelent meg, a többi panel és a lapozó nem volt látható. A szerkesztésből visszatérve a kiválasztott rendszer maradt a felületen, az `×` gomb pedig megfelelően visszaállította a teljes rendszerlistát.
 
 **Eredmény:** a javítás ellenőrzése sikeres; a BUG-SYSTEM-002 hiba nem jelentkezett újra.
+
+## RUN-POLICY-GATE-DB-001 részletei
+
+Az adatbázisban telepített profilkaput egy érvényes **Számla- és fogyasztási ügyintézés** profillal és a profil nélküli régi **Ügyfélszolgálati chatbot** rekorddal ellenőriztük. Az érvényes profil megfelelt. A profil nélküli rekordot a kapu a meghatározott hibaüzenettel elutasította. Az `aic_generated_policies` táblán aktív adatbázis-trigger akadályozza meg a kapu más útvonalon történő megkerülését.
+
+A teljes aktív állomány ellenőrzésekor tíz profilozott rendszer megfelelt. Az **EnergiaChat** rekordhoz rendelt profil és a tárolt rendszertények között eltérés található, ezért ennél a rendszernél a generálás helyesen blokkolódik, amíg az adatokat felül nem vizsgáljuk.
+
+**Eredmény:** az adatbázisszintű ellenőrzés sikeres; a felületi manuális újratesztelés még szükséges.
