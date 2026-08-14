@@ -44,7 +44,7 @@ export default async function SystemsPage({ searchParams }) {
   const to = from + PAGE_SIZE - 1;
   let systemsQuery = supabase
     .from("aic_ai_systems")
-    .select("id, name, intended_purpose, organisation_role, lifecycle_stage, assessment_status, created_at, aic_system_type_templates(name_hu)")
+    .select("id, name, intended_purpose, organisation_role, lifecycle_stage, assessment_status, created_at, usage_profile_code, aic_system_type_templates(name_hu), aic_ai_system_capabilities(capability_code)")
     .eq("organisation_id", membership.organisation_id)
     .eq("inventory_status", "active")
     .order("created_at", { ascending: false });
@@ -106,9 +106,18 @@ export default async function SystemsPage({ searchParams }) {
 
         {systems?.length ? (
           <div className="systems-list">
-            {systems.map((system) => (
+            {systems.map((system) => {
+              const specialCapabilityCodes = new Set([
+                "BILLING_INFORMATION", "METER_READING_INTAKE", "COMPLAINT_INTAKE",
+                "DEBT_DISCONNECTION_SUPPORT", "VULNERABLE_CUSTOMER_SUPPORT",
+              ]);
+              const configuredSpecialCount = (system.aic_ai_system_capabilities || [])
+                .filter((item) => specialCapabilityCodes.has(item.capability_code)).length;
+              const needsFunctionSetup = system.usage_profile_code === "ENERGY_CHAT_COMBINED" && configuredSpecialCount < 2;
+              const targetHref = `/rendszerek/${system.id}`;
+              return (
               <article className="system-row-wrap" key={system.id}>
-              <Link className="system-row" id={`rendszer-${system.id}`} href={`/rendszerek/${system.id}/szabalyzat`}>
+              <Link className="system-row" id={`rendszer-${system.id}`} href={targetHref}>
                 <div className="system-row-main">
                   <span>{system.aic_system_type_templates?.name_hu || "Egyéb MI-rendszer"}</span>
                   <h2>{system.name}</h2>
@@ -117,13 +126,14 @@ export default async function SystemsPage({ searchParams }) {
                 <dl className="system-row-meta">
                   <div><dt>Szerep</dt><dd>{roleLabels[system.organisation_role] || "Még nem ismert"}</dd></div>
                   <div><dt>Állapot</dt><dd>{lifecycleLabels[system.lifecycle_stage] || system.lifecycle_stage}</dd></div>
-                  <div><dt>Szabályzat</dt><dd>{systemsWithPolicy.has(system.id) ? "Elkészült" : "Megnyitáskor elkészül"}</dd></div>
+                  <div><dt>Szabályzat</dt><dd>{needsFunctionSetup ? "Funkciók megadása szükséges" : systemsWithPolicy.has(system.id) ? "Elkészült" : "Megnyitáskor elkészül"}</dd></div>
                 </dl>
                 <span className="system-row-arrow" aria-hidden="true">→</span>
               </Link>
               <Link className="system-row-edit" href={`/rendszerek/${system.id}/szerkesztes`}>Szerkesztés</Link>
               </article>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <div className="systems-empty">
