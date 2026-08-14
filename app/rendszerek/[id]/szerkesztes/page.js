@@ -10,7 +10,7 @@ export default async function EditSystemPage({ params }) {
 
   const { data: system } = await supabase
     .from("aic_ai_systems")
-    .select("id,name,lifecycle_stage,inventory_status,industry_code,system_type_id,aic_organisations(industry),aic_system_type_templates(type_code),aic_usage_profiles(code,name_hu),aic_ai_system_capabilities(capability_code)")
+    .select("id,name,lifecycle_stage,inventory_status,industry_code,system_type_id,usage_profile_code,aic_organisations(industry),aic_system_type_templates(type_code),aic_usage_profiles(code,name_hu),aic_ai_system_capabilities(capability_code)")
     .eq("id", params.id)
     .eq("inventory_status", "active")
     .maybeSingle();
@@ -19,7 +19,7 @@ export default async function EditSystemPage({ params }) {
 
   const industryCode = system.industry_code || system.aic_organisations?.industry;
   const typeCode = system.aic_system_type_templates?.type_code;
-  const { data: compatibleProfiles } = !system.aic_usage_profiles?.code
+  const { data: compatibleProfiles } = !system.usage_profile_code
     ? await supabase
       .from("aic_usage_profiles")
       .select("code,name_hu,description_hu,required_assertions")
@@ -29,7 +29,7 @@ export default async function EditSystemPage({ params }) {
       .order("sort_order")
     : { data: [] };
 
-  const { data: configurableCapabilities } = system.aic_usage_profiles?.code === "ENERGY_CHAT_COMBINED"
+  const { data: configurableCapabilities } = system.usage_profile_code === "ENERGY_CHAT_COMBINED"
     ? await supabase
       .from("aic_capabilities")
       .select("code,name_hu,description_hu")

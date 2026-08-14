@@ -128,7 +128,7 @@ export default function EditSystemForm({ system, compatibleProfiles, configurabl
           {lifecycleOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
         </select>
 
-        {system.aic_usage_profiles?.code ? (
+        {system.usage_profile_code ? (
           <div className="edit-system-readonly">
             <span>Használati profil</span>
             <strong>{system.aic_usage_profiles.name_hu}</strong>
@@ -163,7 +163,7 @@ export default function EditSystemForm({ system, compatibleProfiles, configurabl
           </section>
         )}
 
-        {system.aic_usage_profiles?.code === "ENERGY_CHAT_COMBINED" && (
+        {system.usage_profile_code === "ENERGY_CHAT_COMBINED" && (
           <section className="profile-confirmation edit-profile-assignment">
             <p className="profile-label">Kombinált profil pontosítása</p>
             <h2>Milyen feladatokat végez ténylegesen?</h2>
