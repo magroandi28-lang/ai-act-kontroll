@@ -52,15 +52,15 @@ export async function assignMissingProfile(systemId, profileCode, conditionsConf
   return { success: true };
 }
 
-export async function updateCombinedCapabilities(systemId, capabilityCodes, conditionsConfirmed) {
+export async function updateSystemCapabilities(systemId, capabilityCodes) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "A funkciók módosításához bejelentkezés szükséges." };
 
-  const { error } = await supabase.rpc("aic_update_combined_profile_capabilities", {
+  const { error } = await supabase.rpc("aic_update_system_capabilities", {
     p_system_id: systemId,
     p_capability_codes: capabilityCodes,
-    p_conditions_confirmed: conditionsConfirmed,
+    p_conditions_confirmed: true,
   });
   if (error) return { error: error.message || "A funkciók mentése nem sikerült." };
   revalidatePath("/rendszerek");
