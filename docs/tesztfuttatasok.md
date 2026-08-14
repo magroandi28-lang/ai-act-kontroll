@@ -19,6 +19,8 @@
 | RUN-SYSTEM-FIND-001 | SYSTEM-FIND-001 | Vercel, Chrome, Windows | **Sikertelen** | BUG-SYSTEM-002 | Szükséges |
 | RUN-SYSTEM-FIND-002 | SYSTEM-FIND-001 | Vercel, Chrome, Windows | **Sikeres** | BUG-SYSTEM-002 | Sikeres |
 | RUN-POLICY-GATE-DB-001 | POLICY-GATE-001, POLICY-GATE-002 | Supabase PostgreSQL | **Sikeres** | BUG-POLICY-001 | Felületi újratesztelés szükséges |
+| RUN-POLICY-GATE-UI-001 | POLICY-GATE-001 | Vercel, Chrome, Windows | **Sikeres** | BUG-POLICY-001 | Negatív felületi teszt sikeres |
+| RUN-SYSTEM-RETURN-001 | SYSTEM-RETURN-001 | Vercel, Chrome, Windows | **Sikertelen** | BUG-SYSTEM-003 | Szükséges |
 
 ## RUN-AUTH-001 részletei
 
@@ -89,3 +91,19 @@ Az adatbázisban telepített profilkaput egy érvényes **Számla- és fogyaszt�
 A teljes aktív állomány ellenőrzésekor tíz profilozott rendszer megfelelt. Az **EnergiaChat** rekordhoz rendelt profil és a tárolt rendszertények között eltérés található, ezért ennél a rendszernél a generálás helyesen blokkolódik, amíg az adatokat felül nem vizsgáljuk.
 
 **Eredmény:** az adatbázisszintű ellenőrzés sikeres; a felületi manuális újratesztelés még szükséges.
+
+## RUN-POLICY-GATE-UI-001 részletei
+
+A profil nélküli régi **Ügyfélszolgálati chatbot** paneljét a felhasználó a böngészőben megnyitotta. A rendszer a korábban létrehozott szabályzat megjelenítése helyett leállította a folyamatot, és az alábbi üzenetet jelenítette meg:
+
+> A szabályzat nem készíthető el, mert a rendszerhez nincs érvényes használati profil rendelve.
+
+**Eredmény:** a feketedobozos negatív manuális teszt sikeres. Profil nélküli rendszerhez a felület nem adott ki szabályzatot.
+
+**Bizonyíték:** [A szabálykapu hibaüzenete](bizonyitekok/POLICY-GATE-001.png)
+
+## RUN-SYSTEM-RETURN-001 részletei
+
+A kiválasztott chatbot szabályzatának megnyitása után a visszalépés a teljes rendszerlistára vezetett. A korábban kiválasztott panel nem maradt elkülönítve, ezért azt ismét meg kellett keresni a többi rendszer között.
+
+**Eredmény:** sikertelen használhatósági teszt; BUG-SYSTEM-003 rögzítve. A javítás felületi újratesztelése szükséges.

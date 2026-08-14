@@ -137,7 +137,7 @@ Az újratesztelés során kizárólag a kiválasztott chatbot panelje jelent meg
 | Környezet | Supabase PostgreSQL, Vercel |
 | Súlyosság | Kritikus |
 | Prioritás | Kritikus |
-| Állapot | Javítva, felületi újratesztelésre vár |
+| Állapot | Javítva, részben újratesztelve |
 
 ### Hiba
 
@@ -154,3 +154,30 @@ Központi adatbázis-függvény ellenőrzi a használati profil érvényességé
 ### Adatellenőrzési megállapítás
 
 A profil nélküli régi **Ügyfélszolgálati chatbot** szabályzatkészítése blokkolódik. Az **EnergiaChat** profilja és rendszertényei nem egyeznek teljesen, ezért annak adatait külön felül kell vizsgálni. A további tíz profilozott aktív rendszer átment az adatbázis-ellenőrzésen.
+
+### Felületi újratesztelés
+
+A profil nélküli rendszerrel végzett feketedobozos negatív teszt sikeres volt: a szabályzat nem jelent meg, és a megfelelő hibaüzenet volt látható. A hibajegy teljes lezárása előtt az érvényes profilú rendszer pozitív felületi tesztjét is végre kell hajtani.
+
+## BUG-SYSTEM-003 – A szabályzatból visszatérve elvész a kiválasztott rendszer
+
+| Mező | Érték |
+|---|---|
+| Modul | Mentett MI-rendszerek / szabályzatnavigáció |
+| Kapcsolódó teszteset | SYSTEM-RETURN-001 |
+| Környezet | Vercel, Chrome, Windows |
+| Súlyosság | Közepes |
+| Prioritás | Magas |
+| Állapot | Javítva, újratesztelésre vár |
+
+### Tényleges eredmény
+
+A szabályzat megnyitása után a visszalépési hivatkozás a teljes rendszerlistára vitt. A korábban kiválasztott chatbotot ismét meg kellett keresni a lapozható panelek között.
+
+### Elvárt eredmény
+
+A szabályzatból és a profilkapu hibaoldaláról történő visszalépés ugyanannak az egy kiválasztott rendszernek a paneljére vezessen.
+
+### Elvégzett javítás
+
+A rendes szabályzatoldal és a generálási hibaoldal visszalépési hivatkozása is továbbadja a rendszer azonosítóját a mentett rendszerek oldalának.

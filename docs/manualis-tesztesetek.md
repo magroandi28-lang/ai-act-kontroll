@@ -220,3 +220,16 @@ A felhasználó bejelentkezett, és rendelkezik a rendszer által biztosított, 
 |---:|---|---|
 | 1 | Létező, aktív és a rendszertényekkel összhangban álló profilú chatbot szabályzatának megnyitása. | A profilkapu elfogadja a rendszert, és a szabályzat megjelenik. |
 | 2 | A dokumentum ismételt megnyitása változatlan adatokkal. | Nem készül felesleges új dokumentumverzió. |
+
+## SYSTEM-RETURN-001 – Visszatérés a szabályzatból a kiválasztott rendszerhez
+
+**Kapcsolódó vizsgakövetelmény:** adatok listázása és többoldalas lista bejárása  
+**Prioritás:** Magas  
+**Típus:** Funkcionális és használhatósági  
+**Automatizálható:** Igen
+
+| # | Lépés | Elvárt eredmény |
+|---:|---|---|
+| 1 | Egy rendszer kiválasztása a keresőből. | Kizárólag a kiválasztott rendszer panelje jelenik meg. |
+| 2 | A rendszer szabályzatának megnyitása. | A szabályzat vagy a profilkapu hibaoldala megjelenik. |
+| 3 | A **Vissza ehhez a rendszerhez** hivatkozás kiválasztása. | Ugyanannak az egy rendszernek a panelje jelenik meg; nem kell újra megkeresni a lapozható listában. |
