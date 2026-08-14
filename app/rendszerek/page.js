@@ -126,7 +126,7 @@ export default async function SystemsPage({ searchParams }) {
                 <dl className="system-row-meta">
                   <div><dt>Szerep</dt><dd>{roleLabels[system.organisation_role] || "Még nem ismert"}</dd></div>
                   <div><dt>Állapot</dt><dd>{lifecycleLabels[system.lifecycle_stage] || system.lifecycle_stage}</dd></div>
-                  <div><dt>Szabályzat</dt><dd>{needsFunctionSetup ? "Funkciók megadása szükséges" : systemsWithPolicy.has(system.id) ? "Elkészült" : "Megnyitáskor elkészül"}</dd></div>
+                  <div><dt>Szabályzat</dt><dd>{needsFunctionSetup ? "Funkciók megadása szükséges" : systemsWithPolicy.has(system.id) ? "Elkészült" : "Még nincs elkészítve"}</dd></div>
                 </dl>
                 <span className="system-row-arrow" aria-hidden="true">→</span>
               </Link>
