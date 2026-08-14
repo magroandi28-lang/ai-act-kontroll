@@ -23,6 +23,7 @@ export default async function SystemsPage({ searchParams }) {
 
   const requestedPage = Number.parseInt(searchParams?.oldal || "1", 10);
   const currentPage = Number.isFinite(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+  const selectedSystemId = searchParams?.rendszer || "";
 
   const { data: membership } = await supabase
     .from("aic_organisation_members")
@@ -32,18 +33,6 @@ export default async function SystemsPage({ searchParams }) {
 
   if (!membership) redirect("/vezerlopult");
 
-  const from = (currentPage - 1) * PAGE_SIZE;
-  const to = from + PAGE_SIZE - 1;
-  const systemsQuery = supabase
-    .from("aic_ai_systems")
-    .select("id, name, intended_purpose, organisation_role, lifecycle_stage, assessment_status, created_at, aic_system_type_templates(name_hu)", { count: "exact" })
-    .eq("organisation_id", membership.organisation_id)
-    .eq("inventory_status", "active");
-
-  const { data: systems, count } = await systemsQuery
-    .order("created_at", { ascending: false })
-    .range(from, to);
-
   const { data: allSystems } = await supabase
     .from("aic_ai_systems")
     .select("id, name, intended_purpose, created_at, aic_system_type_templates(name_hu)")
@@ -51,13 +40,28 @@ export default async function SystemsPage({ searchParams }) {
     .eq("inventory_status", "active")
     .order("created_at", { ascending: false });
 
+  const from = (currentPage - 1) * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
+  let systemsQuery = supabase
+    .from("aic_ai_systems")
+    .select("id, name, intended_purpose, organisation_role, lifecycle_stage, assessment_status, created_at, aic_system_type_templates(name_hu)")
+    .eq("organisation_id", membership.organisation_id)
+    .eq("inventory_status", "active")
+    .order("created_at", { ascending: false });
+
+  const { data: systems } = selectedSystemId
+    ? await systemsQuery.eq("id", selectedSystemId).limit(1)
+    : await systemsQuery.range(from, to);
+
+  if (selectedSystemId && !systems?.length) redirect("/rendszerek");
+
   const systemIds = (systems || []).map((system) => system.id);
   const { data: generatedPolicies } = systemIds.length
     ? await supabase.from("aic_generated_policies").select("ai_system_id").in("ai_system_id", systemIds)
     : { data: [] };
   const systemsWithPolicy = new Set((generatedPolicies || []).map((policy) => policy.ai_system_id));
 
-  const total = count || 0;
+  const total = (allSystems || []).length;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   if (currentPage > totalPages && total > 0) redirect(`/rendszerek?oldal=${totalPages}`);
 
@@ -98,7 +102,7 @@ export default async function SystemsPage({ searchParams }) {
           <p className="systems-success" role="status">A rendszer törlése sikerült. Az előzményei archiválva megmaradtak.</p>
         )}
 
-        <SystemFinder systems={finderSystems} />
+        <SystemFinder key={selectedSystemId || "all"} systems={finderSystems} selectedSystemId={selectedSystemId} />
 
         {systems?.length ? (
           <div className="systems-list">
@@ -129,7 +133,7 @@ export default async function SystemsPage({ searchParams }) {
           </div>
         )}
 
-        {totalPages > 1 && (
+        {!selectedSystemId && totalPages > 1 && (
           <nav className="pagination" aria-label="Lapozás">
             {currentPage > 1 ? <Link href={`/rendszerek?oldal=${currentPage - 1}`}>← Előző</Link> : <span />}
             <span>{currentPage} / {totalPages}. oldal</span>

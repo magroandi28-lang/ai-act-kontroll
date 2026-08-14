@@ -10,10 +10,11 @@ function searchable(value) {
     .toLocaleLowerCase("hu-HU");
 }
 
-export default function SystemFinder({ systems }) {
+export default function SystemFinder({ systems, selectedSystemId }) {
   const router = useRouter();
   const wrapperRef = useRef(null);
-  const [query, setQuery] = useState("");
+  const selectedSystem = systems.find((system) => system.id === selectedSystemId);
+  const [query, setQuery] = useState(selectedSystem?.name || "");
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
 
@@ -40,7 +41,7 @@ export default function SystemFinder({ systems }) {
     setQuery(system.name);
     setOpen(false);
     setActiveIndex(-1);
-    router.push(`/rendszerek?oldal=${system.page}#rendszer-${system.id}`);
+    router.push(`/rendszerek?rendszer=${system.id}`);
   }
 
   function handleKeyDown(event) {
@@ -93,6 +94,7 @@ export default function SystemFinder({ systems }) {
               setQuery("");
               setOpen(true);
               setActiveIndex(-1);
+              router.push("/rendszerek");
             }}
           >×</button>
         ) : (
@@ -126,7 +128,7 @@ export default function SystemFinder({ systems }) {
           </div>
         )}
       </div>
-      <p>Kattints a mezőre a teljes listához, vagy keress név és működés alapján.</p>
+      <p>{selectedSystemId ? "Most csak a kiválasztott rendszer látható. Az × gombbal visszatérhetsz a teljes listához." : "Kattints a mezőre a teljes listához, vagy keress név és működés alapján."}</p>
     </div>
   );
 }
