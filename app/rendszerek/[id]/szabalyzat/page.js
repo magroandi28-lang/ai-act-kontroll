@@ -42,7 +42,7 @@ export default async function PolicyPage({ params }) {
     return (
       <main className="policy-page">
         <div className="policy-toolbar">
-          <Link href="/rendszerek">← Mentett szabályzatok</Link>
+          <Link href={`/rendszerek?rendszer=${system.id}`}>← Vissza ehhez a rendszerhez</Link>
         </div>
         <section className="policy-generation-error" role="alert">
           <h1>A szabályzat most nem készíthető el</h1>

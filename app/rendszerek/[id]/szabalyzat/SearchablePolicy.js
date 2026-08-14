@@ -39,7 +39,7 @@ export default function SearchablePolicy({ policy, system, generatedDate }) {
   return (
     <main className="policy-page">
       <div className="policy-toolbar">
-        <Link href="/rendszerek">← Mentett szabályzatok</Link>
+        <Link href={`/rendszerek?rendszer=${system.id}`}>← Vissza ehhez a rendszerhez</Link>
         <div className="policy-toolbar-actions">
           <label className="policy-search">
             <span className="sr-only">Keresés a szabályzatban</span>
