@@ -19,15 +19,18 @@ export default function EditSystemForm({ system }) {
   const [name, setName] = useState(system.name);
   const [lifecycleStage, setLifecycleStage] = useState(system.lifecycle_stage);
   const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("");
   const [saving, setSaving] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   async function handleSave(event) {
     event.preventDefault();
     setMessage("");
+    setMessageType("");
     const cleanName = name.trim().replace(/\s+/g, " ");
     if (!cleanName) {
       setMessage("A rendszer neve nem lehet üres.");
+      setMessageType("error");
       return;
     }
 
@@ -36,9 +39,12 @@ export default function EditSystemForm({ system }) {
     setSaving(false);
     if (result?.error) {
       setMessage(result.error);
+      setMessageType("error");
       return;
     }
-    router.push("/rendszerek?modositva=1");
+    setName(cleanName);
+    setMessage("A módosításokat sikeresen elmentettük.");
+    setMessageType("success");
     router.refresh();
   }
 
@@ -72,7 +78,14 @@ export default function EditSystemForm({ system }) {
           <p>A profil módosítása új szakmai besorolást igényel, ezért ezen az oldalon nem írható át véletlenül.</p>
         </div>
 
-        {message && <p className="system-form-message" role="alert">{message}</p>}
+        {message && (
+          <p
+            className={`system-form-message ${messageType === "success" ? "is-success" : "is-error"}`}
+            role={messageType === "success" ? "status" : "alert"}
+          >
+            {message}
+          </p>
+        )}
         <button className="primary-button" type="submit" disabled={saving}>{saving ? "Mentés…" : "Módosítás mentése"}</button>
       </form>
 

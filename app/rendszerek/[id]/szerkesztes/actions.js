@@ -16,6 +16,7 @@ export async function updateSystem(systemId, values) {
 
   if (error) return { error: error.message || "A módosítás nem sikerült." };
   revalidatePath("/rendszerek");
+  revalidatePath(`/rendszerek/${systemId}/szerkesztes`);
   revalidatePath(`/rendszerek/${systemId}/szabalyzat`);
   return { success: true };
 }
