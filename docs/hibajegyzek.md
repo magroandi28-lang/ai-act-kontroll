@@ -105,7 +105,7 @@ A sorok feldolgozása előtt kötelező fejléc- és oszlopvalidáció fusson. H
 | Környezet | Vercel, Chrome, Windows |
 | Súlyosság | Közepes |
 | Prioritás | Magas |
-| Állapot | Javítva, újratesztelésre vár |
+| Állapot | Lezárt |
 
 ### Reprodukció
 
@@ -123,3 +123,7 @@ A rendszer a megfelelő listaoldalra navigált, de a keresett chatbot mellett az
 ### Elvégzett javítás
 
 A kiválasztott rendszer azonosítója bekerül az oldal címébe. A lista ilyenkor csak ezt az egy rekordot tölti be, a lapozó eltűnik, a szerkesztőoldal visszalépési hivatkozása pedig megőrzi a kiválasztást. Az `×` gomb állítja vissza a teljes listát.
+
+### Javítás ellenőrzése
+
+Az újratesztelés során kizárólag a kiválasztott chatbot panelje jelent meg. A szerkesztésből történő visszatérés megőrizte a kiválasztást, az `×` gomb pedig visszaállította a teljes listát. A hiba nem jelentkezett újra, ezért a hibajegy lezárható.
