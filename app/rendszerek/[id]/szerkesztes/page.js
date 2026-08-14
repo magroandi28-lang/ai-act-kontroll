@@ -20,7 +20,7 @@ export default async function EditSystemPage({ params }) {
   return (
     <main className="system-form-page">
       <section className="system-form-shell edit-system-shell">
-        <Link className="back-link" href="/rendszerek">← Vissza a mentett rendszerekhez</Link>
+        <Link className="back-link" href={`/rendszerek?rendszer=${system.id}`}>← Vissza ehhez a rendszerhez</Link>
         <p className="system-form-eyebrow">RENDSZERADATOK JAVÍTÁSA</p>
         <h1>{system.name}</h1>
         <p className="system-form-intro">Itt javíthatod az elírt nevet és az életciklus-állapotot. A módosítás után a szabályzat a helyes rendszernevet használja.</p>
