@@ -28,6 +28,12 @@ export default function EditSystemForm({ system, compatibleProfiles, configurabl
   const [selectedCapabilities, setSelectedCapabilities] = useState(
     (system.aic_ai_system_capabilities || []).map((item) => item.capability_code)
   );
+  const [conditionsConfirmed, setConditionsConfirmed] = useState(false);
+  const initialCapabilities = (system.aic_ai_system_capabilities || [])
+    .map((item) => item.capability_code).sort().join("|");
+  const capabilitiesChanged = [...selectedCapabilities].sort().join("|") !== initialCapabilities;
+  const revalidationRequired = system.aic_system_facts?.facts?.profile_conditions_confirmed !== true;
+  const needsProfileConfirmation = Boolean(system.usage_profile_code && (capabilitiesChanged || revalidationRequired));
   const selectedProfile = compatibleProfiles.find((profile) => profile.code === profileCode);
 
   async function handleSave(event) {
@@ -40,13 +46,18 @@ export default function EditSystemForm({ system, compatibleProfiles, configurabl
       setMessageType("error");
       return;
     }
+    if (needsProfileConfirmation && !conditionsConfirmed) {
+      setMessage("A profil feltételeit a mentés előtt meg kell erősíteni.");
+      setMessageType("error");
+      return;
+    }
 
     setSaving(true);
     const result = await updateSystem(system.id, { name: cleanName, lifecycleStage });
-    if (!result?.error && system.usage_profile_code) {
+    if (!result?.error && system.usage_profile_code && (capabilitiesChanged || revalidationRequired)) {
       const allowed = configurableCapabilities.map((item) => item.code);
       const selected = selectedCapabilities.filter((code) => allowed.includes(code));
-      const capabilityResult = await updateSystemCapabilities(system.id, selected);
+      const capabilityResult = await updateSystemCapabilities(system.id, selected, conditionsConfirmed);
       if (capabilityResult?.error) result.error = capabilityResult.error;
     }
     setSaving(false);
@@ -150,6 +161,21 @@ export default function EditSystemForm({ system, compatibleProfiles, configurabl
               requiredCodes={system.aic_usage_profiles?.capability_codes || []}
               onChange={setSelectedCapabilities}
             />
+            {needsProfileConfirmation && (
+              <div className="profile-revalidation">
+                <h3>A profil feltételeinek megerősítése</h3>
+                <ul>{(system.aic_usage_profiles?.required_assertions || []).map((item) => <li key={item}>{item}</li>)}</ul>
+                <label className="profile-confirm-check">
+                  <input
+                    type="checkbox"
+                    checked={conditionsConfirmed}
+                    disabled={saving}
+                    onChange={(event) => setConditionsConfirmed(event.target.checked)}
+                  />
+                  <span>A rendszer dokumentációja alapján minden felsorolt feltétel igaz.</span>
+                </label>
+              </div>
+            )}
           </section>
         )}
 

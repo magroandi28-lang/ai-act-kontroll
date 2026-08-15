@@ -10,7 +10,7 @@ export default async function EditSystemPage({ params }) {
 
   const { data: system } = await supabase
     .from("aic_ai_systems")
-    .select("id,name,lifecycle_stage,inventory_status,industry_code,system_type_id,usage_profile_code,aic_organisations(industry),aic_system_type_templates(type_code),aic_usage_profiles(code,name_hu,capability_codes,optional_capability_codes),aic_ai_system_capabilities(capability_code)")
+    .select("id,name,lifecycle_stage,inventory_status,industry_code,system_type_id,usage_profile_code,aic_organisations(industry),aic_system_type_templates(type_code),aic_usage_profiles(code,name_hu,required_assertions,capability_codes,optional_capability_codes),aic_ai_system_capabilities(capability_code),aic_system_facts(facts)")
     .eq("id", params.id)
     .eq("inventory_status", "active")
     .maybeSingle();
