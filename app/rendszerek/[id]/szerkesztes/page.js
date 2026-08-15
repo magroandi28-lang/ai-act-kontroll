@@ -10,7 +10,7 @@ export default async function EditSystemPage({ params }) {
 
   const { data: system } = await supabase
     .from("aic_ai_systems")
-    .select("id,name,lifecycle_stage,inventory_status,industry_code,system_type_id,usage_profile_code,aic_organisations(industry),aic_system_type_templates(type_code),aic_usage_profiles(code,name_hu,capability_codes),aic_ai_system_capabilities(capability_code)")
+    .select("id,name,lifecycle_stage,inventory_status,industry_code,system_type_id,usage_profile_code,aic_organisations(industry),aic_system_type_templates(type_code),aic_usage_profiles(code,name_hu,capability_codes,optional_capability_codes),aic_ai_system_capabilities(capability_code)")
     .eq("id", params.id)
     .eq("inventory_status", "active")
     .maybeSingle();
@@ -37,9 +37,13 @@ export default async function EditSystemPage({ params }) {
       .order("sort_order")
     : { data: [] };
   const configurableCapabilities = (allCapabilities || []).filter((capability) => {
+    const allowedCodes = [
+      ...(system.aic_usage_profiles?.capability_codes || []),
+      ...(system.aic_usage_profiles?.optional_capability_codes || []),
+    ];
     const typeMatches = !capability.system_type_codes?.length || capability.system_type_codes.includes(typeCode);
     const industryMatches = !capability.industry_codes?.length || capability.industry_codes.includes(industryCode);
-    return typeMatches && industryMatches;
+    return allowedCodes.includes(capability.code) && typeMatches && industryMatches;
   });
 
   return (
