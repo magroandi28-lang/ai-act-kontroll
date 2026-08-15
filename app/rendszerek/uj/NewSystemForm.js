@@ -21,9 +21,13 @@ export default function NewSystemForm({ organisationId, industries, profiles, ca
   );
   const selectedProfile = profiles.find((profile) => profile.code === profileCode);
   const compatibleCapabilities = useMemo(() => capabilities.filter((capability) => {
+    const allowedCodes = [
+      ...(selectedProfile?.capability_codes || []),
+      ...(selectedProfile?.optional_capability_codes || []),
+    ];
     const typeMatches = !capability.system_type_codes?.length || capability.system_type_codes.includes(selectedProfile?.system_type_code);
     const industryMatches = !capability.industry_codes?.length || capability.industry_codes.includes(industryCode);
-    return typeMatches && industryMatches;
+    return allowedCodes.includes(capability.code) && typeMatches && industryMatches;
   }), [capabilities, industryCode, selectedProfile]);
 
   async function handleSubmit(event) {

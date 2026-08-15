@@ -34,7 +34,7 @@ export default async function NewSystemPage() {
 
   const { data: profiles } = await supabase
     .from("aic_usage_profiles")
-    .select("code, industry_code, system_type_code, name_hu, description_hu, required_assertions, capability_codes")
+    .select("code, industry_code, system_type_code, name_hu, description_hu, required_assertions, capability_codes, optional_capability_codes")
     .eq("active", true)
     .order("sort_order");
 
