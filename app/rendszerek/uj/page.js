@@ -32,9 +32,9 @@ export default async function NewSystemPage() {
     .eq("active", true)
     .order("sort_order");
 
-  const { data: profiles } = await supabase
-    .from("aic_usage_profiles")
-    .select("code, industry_code, system_type_code, name_hu, description_hu, required_assertions, capability_codes, optional_capability_codes")
+  const { data: systemTypes } = await supabase
+    .from("aic_system_type_templates")
+    .select("id,type_code,name_hu,description_hu,typical_examples_hu,sort_order")
     .eq("active", true)
     .order("sort_order");
 
@@ -50,11 +50,11 @@ export default async function NewSystemPage() {
         <Link className="back-link" href="/vezerlopult">← Vissza az irányítópultra</Link>
         <p className="system-form-eyebrow">{membership.aic_organisations?.name}</p>
         <h1>Új MI-rendszer</h1>
-        <p className="system-form-intro">Három rövid adat alapján rögzítheted a rendszert. A részletes besorolást és leírást a kiválasztott profil automatikusan elkészíti.</p>
+        <p className="system-form-intro">Rögzítsd a rendszer tényleges rendeltetését és aktív funkcióit. A szabálymotor ezekből és a szükséges alkalmazási adatokból választja ki az alkalmazandó szabályokat.</p>
         <NewSystemForm
           organisationId={membership.organisation_id}
           industries={industries || []}
-          profiles={profiles || []}
+          systemTypes={systemTypes || []}
           capabilities={capabilities || []}
         />
       </section>
