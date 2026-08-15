@@ -16,9 +16,13 @@ export default async function PolicyPage({ params, searchParams }) {
 
   if (!system) notFound();
 
+  const POLICY_COLUMNS =
+    "id,title,executive_summary,document_sections,version,status,created_at,updated_at," +
+    "submitted_at,reviewed_at,review_note,content_sha256";
+
   const { data: existingPolicy } = await supabase
     .from("aic_generated_policies")
-    .select("id,title,executive_summary,document_sections,version,status,created_at,updated_at")
+    .select(POLICY_COLUMNS)
     .eq("ai_system_id", system.id)
     .order("version", { ascending: false })
     .limit(1)
@@ -48,7 +52,7 @@ export default async function PolicyPage({ params, searchParams }) {
   } else if (generation?.policy_id) {
     const result = await supabase
       .from("aic_generated_policies")
-      .select("id,title,executive_summary,document_sections,version,status,created_at,updated_at")
+      .select(POLICY_COLUMNS)
       .eq("id", generation.policy_id)
       .maybeSingle();
     policy = result.data;
