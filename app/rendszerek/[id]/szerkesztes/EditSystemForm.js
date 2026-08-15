@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { archiveSystem, assignMissingProfile, updateSystem, updateSystemCapabilities } from "./actions";
+import { archiveSystem, updateSystem, updateSystemCapabilities } from "./actions";
 import FunctionCombobox from "../../FunctionCombobox";
 
 const lifecycleOptions = [
@@ -15,7 +15,7 @@ const lifecycleOptions = [
   ["retired", "Kivezetett"],
 ];
 
-export default function EditSystemForm({ system, compatibleProfiles, configurableCapabilities }) {
+export default function EditSystemForm({ system, configurableCapabilities }) {
   const router = useRouter();
   const [name, setName] = useState(system.name);
   const [lifecycleStage, setLifecycleStage] = useState(system.lifecycle_stage);
@@ -23,18 +23,12 @@ export default function EditSystemForm({ system, compatibleProfiles, configurabl
   const [messageType, setMessageType] = useState("");
   const [saving, setSaving] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
-  const [profileCode, setProfileCode] = useState("");
-  const [profileConfirmed, setProfileConfirmed] = useState(false);
   const [selectedCapabilities, setSelectedCapabilities] = useState(
     (system.aic_ai_system_capabilities || []).map((item) => item.capability_code)
   );
-  const [conditionsConfirmed, setConditionsConfirmed] = useState(false);
   const initialCapabilities = (system.aic_ai_system_capabilities || [])
     .map((item) => item.capability_code).sort().join("|");
   const capabilitiesChanged = [...selectedCapabilities].sort().join("|") !== initialCapabilities;
-  const revalidationRequired = system.aic_system_facts?.facts?.profile_conditions_confirmed !== true;
-  const needsProfileConfirmation = Boolean(system.usage_profile_code && (capabilitiesChanged || revalidationRequired));
-  const selectedProfile = compatibleProfiles.find((profile) => profile.code === profileCode);
 
   async function handleSave(event) {
     event.preventDefault();
@@ -46,18 +40,12 @@ export default function EditSystemForm({ system, compatibleProfiles, configurabl
       setMessageType("error");
       return;
     }
-    if (needsProfileConfirmation && !conditionsConfirmed) {
-      setMessage("A profil feltételeit a mentés előtt meg kell erősíteni.");
-      setMessageType("error");
-      return;
-    }
-
     setSaving(true);
     const result = await updateSystem(system.id, { name: cleanName, lifecycleStage });
-    if (!result?.error && system.usage_profile_code && (capabilitiesChanged || revalidationRequired)) {
+    if (!result?.error && capabilitiesChanged) {
       const allowed = configurableCapabilities.map((item) => item.code);
       const selected = selectedCapabilities.filter((code) => allowed.includes(code));
-      const capabilityResult = await updateSystemCapabilities(system.id, selected, conditionsConfirmed);
+      const capabilityResult = await updateSystemCapabilities(system.id, selected, true);
       if (capabilityResult?.error) result.error = capabilityResult.error;
     }
     setSaving(false);
@@ -83,27 +71,6 @@ export default function EditSystemForm({ system, compatibleProfiles, configurabl
     router.refresh();
   }
 
-  async function handleProfileAssignment() {
-    setMessage("");
-    setMessageType("");
-    if (!profileCode || !profileConfirmed) {
-      setMessage("Válassz profilt, és erősítsd meg a kötelező feltételeket.");
-      setMessageType("error");
-      return;
-    }
-    setSaving(true);
-    const result = await assignMissingProfile(system.id, profileCode, profileConfirmed);
-    setSaving(false);
-    if (result?.error) {
-      setMessage(result.error);
-      setMessageType("error");
-      return;
-    }
-    setMessage("A hiányzó használati profilt sikeresen hozzárendeltük.");
-    setMessageType("success");
-    router.refresh();
-  }
-
   return (
     <>
       <form className="edit-system-form" onSubmit={handleSave}>
@@ -115,69 +82,25 @@ export default function EditSystemForm({ system, compatibleProfiles, configurabl
           {lifecycleOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
         </select>
 
-        {system.usage_profile_code ? (
-          <div className="edit-system-readonly">
-            <span>Használati profil</span>
-            <strong>{system.aic_usage_profiles.name_hu}</strong>
-            <p>A meglévő profil csak külön, naplózott újrabesorolással változtatható meg.</p>
-          </div>
-        ) : (
-          <section className="profile-confirmation edit-profile-assignment">
-            <p className="profile-label">Hiányzó besorolás pótlása</p>
-            <h2>Használati profil kiválasztása</h2>
-            <select value={profileCode} disabled={saving} onChange={(event) => {
-              setProfileCode(event.target.value);
-              setProfileConfirmed(false);
-            }}>
-              <option value="" disabled>Válassz kompatibilis profilt</option>
-              {compatibleProfiles.map((profile) => <option key={profile.code} value={profile.code}>{profile.name_hu}</option>)}
-            </select>
-            {selectedProfile && (
-              <>
-                <p>{selectedProfile.description_hu}</p>
-                <h3>Ez a profil akkor használható, ha:</h3>
-                <ul>{(selectedProfile.required_assertions || []).map((item) => <li key={item}>{item}</li>)}</ul>
-                <label className="profile-confirm-check">
-                  <input type="checkbox" checked={profileConfirmed} disabled={saving} onChange={(event) => setProfileConfirmed(event.target.checked)} />
-                  <span>A rendszer dokumentációja alapján minden felsorolt feltétel igaz.</span>
-                </label>
-                <button className="primary-button" type="button" disabled={saving || !profileConfirmed} onClick={handleProfileAssignment}>
-                  {saving ? "Mentés…" : "Profil hozzárendelése"}
-                </button>
-              </>
-            )}
-            {!compatibleProfiles.length && <p>Ehhez az iparághoz és rendszertípushoz még nincs használható profil.</p>}
-          </section>
-        )}
+        <div className="edit-system-readonly">
+          <span>Rendszertípus</span>
+          <strong>{system.aic_system_type_templates?.name_hu}</strong>
+          <p>{system.intended_purpose}</p>
+        </div>
 
-        {system.usage_profile_code && (
-          <section className="profile-confirmation edit-profile-assignment">
-            <p className="profile-label">Rendszerfunkciók</p>
-            <h2>Aktív funkciók módosítása</h2>
-            <p>Gépelj a keresőmezőbe, vagy nyisd le a teljes listát. Az alap-profil kötelező funkciói nem távolíthatók el.</p>
-            <FunctionCombobox
-              capabilities={configurableCapabilities}
-              selectedCodes={selectedCapabilities}
-              requiredCodes={system.aic_usage_profiles?.capability_codes || []}
-              onChange={setSelectedCapabilities}
-            />
-            {needsProfileConfirmation && (
-              <div className="profile-revalidation">
-                <h3>A profil feltételeinek megerősítése</h3>
-                <ul>{(system.aic_usage_profiles?.required_assertions || []).map((item) => <li key={item}>{item}</li>)}</ul>
-                <label className="profile-confirm-check">
-                  <input
-                    type="checkbox"
-                    checked={conditionsConfirmed}
-                    disabled={saving}
-                    onChange={(event) => setConditionsConfirmed(event.target.checked)}
-                  />
-                  <span>A rendszer dokumentációja alapján minden felsorolt feltétel igaz.</span>
-                </label>
-              </div>
-            )}
-          </section>
-        )}
+        <section className="profile-confirmation edit-profile-assignment">
+          <p className="profile-label">Rendszerfunkciók</p>
+          <h2>Aktív funkciók módosítása</h2>
+          <p>Egyik funkciót sem kényszeríti rá profil. Csak a rendszer tényleges működését jelöld.</p>
+          <FunctionCombobox
+            capabilities={configurableCapabilities}
+            selectedCodes={selectedCapabilities}
+            requiredCodes={[]}
+            onChange={setSelectedCapabilities}
+          />
+          <p className="quick-form-note">A kockázati és alkalmazási adatokat külön ellenőrizheted.</p>
+          <a className="secondary-button" href={`/rendszerek/${system.id}/vizsgalat`}>Alkalmazási adatok ellenőrzése</a>
+        </section>
 
         {message && (
           <p
