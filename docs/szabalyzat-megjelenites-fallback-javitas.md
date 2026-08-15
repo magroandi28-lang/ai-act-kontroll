@@ -4,7 +4,7 @@ Dátum: 2026-08-15
 
 ## Hiba
 
-A 12 aktív rendszerből 11 korábbi rendszer `profile_revalidation_required=true` állapotba került. Ez az új szabályzatverzió létrehozását helyesen blokkolta, de a szabályzatoldal minden megnyitáskor azonnal újragenerálást kért, ezért RPC-hiba esetén a már meglévő szabályzatot is elrejtette.
+A korábbi állapotban 12 aktív rendszerből 11 rendszer `profile_revalidation_required=true` jelölést kapott. A 2026-08-15-i helyreállítás ezt megszüntette: a meglévő kapcsolatok visszaálltak, a központi generálási ellenőrzés mindegyik aktív rendszeren sikeres. A megjelenítési fallback ettől függetlenül megmarad, hogy egy későbbi generálási hiba se rejthesse el a már mentett szabályzatot.
 
 ## Adatbázis-ellenőrzés
 
