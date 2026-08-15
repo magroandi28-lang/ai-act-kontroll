@@ -1,7 +1,128 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { approvePolicy, rejectPolicy, submitPolicyForReview } from "./actions";
+
+const statusLabels = {
+  draft: "Piszkozat",
+  in_review: "Felülvizsgálat alatt",
+  approved: "Jóváhagyva",
+  rejected: "Elutasítva",
+  published: "Közzétéve",
+  archived: "Archivált",
+};
+
+function formatDate(value) {
+  if (!value) return null;
+  return new Intl.DateTimeFormat("hu-HU", { dateStyle: "long", timeStyle: "short" })
+    .format(new Date(value));
+}
+
+// A jóváhagyási sáv a dokumentum tetején. A jogosultságot az adatbázis dönti el,
+// ezért itt minden művelet felkínálható: illetéktelen hívást a szerver utasít el.
+function ApprovalPanel({ policy, systemId }) {
+  const router = useRouter();
+  const [note, setNote] = useState("");
+  const [message, setMessage] = useState("");
+  const [pending, startTransition] = useTransition();
+
+  const status = policy.status || "draft";
+  const canSubmit = status === "draft" || status === "rejected";
+  const canDecide = status === "in_review";
+
+  function run(action) {
+    setMessage("");
+    startTransition(async () => {
+      const result = await action();
+      if (result?.error) {
+        setMessage(result.error);
+        return;
+      }
+      setNote("");
+      router.refresh();
+    });
+  }
+
+  return (
+    <section className={`policy-approval policy-approval-${status}`} aria-live="polite">
+      <div className="policy-approval-header">
+        <div>
+          <p className="profile-label">A dokumentum állapota</p>
+          <strong>{statusLabels[status] || status}</strong>
+        </div>
+        {status === "approved" && policy.reviewed_at && (
+          <p className="policy-approval-meta">Jóváhagyva: {formatDate(policy.reviewed_at)}</p>
+        )}
+        {status === "in_review" && policy.submitted_at && (
+          <p className="policy-approval-meta">Beküldve: {formatDate(policy.submitted_at)}</p>
+        )}
+      </div>
+
+      {policy.review_note && (
+        <p className="policy-approval-note">
+          <strong>{status === "rejected" ? "Elutasítás indoklása: " : "Megjegyzés: "}</strong>
+          {policy.review_note}
+        </p>
+      )}
+
+      {status === "approved" && policy.content_sha256 && (
+        <p className="policy-approval-hash">
+          Tartalmi ujjlenyomat: <code>{policy.content_sha256.slice(0, 16)}…</code>
+        </p>
+      )}
+
+      {(canSubmit || canDecide) && (
+        <div className="policy-approval-actions">
+          <label className="sr-only" htmlFor="policy-review-note">Megjegyzés</label>
+          <textarea
+            id="policy-review-note"
+            value={note}
+            onChange={(event) => setNote(event.target.value)}
+            placeholder={canDecide ? "Megjegyzés (elutasításnál kötelező)" : "Megjegyzés a felülvizsgálónak (nem kötelező)"}
+            rows={2}
+            disabled={pending}
+          />
+          <div className="policy-approval-buttons">
+            {canSubmit && (
+              <button
+                className="primary-button"
+                type="button"
+                disabled={pending}
+                onClick={() => run(() => submitPolicyForReview(systemId, policy.id, note))}
+              >
+                {pending ? "Küldés…" : "Beküldés felülvizsgálatra"}
+              </button>
+            )}
+            {canDecide && (
+              <>
+                <button
+                  className="primary-button"
+                  type="button"
+                  disabled={pending}
+                  onClick={() => run(() => approvePolicy(systemId, policy.id, note))}
+                >
+                  {pending ? "Mentés…" : "Jóváhagyom"}
+                </button>
+                <button
+                  className="secondary-button"
+                  type="button"
+                  disabled={pending}
+                  onClick={() => run(() => rejectPolicy(systemId, policy.id, note))}
+                >
+                  Elutasítom
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {message && <p className="system-form-message is-error" role="alert">{message}</p>}
+    </section>
+  );
+}
 
 function normalise(value) {
   return String(value || "")
@@ -55,6 +176,8 @@ export default function SearchablePolicy({ policy, system, generatedDate, refres
           </button>
         </div>
       </div>
+
+      <ApprovalPanel policy={policy} systemId={system.id} />
 
       {refreshWarning && (
         <section className="policy-refresh-warning" role="status">
