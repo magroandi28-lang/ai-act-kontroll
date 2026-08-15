@@ -1032,3 +1032,30 @@ input:disabled {
 .policy-approval-buttons button:disabled { opacity: .6; cursor: wait; }
 .policy-approval .system-form-message { margin: 12px 0 0; padding: 11px 14px; color: #8a2a10; border-radius: 7px; background: rgba(255,84,45,.08); }
 @media print { .policy-approval-actions { display: none; } .policy-approval { box-shadow: none; break-inside: avoid; } }
+
+/* Jóváhagyási sor. A mentett rendszerek kártyás felépítését követi. */
+.queue-page { min-height: 100vh; padding: 48px 20px 70px; background: radial-gradient(circle at 15% 18%,rgba(0,189,218,.07),transparent 28%),var(--navy-950); }
+.queue-shell { width: min(100%,900px); margin: 0 auto; }
+.queue-shell h1 { margin: 16px 0 12px; font-size: clamp(36px,5.5vw,54px); }
+.queue-intro { margin: 0 0 26px; color: #aebbc4; font-size: 16px; line-height: 1.65; }
+.queue-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.queue-filter { padding: 9px 15px; color: #b9c6cd; border: 1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,.03); font-size: 12px; text-decoration: none; transition: border-color .2s,color .2s; }
+.queue-filter:hover { color: #f4f7f8; border-color: rgba(0,189,218,.4); }
+.queue-filter.is-active { color: #04141f; border-color: var(--cyan); background: var(--cyan); font-weight: 700; }
+.queue-list { display: grid; gap: 13px; }
+.queue-card { padding: 22px 24px; display: flex; align-items: center; gap: 20px; border: 1px solid var(--line); border-radius: 14px; background: rgba(8,29,44,.72); }
+.queue-card-main { flex: 1; min-width: 0; }
+.queue-card-title { display: flex; align-items: center; flex-wrap: wrap; gap: 11px; }
+.queue-card-title h2 { margin: 0; font-size: 19px; }
+.queue-card-meta { margin: 8px 0 0; color: #8297a2; font-size: 12px; }
+.queue-card-note { margin: 10px 0 0; padding: 10px 13px; color: #ffd1c5; border-radius: 8px; background: rgba(255,84,45,.07); font-size: 13px; line-height: 1.5; }
+.queue-card .primary-button,.queue-card .secondary-button { flex: 0 0 auto; display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px; border-radius: 8px; font-weight: 700; text-decoration: none; }
+.queue-card .primary-button { color: #fff; border: 0; background: var(--orange); }
+.queue-card .secondary-button { color: #b9c6cd; border: 1px solid var(--line); background: transparent; }
+.queue-badge { padding: 5px 11px; border-radius: 999px; font-size: 11px; white-space: nowrap; }
+.queue-badge-draft,.queue-badge-archived { color: #b9c6cd; border: 1px solid var(--line); background: rgba(255,255,255,.03); }
+.queue-badge-in_review { color: #d6c89d; border: 1px solid rgba(225,197,111,.25); background: rgba(225,197,111,.07); }
+.queue-badge-approved,.queue-badge-published { color: #b9f1d8; border: 1px solid rgba(118,228,182,.3); background: rgba(118,228,182,.08); }
+.queue-badge-rejected { color: #ffd1c5; border: 1px solid rgba(255,84,45,.35); background: rgba(255,84,45,.09); }
+.queue-empty { padding: 34px; color: #aebbc4; text-align: center; border: 1px dashed var(--line); border-radius: 13px; }
+@media (max-width: 640px) { .queue-card { flex-direction: column; align-items: stretch; } .queue-card .primary-button,.queue-card .secondary-button { justify-content: center; } }
