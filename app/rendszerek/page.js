@@ -5,17 +5,6 @@ import SystemFinder from "./SystemFinder";
 
 const PAGE_SIZE = 5;
 
-const roleLabels = {
-  provider: "Szolgáltató", deployer: "Alkalmazó", importer: "Importőr",
-  distributor: "Forgalmazó", product_manufacturer: "Termékgyártó",
-  authorised_representative: "Meghatalmazott képviselő", multiple: "Több szerep", unknown: "Még nem ismert",
-};
-
-const lifecycleLabels = {
-  planned: "Tervezett", development: "Fejlesztés alatt", testing: "Tesztelés alatt",
-  pilot: "Próbaüzem", production: "Éles üzemben", suspended: "Felfüggesztett", retired: "Kivezetett",
-};
-
 export default async function SystemsPage({ searchParams }) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -114,23 +103,27 @@ export default async function SystemsPage({ searchParams }) {
               const configuredSpecialCount = (system.aic_ai_system_capabilities || [])
                 .filter((item) => specialCapabilityCodes.has(item.capability_code)).length;
               const needsFunctionSetup = system.usage_profile_code === "ENERGY_CHAT_COMBINED" && configuredSpecialCount < 2;
-              const targetHref = `/rendszerek/${system.id}`;
+              const hasPolicy = systemsWithPolicy.has(system.id);
+              const policyHref = needsFunctionSetup
+                ? `/rendszerek/${system.id}/szerkesztes`
+                : hasPolicy
+                  ? `/rendszerek/${system.id}/szabalyzat`
+                  : `/rendszerek/${system.id}`;
               return (
               <article className="system-row-wrap" key={system.id}>
-              <Link className="system-row" id={`rendszer-${system.id}`} href={targetHref}>
+              <div className="system-row" id={`rendszer-${system.id}`}>
                 <div className="system-row-main">
                   <span>{system.aic_system_type_templates?.name_hu || "Egyéb MI-rendszer"}</span>
                   <h2>{system.name}</h2>
                   <p>{system.intended_purpose}</p>
                 </div>
-                <dl className="system-row-meta">
-                  <div><dt>Szerep</dt><dd>{roleLabels[system.organisation_role] || "Még nem ismert"}</dd></div>
-                  <div><dt>Állapot</dt><dd>{lifecycleLabels[system.lifecycle_stage] || system.lifecycle_stage}</dd></div>
-                  <div><dt>Szabályzat</dt><dd>{needsFunctionSetup ? "Funkciók megadása szükséges" : systemsWithPolicy.has(system.id) ? "Elkészült" : "Még nincs elkészítve"}</dd></div>
-                </dl>
-                <span className="system-row-arrow" aria-hidden="true">→</span>
-              </Link>
-              <Link className="system-row-edit" href={`/rendszerek/${system.id}/szerkesztes`}>Szerkesztés</Link>
+                <div className="system-row-buttons">
+                  <Link className="system-row-edit" href={`/rendszerek/${system.id}/szerkesztes`}>Szerkesztés</Link>
+                  <Link className="system-row-policy" href={policyHref}>
+                    {needsFunctionSetup ? "Funkciók megadása" : hasPolicy ? "Szabályzat megnyitása" : "Szabályzat elkészítése"}
+                  </Link>
+                </div>
+              </div>
               </article>
               );
             })}
