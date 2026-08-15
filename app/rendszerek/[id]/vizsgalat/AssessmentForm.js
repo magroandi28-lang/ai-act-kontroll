@@ -17,12 +17,39 @@ export default function AssessmentForm({ systemId, userId, questions, defaultFac
     if (!complete) { setMessage("Válaszolj minden látható kérdésre."); return; }
     setSaving(true); setMessage("");
     const visibleAnswers = Object.fromEntries(visible.map((question) => [question.fact_key, answers[question.fact_key]]));
-    const baseFacts = { ...defaultFacts, ...visibleAnswers, law_enforcement_exception_applies: false };
+    const baseFacts = {
+      ...defaultFacts,
+      ...savedFacts,
+      ...visibleAnswers,
+      law_enforcement_exception_applies: false,
+      persons_operate_or_use_ai_on_behalf: true,
+      ai_compliance_database_in_use: true,
+      selection_basis: "active_capabilities_and_system_facts",
+    };
+    const annexIIIListed = [
+      "annex_iii_biometrics_use_case",
+      "annex_iii_critical_infrastructure",
+      "annex_iii_education_use_case",
+      "annex_iii_employment_use_case",
+      "annex_iii_essential_services_use_case",
+      "annex_iii_law_enforcement_use_case",
+      "annex_iii_migration_border_use_case",
+      "annex_iii_justice_democracy_use_case",
+    ].some((key) => baseFacts[key] === true);
     const facts = {
       ...baseFacts,
+      direct_two_way_interaction: baseFacts.interaction_with_natural_person === true,
+      natural_person_exposed: baseFacts.interaction_with_natural_person === true,
+      annex_iii_listed: baseFacts.annex_iii_listed === true || annexIIIListed,
+      system_is_high_risk:
+        baseFacts.system_is_high_risk === true ||
+        (annexIIIListed && baseFacts.performs_limited_article_6_3_task !== true) ||
+        (baseFacts.annex_i_product_or_safety_component === true && baseFacts.third_party_conformity_assessment_required === true),
       article_50_notice_required:
-        (baseFacts.direct_two_way_interaction === true && baseFacts.ai_interaction_obvious === false) ||
+        (baseFacts.interaction_with_natural_person === true && baseFacts.ai_interaction_obvious === false) ||
         baseFacts.generates_synthetic_content === true,
+      facts_validated: true,
+      profile_revalidation_required: false,
     };
     const supabase = createClient();
     const { error } = await supabase.from("aic_system_facts").upsert({ system_id: systemId, facts, completion_status: "complete", updated_by: userId, updated_at: new Date().toISOString() }, { onConflict: "system_id" });

@@ -21,7 +21,7 @@ export async function evaluateSystem(systemId) {
     .eq("system_id", system.id)
     .maybeSingle();
   if (!factRow || factRow.completion_status !== "complete") {
-    return { error: "A kérdőív még nincs befejezve." };
+    return { error: "A rendszer alkalmazási adatainak ellenőrzése még nincs befejezve." };
   }
 
   const { data: rules, error: rulesError } = await supabase
