@@ -44,7 +44,7 @@ export default function FunctionCombobox({ capabilities, selectedCodes, required
           <span className={`function-chip ${required.has(item.code) ? "is-required" : ""}`} key={item.code}>
             {item.name_hu}
             {required.has(item.code)
-              ? <small title="Az alap-profil kötelező funkciója">Kötelező</small>
+              ? <small title="A rendszer működéséhez szükséges funkció">Kötelező</small>
               : <button type="button" onClick={() => remove(item.code)} aria-label={`${item.name_hu} eltávolítása`}>×</button>}
           </span>
         ))}

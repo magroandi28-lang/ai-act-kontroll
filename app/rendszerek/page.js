@@ -33,7 +33,7 @@ export default async function SystemsPage({ searchParams }) {
   const to = from + PAGE_SIZE - 1;
   let systemsQuery = supabase
     .from("aic_ai_systems")
-    .select("id, name, intended_purpose, organisation_role, lifecycle_stage, assessment_status, created_at, usage_profile_code, aic_system_type_templates(name_hu), aic_ai_system_capabilities(capability_code)")
+    .select("id, name, intended_purpose, organisation_role, lifecycle_stage, assessment_status, created_at, aic_system_type_templates(name_hu)")
     .eq("organisation_id", membership.organisation_id)
     .eq("inventory_status", "active")
     .order("created_at", { ascending: false });
@@ -96,19 +96,8 @@ export default async function SystemsPage({ searchParams }) {
         {systems?.length ? (
           <div className="systems-list">
             {systems.map((system) => {
-              const specialCapabilityCodes = new Set([
-                "BILLING_INFORMATION", "METER_READING_INTAKE", "COMPLAINT_INTAKE",
-                "DEBT_DISCONNECTION_SUPPORT", "VULNERABLE_CUSTOMER_SUPPORT",
-              ]);
-              const configuredSpecialCount = (system.aic_ai_system_capabilities || [])
-                .filter((item) => specialCapabilityCodes.has(item.capability_code)).length;
-              const needsFunctionSetup = system.usage_profile_code === "ENERGY_CHAT_COMBINED" && configuredSpecialCount < 2;
               const hasPolicy = systemsWithPolicy.has(system.id);
-              const policyHref = needsFunctionSetup
-                ? `/rendszerek/${system.id}/szerkesztes`
-                : hasPolicy
-                  ? `/rendszerek/${system.id}/szabalyzat`
-                  : `/rendszerek/${system.id}`;
+              const policyHref = hasPolicy ? `/rendszerek/${system.id}/szabalyzat` : `/rendszerek/${system.id}`;
               return (
               <article className="system-row-wrap" key={system.id}>
               <div className="system-row" id={`rendszer-${system.id}`}>
@@ -120,7 +109,7 @@ export default async function SystemsPage({ searchParams }) {
                 <div className="system-row-buttons">
                   <Link className="system-row-edit" href={`/rendszerek/${system.id}/szerkesztes`}>Szerkesztés</Link>
                   <Link className="system-row-policy" href={policyHref}>
-                    {needsFunctionSetup ? "Funkciók megadása" : hasPolicy ? "Szabályzat megnyitása" : "Szabályzat elkészítése"}
+                    {hasPolicy ? "Szabályzat megnyitása" : "Szabályzat elkészítése"}
                   </Link>
                 </div>
               </div>
