@@ -56,9 +56,7 @@ export default function EditSystemForm({ system, compatibleProfiles, configurabl
       return;
     }
     setName(cleanName);
-    setMessage("A módosításokat sikeresen elmentettük.");
-    setMessageType("success");
-    router.refresh();
+    router.push(`/rendszerek?rendszer=${system.id}&modositva=1#rendszer-${system.id}`);
   }
 
   async function handleArchive() {
