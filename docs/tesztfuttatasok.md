@@ -21,6 +21,8 @@
 | RUN-POLICY-GATE-DB-001 | POLICY-GATE-001, POLICY-GATE-002 | Supabase PostgreSQL | **Sikeres** | BUG-POLICY-001 | Felületi újratesztelés szükséges |
 | RUN-POLICY-GATE-UI-001 | POLICY-GATE-001 | Vercel, Chrome, Windows | **Sikeres** | BUG-POLICY-001 | Negatív felületi teszt sikeres |
 | RUN-SYSTEM-RETURN-001 | SYSTEM-RETURN-001 | Vercel, Chrome, Windows | **Sikertelen** | BUG-SYSTEM-003 | Szükséges |
+| RUN-PROFILE-AUDIT-001 | Profilok 2–8 adatbázis-regresszió | Supabase PostgreSQL 17 | **Sikeres** | – | Szakértői felülvizsgálat után |
+| RUN-PROFILE-BUILD-001 | Javítás utáni produkciós build | Helyi Next.js 14.2.35 | **Sikeres** | – | Nem szükséges |
 
 ## RUN-AUTH-001 részletei
 
@@ -107,3 +109,15 @@ A profil nélküli régi **Ügyfélszolgálati chatbot** paneljét a felhasznál
 A kiválasztott chatbot szabályzatának megnyitása után a visszalépés a teljes rendszerlistára vezetett. A korábban kiválasztott panel nem maradt elkülönítve, ezért azt ismét meg kellett keresni a többi rendszer között.
 
 **Eredmény:** sikertelen használhatósági teszt; BUG-SYSTEM-003 rögzítve. A javítás felületi újratesztelése szükséges.
+
+## RUN-PROFILE-AUDIT-001 részletei
+
+A 2–8. használati profil teljes auditjában feltárt F-01–F-09 hiányosságok javítása után adatbázis-regresszió készült. A 30 chatbot- és energetikai modul mindegyikéhez tartozik szabály, végrehajtási művelet és kötelező bizonyíték. A mérőállás-, panasz-, különlegesadat-, védendő ügyfél- és egyediadat-nyomkövetési modulok a megfelelő profilokban kiválasztódtak.
+
+A kombinált profil mind a 10 kételemű szolgáltatáspárja megfelelt: funkciófüggőségi hiba **0**, szakmodul-unió eltérés **0**. A hiányos számla-, mérési, mérőállás- és tartozási konfigurációkat a függőségi kapu elutasítja.
+
+**Eredmény:** sikeres. A megváltozott profilok 11 aktív rendszerénél kötelező kezelői újramegerősítés maradt; ezt a szabályzatgeneráló kapu kikényszeríti.
+
+## RUN-PROFILE-BUILD-001 részletei
+
+Az auditjavítások után az `npm run build` sikeresen lefutott. A Next.js fordítás, lint- és típusellenőrzés, 13 statikus oldal generálása, a dinamikus útvonalak és a middleware összeállítása sikeres volt. A meglévő Webpack-gyorsítótár helyreállítási figyelmeztetései nem okoztak buildhibát.

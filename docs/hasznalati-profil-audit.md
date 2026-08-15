@@ -1,270 +1,520 @@
-# Használati profilok auditja
+# Használati profilok teljes auditja
 
-Állapot: első adatmodell- és konzisztencia-audit  
-Dátum: 2026-08-15
+> **Javítás utáni állapot – 2026-08-15:** az auditban feltárt F-01–F-09 hiányosságok adatbázisoldali javítása és regressziós ellenőrzése megtörtént. A részletes, elsődleges záróeredmény a `docs/profilok-2-8-javitasi-jelentes.md` dokumentumban található. A jelen dokumentum további része a javítás előtti megállapításokat auditnyomként őrzi; a korábbi „még nem kész” minősítéseket a javítási jelentés záró minősítése felülírja.
 
-## Javítások állapota
+Auditált kör: **2–8. használati profil**  
+Kapcsolódó előzmény: az 1. profil korábbi auditja  
+Audit dátuma: **2026-08-15**  
+Audit jellege: adatmodell-, szabálymotor-, jogforrás-, működési kontroll- és szakértői átadhatósági audit  
+Adatbázis: Supabase projekt `enhrrhdvpqxbkefnfztl`
 
-| Azonosító | Állapot | Ellenőrzés |
-|---|---|---|
-| P-01 | Javítva | A származtatott tények hiteles forrásokból újraépülnek; az örökölt biometriai, érzelemfelismerési és szintetikus tartalomra vonatkozó kulcsok eltűntek. |
-| P-02 | Javítva | Kötelező, választható és tiltott funkciók kerültek minden profilhoz; mentéskor és szabályzatkészítéskor adatbázis-kapu ellenőriz. |
-| P-03 | Javítva az adatmodellben | A kritikus feltételek külön gépi tényekké váltak; profilváltozáskor a korábbi igazolás érvényét veszti, és új kezelői megerősítés szükséges. |
-| P-04 | Javítva | A komplex profil minden üzleti funkciót kötelezővé tesz; a kombinált profil legalább két, külön kiválasztott funkciót kapcsol össze. |
-| P-05 | Javítva | A generatív válaszkészítés minden profilnál választható technikai funkció. |
-| P-06 | Javítva | A személyes fiókadat a védendő fogyasztói profilnál választható; kiválasztásakor az ügyfél-azonosítás gépi ténye automatikusan aktiválódik. |
+## Vezetői döntés
 
-## Audit célja
+**A 2–8. profil teljes auditja elkészült. A profilválasztási és szabálymodul-kiválasztási motor technikailag determinisztikus, de a szabályzatok jelen állapotukban még nem jelenthetők ki szakemberi vizsgálatra késznek.**
 
-Annak ellenőrzése, hogy minden használati profil egyértelműen meghatározza:
+Az átadás előtt hét javítási csomag szükséges. A legfontosabb blokkolók:
 
-- mit tartalmaz;
-- mit nem tartalmaz;
-- mely funkciók kötelezők;
-- mely funkciók választhatók;
-- milyen kizáró feltételek mellett nem használható;
-- mikor szükséges másik profil vagy emberi felülvizsgálat.
+1. a mérőállás-rögzítéshez nincs önálló visszaigazolási, érvényességi és duplikációs kontrollmodul;
+2. a panasz és az általános kérelem egy profilban szerepel, miközben jogi és adatkezelési követelményeik eltérnek;
+3. a védendő fogyasztói profilból hiányzik a GDPR 9. cikk szerinti különleges adatok kezelési szabálya;
+4. több energetikai jogforrás-hivatkozás pontatlan vagy hiányos;
+5. a 26 szabálymodulból 24-hez nincs végrehajtási művelet és bizonyítéktípus rendelve;
+6. a kombinált profil nem ellenőrzi a funkciók közötti függőségeket;
+7. valamennyi modul életciklus-állapota `under_review`.
 
-## Kritikus megállapítások
+Az auditdokumentum maga szakértői egyeztetésre kész. A generált szabályzatok csak a jelen jelentésben szereplő blokkolók javítása, újratesztelése és verziózott újragenerálása után adhatók át végleges szakmai/jogi felülvizsgálatra.
 
-### P-01 – Régi kérdőívből maradt tények szennyezik a szabálymotor bemenetét
+## Auditmódszer és bizonyíték
 
-Súlyosság: kritikus
+Az audit az alábbiakat ellenőrizte:
 
-Az `Ügyfélszolgálati kombinált chatbot` aktuális funkciói között nincs biometria és érzelemfelismerés, a `aic_system_facts` rekordban mégis igaz értékkel szerepel:
+- a profilok kötelező, választható és tiltott funkcióit;
+- a profilból származtatott gépi tényeket;
+- az adatbázisoldali profilérvényesítést;
+- a szabálymodulok determinisztikus kiválasztását;
+- a kombinált profil összes kételemű szolgáltatáskombinációját;
+- a jogi szabályok, joghelyek és modulok kapcsolatát;
+- a modulokhoz rendelt végrehajtási műveleteket és bizonyítékokat;
+- az emberi átadás, azonosítás, döntési tilalom és forráskontroll meglétét;
+- az AI Act, GDPR, VET, Vhr. és Fgytv. hivatalos, 2026-08-15-én elérhető szövegét.
 
-- `annex_iii_biometrics_use_case = true`;
-- `infers_natural_person_emotions = true`;
-- `generates_synthetic_content = true`.
+Az audit olvasási műveletekkel készült. Az adatbázis tartalma nem változott.
 
-Ok: a funkciók módosítása csak a jelenlegi képességkatalógus által kezelt kulcsokat törli. A korábbi kérdőív örökölt kulcsai megmaradnak.
+## Összesített minősítés
 
-Következmény: a szabálymotor olyan szabályokat is kiválaszthat, amelyek a rendszer dokumentált működésére nem vonatkoznak.
+| # | Profil | Technikai konzisztencia | Tartalmi minősítés | Szakértői átadás |
+|---:|---|---|---|---|
+| 1 | Általános energetikai tájékoztatás | determinisztikus | feltételesen megfelelő | javítás után |
+| 2 | Számla- és fogyasztási ügyintézés | determinisztikus | feltételesen megfelelő | javítás után |
+| 3 | Mérőállás rögzítése | determinisztikus | módosítandó | még nem |
+| 4 | Panasz és kérelem fogadása | determinisztikus | módosítandó | még nem |
+| 5 | Tartozási és kikapcsolási tájékoztatás | determinisztikus | feltételesen megfelelő | javítás után |
+| 6 | Védendő fogyasztói ügyek támogatása | determinisztikus | módosítandó | még nem |
+| 7 | Kombinált energetikai ügyfélszolgálat | determinisztikus | tartalmilag feltételes | még nem |
+| 8 | Komplex energetikai ügyfélszolgálat | determinisztikus | tartalmilag feltételes | még nem |
 
-Javítási elvárás:
+## Közös, megfelelően működő kontrollok
 
-1. legyen meghatározott, engedélyezett profil-ténykészlet;
-2. újrabesoroláskor a származtatott tényeket ebből újra kell építeni;
-3. a régi kérdőív származtatott kulcsait el kell távolítani;
-4. kézzel igazolt, valódi rendszertény csak külön forrás- és időbélyeggel maradhat meg.
+Az alábbi szerkezeti elemek megfelelőek:
 
-### P-02 – A profilkompatibilitás csak iparág és rendszertípus alapján működik
+- mind a nyolc profil aktív és a `CUSTOMER_CHATBOT` rendszertípushoz, valamint az energetikai iparághoz kötött;
+- a kötelező, választható és tiltott funkcióhalmazok között nincs átfedés;
+- a generatív válaszkészítés technikai képességként választható, nem üzleti alapkövetelmény;
+- a profilkapu ellenőrzi az aktív profilt, rendszertípust, iparágat, funkciókat és a profilhoz rögzített tényeket;
+- a komplex profil minden üzleti funkciót kötelezővé tesz, ezért elkülönül a kombinált profiltól;
+- a kombinált profil legalább két konkrét ügyfélszolgálati funkciót követel meg;
+- a szabályzatgenerálás változatlan bemenet esetén nem készít új verziót;
+- a kiválasztott profil és funkciók alapján a modulok sorrendje és halmaza ismételhető.
 
-Súlyosság: kritikus
+## Keresztmetszeti auditmegállapítások
 
-Jelenleg egy energetikai ügyfélszolgálati profilhoz bármely aktív, energetikával és `CUSTOMER_CHATBOT` típussal kompatibilis funkció hozzáadható. Nincs profilonkénti engedélyezett és tiltott funkciólista.
+### AUD-01 – A profil-tények egy része nincs szabályhoz kötve
 
-Következmény: például az `Általános energetikai tájékoztatás` profilhoz személyes ügyféladat-kezelés adható, miközben a profil kötelező állítása ennek ellenkezőjét mondja.
+Súlyosság: **kritikus**
 
-Javítási elvárás:
+Az adatbázisban egyetlen szabálymodul alkalmazhatósági feltétele sem hivatkozik az alábbi tényekre:
 
-- profilonként `required_capability_codes`;
-- profilonként `optional_capability_codes`;
-- profilonként `forbidden_capability_codes`;
-- adatbázisoldali ellenőrzés mentéskor és szabályzatkészítéskor.
+- `requires_input_confirmation`;
+- `provides_case_acknowledgement`;
+- `may_process_vulnerability_data`.
 
-### P-03 – A kötelező állítások többsége csak szöveg
+Következmény: a profil ugyan igaz értékre állítja ezeket, de ettől még nem kerül be olyan szabály, amely a visszaigazolás, ügyazonosító vagy különleges adat kezelési követelményeit ténylegesen előírja.
 
-Súlyosság: magas
+Elvárt javítás: mindhárom tényhez önálló vagy egyértelműen kapcsolt megfelelőségi szabály, modul, művelet és bizonyíték szükséges.
 
-A felhasználó egyetlen jelöléssel erősíti meg a teljes állításlistát, de az adatbázis nem ellenőrzi külön a feltételeket. A gépi kapu csak a profil `fact_patch` mezőjét és a funkciók meglétét vizsgálja.
+### AUD-02 – A modulok nem végrehajthatóak és nem bizonyíthatóak
 
-Következmény: olyan profil is érvényesnek minősülhet, amelynek valamely lényeges feltétele nem bizonyított.
+Súlyosság: **kritikus**
 
-Javítási elvárás: minden valóban kötelező állításhoz géppel értelmezhető ténykulcs, elvárt érték és bizonyítási állapot tartozzon.
+A 26 aktív szabálymodulból csak kettőhöz tartozik érdemi művelet- és bizonyítékkapcsolat:
 
-### P-04 – A `Komplex energetikai ügyfélszolgálat` leírása és kötelező funkciói eltérnek
+- `CHATBOT_INTERACTION_NOTICE`: 1 művelet, 1 bizonyíték;
+- `CHATBOT_AI_LITERACY`: 2 művelet, 1 bizonyíték.
 
-Súlyosság: magas
+A többi 24 modul szöveges követelményt ad, de nem határozza meg, hogy:
 
-A leírás szerint a rendszer több ügytípust támogat. A profil viszont mind a tíz funkciót kötelezővé teszi, köztük a generatív válaszadást is.
+- ki mit hajt végre;
+- milyen határidővel;
+- milyen rendszerállapot vagy napló bizonyítja a teljesítést;
+- ki és mikor vizsgálja felül;
+- mi történik eltérés esetén.
 
-Javítási döntés szükséges:
+Ez különösen érinti a számlázási, mérési, panaszkezelési, kikapcsolási, védendő fogyasztói, GDPR- és AI Act-modulokat.
 
-- ha valóban teljes körű profil, minden felsorolt üzleti funkció legyen kötelező, de a generatív működés külön opcionális technikai tulajdonság legyen;
-- ha csak több funkciót összekapcsoló profil, akkor a `Kombinált` profillal duplikál, ezért a kettőt össze kell vonni vagy világosan el kell választani.
+Elvárt javítás: minden szakértőnek átadandó modulhoz legalább egy felelős művelet, elfogadási feltétel és ellenőrizhető bizonyíték tartozzon.
 
-### P-05 – A generatív működés több profilban indokolatlanul kötelező
+### AUD-03 – Minden modul felülvizsgálat alatti
 
-Súlyosság: közepes
+Súlyosság: **magas**
 
-A `GENERATIVE_RESPONSES` kötelező az általános tájékoztató és a komplex profilban, miközben ugyanazt az üzleti funkciót előre megírt vagy visszakeresett válaszokkal működő chatbot is elláthatja.
+Mind a 26 modul életciklus-állapota `under_review`. Ez helyes előkészítési állapot, de nem egyeztethető össze azzal az állítással, hogy a generált szabályzat végleges vagy jóváhagyott.
 
-Javítási elvárás: a generatív működés legyen külön technikai képesség, ne az üzleti használati profil automatikus része.
+Elvárt javítás: a szakmai és jogi felelősök jóváhagyása után verziózva kell `approved` vagy az alkalmazás által használt végleges státuszba emelni a modulokat.
 
-### P-06 – A védendő fogyasztói profil személyes fiókadatot kötelezővé tesz
+### AUD-04 – Funkciófüggőségek nincsenek általánosan kikényszerítve
 
-Súlyosság: közepes
+Súlyosság: **magas**
 
-A profil leírása alapján általános tájékoztatás és emberi továbbítás is elegendő lehet, mégis kötelező a `PERSONAL_ACCOUNT_DATA`.
+A profilkapu a kötelező, engedélyezett és tiltott funkciókat ellenőrzi, de nem kezel általános képességfüggőségeket. Például a kombinált profilban a mérőállás-fogadás önmagában kiválasztható anélkül, hogy gépi szabály írná elő az ügyfél és a mérési pont megbízható összerendelését.
 
-Javítási döntés szükséges: külön kell választani az általános védendő fogyasztói tájékoztatást és az azonosított ügyfél egyedi ügyintézését.
+Elvárt javítás: adatvezérelt függőségi szabályok szükségesek, legalább a következőkre:
 
-## Profilonkénti első minősítés
+- mérőállás-fogadás → azonosítás vagy más dokumentált mérési pont-összerendelés;
+- egyedi számla/tartozás/kikapcsolás → ügyfél-azonosítás és jogosultság-ellenőrzés;
+- védendőségi egyedi ügy → célhoz kötött adatfelvétel és megfelelő hozzáférési szint;
+- panasz továbbítása → elérhetőség, visszaigazolás és ügyazonosító.
 
-| Profil | Első minősítés | Fő teendő |
-|---|---|---|
-| Általános energetikai tájékoztatás | Feltételesen megfelelő | személyes adat tiltása gépi szabállyal; generatív funkció opcionálissá tétele |
-| Számla- és fogyasztási ügyintézés | Tovább auditálandó | számlázási és fogyasztási funkciók határának, azonosításnak és döntési tilalomnak ellenőrzése |
-| Mérőállás rögzítése | Tovább auditálandó | visszaigazolás, hibás adat és emberi átadás gépi tényeinek pótlása |
-| Panasz és kérelem fogadása | Tovább auditálandó | panasz és általános kérelem különválasztása; azonosítás szükségességének vizsgálata |
-| Tartozási és kikapcsolási tájékoztatás | Tovább auditálandó | egyedi ügyadat és általános tájékoztatás szétválasztása; döntési tilalom gépi ellenőrzése |
-| Védendő fogyasztói ügyek támogatása | Módosítandó | általános tájékoztatás és azonosított ügyintézés szétválasztása |
-| Kombinált energetikai ügyfélszolgálat | Módosítandó | profilonként engedélyezett funkciók; minimum két üzleti funkció; régi tények törlése |
-| Komplex energetikai ügyfélszolgálat | Módosítandó | a kombinált profiltól való pontos eltérés meghatározása vagy összevonás |
+### AUD-05 – Jogi hivatkozások pontossága
 
-## 1. profil tételes auditja – Általános energetikai tájékoztatás
+Súlyosság: **magas**
 
-Audit dátuma: 2026-08-15  
-Profilkód: `ENERGY_CHAT_PUBLIC_INFO`  
-Minősítés: **feltételesen megfelelő – a szabálymodulok javításáig nem hitelesített**
+Három forráskapcsolat javítandó:
 
-### Rendeltetés és megengedett működés
+1. A számlázási modul `VHR_ANNEX_BILLING` hivatkozása a „2. melléklet, 4–5. pontot” nevezi meg, miközben a jelenlegi szerkezetben a mérés, elszámolás és számlakifogás releváns részei a 2. melléklet 14–16. pontjai környezetében találhatók. A modul állításait pontos alpontokra kell bontani.
+2. A kikapcsolási modul általános `24–26. §` hivatkozása túl tág. A kikapcsolás fő szabályai a Vhr. 24–25. §-ában, a visszakapcsolási kötelezettségek a 22/C. §-ban vannak. A 26. § kereskedőváltásra vonatkozik, ezért csak ilyen tényállásnál indokolt.
+3. A védendő fogyasztói modul a VET 64–65. § mellett nem tartalmazza a Vhr. 30–36. § részletes nyilvántartási, igazolási, fizetési könnyítési, különleges bánásmódi és szolgáltatási szabályait.
 
-A profil olyan ügyfélkapcsolati chatbothoz használható, amely:
+### AUD-06 – A védendőségi adatok különleges adatnak minősülhetnek
 
-- nyilvános, általános energetikai és ügyintézési információt ad;
-- ellenőrzött vállalati, hatósági vagy hivatalos tudásforrást használ;
-- nem fér hozzá azonosított ügyfél fiók-, szerződés-, számla-, fogyasztási vagy mérési adataihoz;
-- nem fogad mérőállást, nem indít panaszt, és nem kezel egyedi tartozási, kikapcsolási vagy védendő fogyasztói ügyet;
-- nem hoz joghatással járó, pénzügyi vagy szerződéses döntést;
-- bizonytalan vagy egyedi ügyet emberi ügyintézőhöz továbbít.
+Súlyosság: **kritikus**
 
-### Kötelező és választható funkciók
+A védendő fogyasztói profil megengedi a védendőségi adatok kezelését. Az igazolások fogyatékosságra vagy egészségi állapotra vonatkozó adatot is tartalmazhatnak. Ehhez a GDPR 9. cikke szerinti különlegesadat-kezelési feltételt, hozzáférés-korlátozást, megőrzést és törlést külön kell modellezni.
 
-| Típus | Funkció |
+Az adatbázisban nincs azonosítható, kifejezetten GDPR 9. cikkre épülő jogi szabály és modul. A jelenlegi általános GDPR-modulok ezt nem pótolják.
+
+### AUD-07 – Adatfrissesség és döntési határ bizonyítása
+
+Súlyosság: **magas**
+
+A profilok szövegesen tiltják a joghatással járó döntést és előírják az ellenőrzött forrást, de az egyedi számla-, tartozás-, kikapcsolás- és státuszadatoknál nincs egységes bizonyíték arra, hogy:
+
+- mely forrásrendszerből származott az adat;
+- mikori volt a lekérdezés;
+- mely ügyfélhez és jogosultsághoz kapcsolódott;
+- a chatbot csak tájékoztatott, nem döntött;
+- szükség esetén megtörtént az emberi átadás.
+
+Elvárt javítás: mezőszintű jogosultsági és adatfrissességi napló, forrásazonosító, válaszidőbélyeg és emberi átadási esemény.
+
+## 2. profil – Számla- és fogyasztási ügyintézés
+
+Profilkód: `ENERGY_CHAT_BILLING_CONSUMPTION`  
+Minősítés: **feltételesen megfelelő – javítás után adható szakértőnek**
+
+### Rendeltetés
+
+A profil azonosított ügyfél számla-, elszámolási, fogyasztási és mérési adatainak megjelenítésére és magyarázatára használható. Nem módosíthat számlát, elszámolást, szerződést vagy mérési adatot, és nem hozhat joghatással járó döntést.
+
+### Funkcióhatár
+
+| Típus | Funkciók |
 |---|---|
-| Kötelező | Általános ügyféltájékoztatás |
-| Kötelező | Energetikai tájékoztatás |
-| Választható | Generatív válaszok készítése |
+| Kötelező | általános tájékoztatás; energetikai tájékoztatás; számlázási információ; fogyasztási/mérési adat; személyes fiókadat |
+| Választható | generatív válaszok |
+| Tiltott | mérőállás fogadása; panaszfelvétel; tartozási/kikapcsolási ügy; védendő fogyasztói ügy |
 
-A jelenlegi kötelező és választható funkciók megfelelnek a profil rendeltetésének. A generatív működés helyesen választható, mert ugyanaz a szolgáltatás előre rögzített vagy visszakeresett válaszokkal is működhet.
+### Megfelelő kontrollok
 
-### Tiltott funkciók
+- az ügyfél-azonosítás és a személyes fiókadat elérése kötelező;
+- számlamódosítás és joghatással járó döntés tiltott;
+- ellenőrzött forrás és emberi átadás előírt;
+- a profilhoz a számlázási/mérési szakmodul determinisztikusan kiválasztódik;
+- az alapkonfiguráció 20 modult eredményez.
 
-A jelenlegi tiltás helyes: számlázási, fogyasztási és mérési adat, személyes fiókadat, mérőállásfogadás, panaszfelvétel, tartozási vagy kikapcsolási ügy és védendő fogyasztói ügy nem tartozhat ebbe a profilba. Ha ezek közül bármelyik ténylegesen megjelenik, másik vagy kombinált profil szükséges.
+### Eltérések
 
-### Kötelező gépi tények
+1. A Vhr. 2. mellékletére mutató forráshely pontatlan; a szabályállításokat a mérés, elszámolás és számlakifogás megfelelő alpontjaihoz kell kötni.
+2. A modulhoz nincs végrehajtási művelet és bizonyíték.
+3. Az egyedi adat válaszban való használatához nincs előírt adatfrissességi időbélyeg és mezőszintű jogosultsági bizonyíték.
+4. A profil neve a számla- és fogyasztási ügyintézést együtt kezeli. Ha egy rendszer csak számlát vagy csak fogyasztási adatot kezel, a kombinált profil vagy szűkebb profil pontosabb lehet.
 
-| Tény | Elvárt érték |
+### Kötelező javítás
+
+- a joghely pontosítása;
+- forrásrendszer-, jogosultság- és lekérdezési időbélyeg rögzítése;
+- a „magyarázat” és „módosítás/döntés” technikai elkülönítése;
+- művelet- és bizonyítéksorok létrehozása.
+
+## 3. profil – Mérőállás rögzítése
+
+Profilkód: `ENERGY_CHAT_METER_READING`  
+Minősítés: **módosítandó – még nem adható szakértőnek kész szabályzatként**
+
+### Rendeltetés
+
+A profil mérőállás fogadására, formai ellenőrzésére, ügyfél általi megerősítésére és a háttérrendszer felé történő továbbítására használható. Nem számolhat el fogyasztást, nem módosíthat számlát és nem dönthet a mérőállás elfogadásáról vitás vagy rendellenes esetben.
+
+### Funkcióhatár
+
+| Típus | Funkciók |
 |---|---|
-| `industry` | `energy` |
-| `system_type_code` | `CUSTOMER_CHATBOT` |
-| `provides_general_information` | `true` |
-| `provides_energy_information` | `true` |
-| `accesses_personal_account_data` | `false` |
-| `makes_legally_effective_decisions` | `false` |
-| `uses_controlled_knowledge_sources` | `true` |
-| `requires_human_handoff` | `true` |
+| Kötelező | általános tájékoztatás; energetikai tájékoztatás; fogyasztási/mérési adat; személyes fiókadat; mérőállás fogadása |
+| Választható | generatív válaszok |
+| Tiltott | számlázási ügy; panaszfelvétel; tartozási/kikapcsolási ügy; védendő fogyasztói ügy |
 
-### A személyesadat-kezelés feltárt ellentmondása
+### Megfelelő kontrollok
 
-A `processes_personal_data = false` állítás önmagában nem bizonyítható abból, hogy a chatbot nem fér hozzá ügyfélfiókhoz. Szabad szöveges kérdésben az ügyfél saját maga is megadhat személyes adatot, továbbá a beszélgetési napló, IP-cím, technikai azonosító vagy külső modellnek továbbított prompt is személyes adatot tartalmazhat.
+- azonosítás és személyes fiókadat kötelező;
+- a profil előírja a bevitel megerősítését;
+- joghatással járó döntés tiltott, emberi átadás előírt;
+- az alapkonfiguráció 20 modult eredményez.
 
-Ezért külön tényként kell kezelni legalább:
+### Kritikus eltérés
 
-- fogad-e szabad szöveget;
-- tárol-e beszélgetési naplót;
-- kezel-e technikai azonosítót;
-- továbbít-e promptot külső szolgáltatónak;
-- használják-e a beszélgetést modellfejlesztésre;
-- mennyi a megőrzési idő.
+A `requires_input_confirmation = true` tényt egyetlen szabálymodul sem használja. Emiatt nincs kikényszerítve:
 
-Csak akkor állítható teljesen, hogy nincs személyesadat-kezelés, ha ezek egyike sem valósul meg. Egyébként a GDPR-modulokat a tényleges adatkezelés alapján kell kiválasztani.
+- a mérési pont és az ügyfél összerendelése;
+- a mérő gyári számának vagy más azonosítójának ellenőrzése;
+- a mértékegység és formátum ellenőrzése;
+- a kirívó vagy a korábbi állásnál kisebb érték kezelése;
+- a duplikált beküldés felismerése;
+- a beküldés előtti összefoglaló megerősítés;
+- a sikeres vagy sikertelen továbbítás visszaigazolása és bizonylata;
+- vitás esetben az emberi átadás.
 
-### A jelenlegi szabályzatmotor hibája
+### Kötelező javítás
 
-Az `Energia Tudástár` szabályzatának 2. verziója a profil `processes_personal_data = false` ténye ellenére automatikusan beemel nyolc adatvédelmi modult. A modulok feltétele jelenleg több esetben pusztán az, hogy természetes személy kommunikál a chatbottal vagy a rendszer típusa `CUSTOMER_CHATBOT`.
+Önálló `ENERGY_METER_READING_INTAKE` kontrollmodul szükséges, amely műveletet, hibautat, visszaigazolást, ügyazonosítót és naplóbizonyítékot ír elő. A kombinált profilban a mérőállás-funkcióhoz függőségként kell kapcsolni az azonosítást vagy a dokumentált mérési pont-összerendelést.
 
-Különösen nem lehet automatikusan minden ilyen rendszerre alkalmazni:
+## 4. profil – Panasz és kérelem fogadása
 
-- az adatvédelmi hatásvizsgálatot;
-- a nemzetközi adattovábbítást;
-- a személyesadat-incidens kezelését;
-- az érintetti jogok teljes modulját;
-- a beszélgetési naplók megőrzési és törlési követelményeit.
+Profilkód: `ENERGY_CHAT_COMPLAINT_INTAKE`  
+Minősítés: **módosítandó – még nem adható szakértőnek kész szabályzatként**
 
-Ezeket a tényleges adatkezelési tényekhez kell kötni. Az adatvédelmi hatásvizsgálat esetében először csak a szükségesség dokumentált vizsgálata írható elő; maga a DPIA csak magas kockázat esetén kötelező.
+### Rendeltetés
 
-### Emberi felülvizsgálat vagy másik profil szükséges
+A profil elektronikus panasz befogadására, rögzítésére, visszaigazolására és emberi panaszkezelési folyamatba továbbítására használható. A chatbot nem bírálhatja el a panaszt, nem tehet végleges jogi nyilatkozatot és nem tagadhatja meg a panasz rögzítését pusztán azért, mert az ügyfél nem lépett be a fiókjába.
 
-- ha az ügyfél egyedi ügyállapotot, számlát, fogyasztási adatot vagy szerződéses információt kér;
-- ha panaszt, mérőállást, tartozási vagy kikapcsolási ügyet indítana;
-- ha a válasz forrása hiányzik, lejárt vagy ellentmondásos;
-- ha a kérdés jogi, pénzügyi vagy szerződéses döntést igényel;
-- ha személyes adat jelenik meg, de a rendszer erre nincs dokumentáltan felkészítve;
-- ha a chatbot bizonytalan vagy az ügyfél emberi ügyintézőt kér.
+### Funkcióhatár
 
-### Jogi és szakmai alapok
+| Típus | Funkciók |
+|---|---|
+| Kötelező | általános tájékoztatás; energetikai tájékoztatás; személyes fiókadat; panaszfelvétel |
+| Választható | generatív válaszok |
+| Tiltott | számlázási ügy; fogyasztási/mérési adat; mérőállás; tartozási/kikapcsolási ügy; védendő fogyasztói ügy |
 
-- Az AI Act 50. cikk (1) és (5) alapján az ügyfelet világosan, megkülönböztethetően, hozzáférhetően és legkésőbb az első interakciókor tájékoztatni kell arról, hogy MI-rendszerrel kommunikál: [Regulation (EU) 2024/1689 – consolidated text](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02024R1689-20260727).
-- Az AI Act 4. cikke alapján a működtetésben részt vevő személyek feladatához és a használat körülményeihez igazodó MI-ismereti intézkedés szükséges: [Regulation (EU) 2024/1689 – consolidated text](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02024R1689-20260727).
-- Ha személyes adatot kezelnek, a célhoz kötöttség, adattakarékosság és beépített adatvédelem követelménye alkalmazandó: [GDPR 5. és 25. cikk](https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng).
-- Az energetikai információnak a hatályos, egységes üzletszabályzattal és hivatalos forrásokkal összhangban kell állnia: [2007. évi LXXXVI. törvény 56/A. §](https://njt.hu/jogszabaly/2007-86-00-00).
-- A megtévesztő vagy lényeges információt elhallgató kereskedelmi gyakorlat tilos: [2008. évi XLVII. törvény 3., 6–7. §](https://njt.hu/jogszabaly/2008-47-00-00).
+### Megfelelő kontrollok
 
-### Auditdöntés
+- a profil ügyvisszaigazolást és emberi átadást vár el;
+- joghatással járó döntést nem enged;
+- a panaszkezelési modul determinisztikusan kiválasztódik;
+- az alapkonfiguráció 20 modult eredményez.
 
-A profil funkcióhatára megfelelő. A profilt azonban csak az alábbi javítások után lehet hitelesítettnek jelölni:
+### Kritikus eltérések
 
-1. a személyesadat-kezelést részletes, gépi tényekkel kell meghatározni;
-2. a GDPR-modulokat ezekhez a tényekhez kell kötni;
-3. a profilfeltételek egyetlen közös jelölése helyett a kritikus állításokat külön kell bizonyítani;
-4. a javítás után új szabályzatverziót kell készíteni és összehasonlítani a jelenlegi 20 fejezetes változattal.
+1. **Panasz és kérelem összemosása.** A kettő eltérő jogi kategória és eltérő folyamatot, határidőt, adatmezőt és választ igényel. A profilt panaszra kell szűkíteni, vagy két profilt/képességet kell létrehozni.
+2. **Túl szigorú fiókkövetelmény.** A `PERSONAL_ACCOUNT_DATA` és a hitelesítés kötelező. Panasz benyújtásához azonban elég lehet a szükséges azonosító és elérhetőségi adat felvétele; a teljes fiókhozzáférés kötelezővé tétele adatminimalizálási és hozzáférési kockázatot okoz.
+3. **A gépi tény nincs felhasználva.** A `provides_case_acknowledgement = true` tényre egyetlen modul sem hivatkozik.
+4. **Hiányzó végrehajtási részletek.** A modul nem bizonyítja az elektronikus panasz azonnali visszaigazolását, az egyedi azonosítót, a főszabály szerinti 30 napos válaszadást, a hároméves megőrzést, valamint az indokolt elutasítást és a jogorvoslati tájékoztatást.
 
-## A nyolc profil egységes validációjának eredménye
+### Kötelező javítás
 
-Dátum: 2026-08-15  
-Validáció típusa: adatmodell-, konzisztencia-, szabálykapu- és forráskapcsolati ellenőrzés
+- a panasz és az általános kérelem szétválasztása;
+- a személyes fiókadat opcionálissá tétele, külön `collects_complaint_contact_data` vagy azzal egyenértékű tény bevezetése;
+- azonnali elektronikus visszaigazolás, egyedi ügyazonosító és naplóbizonyíték;
+- a határidő, megőrzés, elutasítás és jogorvoslati tájékoztatás külön szabályozása;
+- ágazati rövidebb határidő esetén a szigorúbb szabály elsőbbségének kezelése.
 
-| Profil | Kötelező funkciók | Profilspecifikus modul | Gépi eredmény |
-|---|---:|---|---|
-| Általános energetikai tájékoztatás | 2 | ellenőrzött energetikai tudásforrás | megfelelő, új kezelői megerősítés szükséges |
-| Számla- és fogyasztási ügyintézés | 5 | számlázási és mérési követelmények | megfelelő, új kezelői megerősítés szükséges |
-| Mérőállás rögzítése | 5 | számlázási/mérési követelmény és bevitel-visszaigazolás | megfelelő, új kezelői megerősítés szükséges |
-| Panasz és kérelem fogadása | 4 | fogyasztói panaszkezelés | megfelelő, új kezelői megerősítés szükséges |
-| Tartozási és kikapcsolási tájékoztatás | 4 | kikapcsolási és visszakapcsolási követelmények | megfelelő, új kezelői megerősítés szükséges |
-| Védendő fogyasztói ügyek támogatása | 3 | védendő fogyasztói követelmények | megfelelő, új kezelői megerősítés szükséges |
-| Kombinált energetikai ügyfélszolgálat | 2 alap + legalább 2 üzleti | a kiválasztott funkciók moduljainak uniója | megfelelő, funkciónként determinisztikus |
-| Komplex energetikai ügyfélszolgálat | 9 | minden energetikai ügyfélszolgálati modul | megfelelő, új kezelői megerősítés szükséges |
+## 5. profil – Tartozási és kikapcsolási tájékoztatás
 
-### Egységes adatvédelmi döntés
+Profilkód: `ENERGY_CHAT_DEBT_DISCONNECTION`  
+Minősítés: **feltételesen megfelelő – javítás után adható szakértőnek**
 
-A `CUSTOMER_CHATBOT` típus konzervatív alapértelmezése szerint felhasználói szabad szöveget dolgoz fel, ezért `processes_personal_data = true`. Ez nem jelenti automatikusan személyes ügyfélfiók elérését. A két fogalom külön gépi tényként szerepel:
+### Rendeltetés
 
-- `processes_personal_data`: a felhasználói bemenet vagy technikai adat kezelése;
-- `accesses_personal_account_data`: azonosított ügyfél fiók-, szerződés-, számla- vagy fogyasztási adatának elérése.
+A profil azonosított ügyfél aktuális tartozási, fizetési, kikapcsolási és visszakapcsolási státuszáról adhat tájékoztatást. Nem rendelhet el kikapcsolást, nem állapíthat meg tartozást önállóan, nem dönthet részletfizetésről vagy visszakapcsolásról.
 
-A GDPR-modulok az első tényhez, az ügyfél-azonosítás és az egyedi ügyintézés a másodikhoz kapcsolódik. A nemzetközi adattovábbítás modul csak `international_data_transfer = true` esetén választható ki; külső szolgáltató használatából ezt nem szabad bizonyíték nélkül feltételezni.
+### Funkcióhatár
 
-### Újraigazolási kapu
+| Típus | Funkciók |
+|---|---|
+| Kötelező | általános tájékoztatás; energetikai tájékoztatás; személyes fiókadat; tartozási/kikapcsolási támogatás |
+| Választható | generatív válaszok |
+| Tiltott | számlázási ügy; fogyasztási/mérési adat; mérőállás; panaszfelvétel; védendő fogyasztói ügy |
 
-A profilok lényeges definíciója megváltozott, ezért minden aktív rendszer korábbi profilmegerősítése érvényét vesztette. A szabályzatkészítő kapu addig nem enged új szabályzatot, amíg a felhasználó a Szerkesztés oldalon át nem tekinti és meg nem erősíti az új feltételeket. A megerősítés után a rendszer a kiválasztott funkciókból tisztán újraépíti a tényeket.
+### Megfelelő kontrollok
 
-### Automatikus ellenőrzések
+- azonosítás és személyes fiókadat kötelező;
+- a profil kifejezetten tiltja a chatbot általi kikapcsolást és joghatásos döntést;
+- emberi átadás és ellenőrzött forrás előírt;
+- az alapkonfiguráció 20 modult eredményez.
 
-- kötelező, választható és tiltott funkcióhalmazok átfedése: **0**;
-- nem létező vagy inaktív funkciókód a profilokban: **0**;
-- kötelező funkcióhiány a jelenlegi aktív rendszerekben: **0**;
-- profilhoz nem engedélyezett funkció a jelenlegi aktív rendszerekben: **0**;
-- jogi követelmény szabályrekord nélkül: **0**;
-- jogi követelmény hivatalos forráskapcsolat nélkül: **0**.
+### Eltérések
 
-### Minősítés értelmezése
+1. A `Vhr. 24–26. §` hivatkozás pontatlanul széles. A kikapcsolásnál a 24–25. §, visszakapcsolásnál a 22/C. § a közvetlen forrás; a 26. § csak kereskedőváltási helyzetben releváns.
+2. Nincs művelet és bizonyíték az ügyfél-azonosításra, az aktuális státusz lekérdezésére, az értesítések ellenőrzésére és az emberi átadásra.
+3. A válaszban nincs kötelezően feltüntetett forrás- és lekérdezési időbélyeg, ezért elavult státusz kommunikálható.
 
-A nyolc profil a belső adatmodell és a determinisztikus szabálymotor szintjén konzisztens és tesztelhető. A dokumentum nem helyettesíti a vállalati jogi vagy megfelelőségi szakértő jóváhagyását. Éles vállalati alkalmazás előtt a hivatalos jogforrások aktuális szövegét, a vállalat üzletszabályzatát és a tényleges technikai adatfolyamot is jóvá kell hagyatni.
+### Kötelező javítás
 
-## Javítási sorrend
+- a joghely bontása VET 47. §, Vhr. 24–25. § és 22/C. § szerint;
+- a kereskedőváltási szabály feltételes leválasztása;
+- élő háttérrendszeri státusz, jogosultság és időbélyeg bizonyítása;
+- automatikus döntés és ígéret technikai tiltása;
+- művelet- és bizonyítéksorok létrehozása.
 
-1. Régi kérdőívből maradt származtatott tények biztonságos eltávolítása – **kész**.
-2. Kötelező, választható és tiltott funkciók adatmodelljének kialakítása – **kész**.
-3. Kombinált és komplex profil közötti átfedés megszüntetése – **kész**.
-4. Generatív működés leválasztása az üzleti profilokról – **kész**.
-5. Profilonkénti kötelező tények és kizáró feltételek gépi rögzítése – **kész**.
-6. Jogi források és szabálymodulok tételes auditja – **következő auditfázis**.
+## 6. profil – Védendő fogyasztói ügyek támogatása
 
-## Auditkövetkeztetés
+Profilkód: `ENERGY_CHAT_VULNERABLE_SUPPORT`  
+Minősítés: **módosítandó – még nem adható szakértőnek kész szabályzatként**
 
-A profilkapu megakadályozza az ismeretlen, inaktív, más iparághoz vagy rendszertípushoz tartozó profil használatát, továbbá ellenőrzi a kötelező, választható és tiltott funkciókat. A korábbi kérdőívből maradt tények eltávolítása és a profilhatárok gépi rögzítése megtörtént.
+### Rendeltetés
 
-A profilaudit technikai és determinisztikus szakasza lezárható. A következő fázis a szabálymodulok jogi tartalmának és pontos cikkhivatkozásainak tételes ellenőrzése, majd az automatizált szabálymotor tesztkészlete.
+A profil általános tájékoztatást adhat a védendő fogyasztói jogosultságokról, iratokról és ügyintézési lépésekről, majd emberi ügyintézőhöz irányíthat. Egyedi ügyintézés csak megfelelő azonosítással, célhoz kötött adatfelvétellel és korlátozott hozzáféréssel végezhető. A chatbot nem állapíthatja meg a jogosultságot.
+
+### Funkcióhatár
+
+| Típus | Funkciók |
+|---|---|
+| Kötelező | általános tájékoztatás; energetikai tájékoztatás; védendő fogyasztói támogatás |
+| Választható | személyes fiókadat; generatív válaszok |
+| Tiltott | számlázási ügy; fogyasztási/mérési adat; mérőállás; panaszfelvétel; tartozási/kikapcsolási ügy |
+
+### Megfelelő kontrollok
+
+- a személyes fiókadat helyesen választható, nem kötelező;
+- alaphelyzetben nem szükséges azonosított ügyfélfiók;
+- joghatásos döntés tiltott és emberi átadás kötelező;
+- az alapkonfiguráció 20 modult eredményez.
+
+### Kritikus eltérések
+
+1. A profil `may_process_vulnerability_data = true` tényét egyetlen modul sem használja.
+2. Nincs kifejezett GDPR 9. cikk szerinti szabály a fogyatékosságra vagy egészségi állapotra utaló különleges adatokhoz.
+3. A jogalap csak a VET 64–65. §-ra épül; hiányzik a Vhr. 30–36. § részletes szabályainak leképezése.
+4. Nincs külön kezelve az általános tájékoztatás, a jogosultság igazolása, a nyilvántartásba vétel és a különleges szolgáltatás igénylése.
+5. A különböző igazolások megőrzési ideje és hozzáférési szintje nincs dokumentumtípusonként meghatározva.
+6. A hozzáférhető kommunikáció és speciális ügyfélkiszolgálás nem kötelező belső kontrollként jelenik meg. Ez független attól, hogy az általános akadálymentességi jogszabálymodul egy adott szolgáltatóra alkalmazandó-e.
+
+### Kötelező javítás
+
+- különlegesadat-kezelési jogalap és GDPR 9. cikk szerinti feltétel;
+- adatmező-, szerepkör- és dokumentumtípus-szintű hozzáférés;
+- Vhr. 30–36. § tételes leképezése;
+- dokumentumtípusonkénti megőrzés és törlés;
+- hozzáférhető kommunikáció, emberi segítség és sürgős átadás;
+- a chatbot általi jogosultság-megállapítás technikai tiltása.
+
+## 7. profil – Kombinált energetikai ügyfélszolgálat
+
+Profilkód: `ENERGY_CHAT_COMBINED`  
+Minősítés: **technikailag determinisztikus, tartalmilag feltételes – még nem adható szakértőnek kész szabályzatként**
+
+### Rendeltetés
+
+A profil legalább két, külön kiválasztott energetikai ügyfélszolgálati funkció egy rendszerben történő használatára szolgál. A kiválasztott funkciók szabálymoduljainak unióját kell létrehoznia, miközben a nem kiválasztott funkciók követelményeit nem emeli be.
+
+### Funkcióhatár
+
+| Típus | Funkciók |
+|---|---|
+| Kötelező alap | általános tájékoztatás; energetikai tájékoztatás |
+| Választható üzleti | számlázás; fogyasztási/mérési adat; személyes fiókadat; mérőállás; panasz; tartozás/kikapcsolás; védendő fogyasztói támogatás |
+| Választható technikai | generatív válaszok |
+| Minimum | legalább két konkrét szolgáltatási funkció a számlázás, mérőállás, panasz, tartozás/kikapcsolás és védendő támogatás közül |
+
+### Determinisztikus teszt
+
+Az öt konkrét szolgáltatás összes kételemű kombinációját ellenőriztük, összesen 10 esetet. Minden esetben pontosan a kiválasztott szolgáltatások szakmoduljainak uniója jelent meg.
+
+Példák:
+
+- számlázás + panasz → számlázási/mérési és panaszkezelési modul;
+- panasz + tartozás → panaszkezelési és kikapcsolási/visszakapcsolási modul;
+- tartozás + védendő támogatás → kikapcsolási/visszakapcsolási és védendő fogyasztói modul.
+
+A kötelező alap önmagában 19 modult eredményez, de a profilkapu ezt érvénytelennek minősíti, amíg nincs legalább két konkrét szolgáltatási funkció.
+
+### Eltérések
+
+1. A kombinációk kiválasztása helyes, de a funkciófüggőségek nincsenek kikényszerítve.
+2. A profil örökli minden kiválasztott szakmodul jogi és bizonyítási hibáját.
+3. A minimumszabály a szolgáltatásdarabszámot ellenőrzi, nem a szükséges azonosítást, adatforrást vagy jogosultságot.
+4. A fogyasztási/mérési adat és a személyes fiókadat önmagában nem számít a két konkrét szolgáltatás egyikének; ezt a felhasználói felületen világosan jelezni kell.
+
+### Kötelező javítás
+
+- adatvezérelt funkciófüggőségi táblázat és adatbázisoldali ellenőrzés;
+- a kiválasztott funkciókhoz tartozó hitelesítési és adatkezelési tények automatikus levezetése;
+- hibás szakmodul kiválasztásakor a szabályzatgenerálás blokkolása;
+- valamennyi kételemű és fontos háromelemű kombináció regressziós tesztje.
+
+## 8. profil – Komplex energetikai ügyfélszolgálat
+
+Profilkód: `ENERGY_CHAT_FULL_SERVICE`  
+Minősítés: **technikailag determinisztikus, tartalmilag feltételes – még nem adható szakértőnek kész szabályzatként**
+
+### Rendeltetés
+
+A profil teljes körű energetikai ügyfélszolgálati rendszerhez használható, amely valamennyi üzleti funkciót támogatja. Ettől különül el a kombinált profiltól: itt mind a kilenc üzleti képesség kötelező, a generatív válaszadás pedig továbbra is választható technikai képesség.
+
+### Funkcióhatár
+
+| Típus | Funkciók |
+|---|---|
+| Kötelező | mind a 9 üzleti funkció: általános és energetikai tájékoztatás, számla, fogyasztási/mérési adat, személyes fiókadat, mérőállás, panasz, tartozás/kikapcsolás, védendő támogatás |
+| Választható | generatív válaszok |
+| Tiltott | nincs, a profil a teljes üzleti funkciókört fedi le |
+
+### Megfelelő kontrollok
+
+- a komplex és kombinált profil közötti különbség egyértelmű;
+- minden lényeges biztonsági tény aktív: azonosítás, adatkezelés, visszaigazolás, döntési tilalom, ellenőrzött forrás és emberi átadás;
+- a teljes konfiguráció 23 modult eredményez;
+- a modulunió determinisztikus.
+
+### Eltérések
+
+1. A profil örökli a 2–6. profil minden blokkolóját.
+2. A magas adatkockázat miatt nem elegendő egyetlen általános hozzáférési szint; ügytípus- és adatmező-szintű jogosultság szükséges.
+3. Az emberi átadás okát, időpontját, célcsoportját és eredményét ügyfolyamatonként kell naplózni.
+4. A panasz, mérőállás, tartozás/kikapcsolás és védendő ügyek eltérő bizonylati és megőrzési követelményei nincsenek szétválasztva.
+5. A teljes szolgáltatási kör miatt különösen indokolt a DPIA-szükségesség dokumentált vizsgálata; ez nem azonos az automatikus DPIA-kötelezettség kijelentésével.
+
+### Kötelező javítás
+
+- a 2–6. profil valamennyi blokkolójának lezárása;
+- ügyfolyamatonként elkülönített jogosultság, napló és megőrzés;
+- emberi átadási mátrix;
+- teljes körű művelet- és bizonyítékkatalógus;
+- a javított modulunió teljes regressziós tesztje.
+
+## Szabálymotor-ellenőrzés
+
+### Profilkapu
+
+Az `aic_require_valid_usage_profile` adatbázis-függvény ellenőrzi:
+
+- az aktív rendszert és profilt;
+- a rendszer típusát és iparágát;
+- a kötelező és engedélyezett funkciókat;
+- a tiltott funkciókat;
+- a profilhoz rögzített elvárt tényeket;
+- a kombinált profil minimum két konkrét szolgáltatását.
+
+Nem ellenőrzi általánosan a funkciók közötti függőségeket. Ez az AUD-04 szerinti javítást igényli.
+
+### Verzióképzés
+
+Az `aic_generate_policy_if_changed` a kiértékelt profilt és a modulpillanatképet összehasonlítja a meglévő szabályzattal. Ha nincs tényleges változás, nem készít új verziót. Ez a működés megfelelő.
+
+### Modulválasztási eredmények
+
+| Profil | Alapkonfigurációban kiválasztott modulok |
+|---|---:|
+| 2. Számla- és fogyasztási ügyintézés | 20 |
+| 3. Mérőállás rögzítése | 20 |
+| 4. Panasz és kérelem fogadása | 20 |
+| 5. Tartozási és kikapcsolási tájékoztatás | 20 |
+| 6. Védendő fogyasztói támogatás | 20 |
+| 7. Kombinált profil kötelező alapja | 19, de két szolgáltatás nélkül érvénytelen |
+| 8. Komplex energetikai ügyfélszolgálat | 23 |
+
+Az azonos modulszám nem jelenti a szakmodulok azonosságát; a négy 20 modulos profilnál a közös alapmodulok mellé eltérő szakmodul kerül.
+
+## Javítási és visszaellenőrzési mátrix
+
+| Azonosító | Javítás | Érintett profil | Elfogadási feltétel |
+|---|---|---|---|
+| F-01 | Mérőállás-beviteli kontrollmodul | 3, 7, 8 | megerősítés, validáció, duplikáció, bizonylat és hibautak tesztelve |
+| F-02 | Panasz és kérelem szétválasztása | 4, 7, 8 | külön képesség/profil vagy egyértelmű panasz-szűkítés; fiókadat nem indokolatlanul kötelező |
+| F-03 | GDPR 9. cikk és különlegesadat-kezelés | 6, 7, 8 | jogalap, cél, hozzáférés, megőrzés, törlés és bizonyíték rögzítve |
+| F-04 | Energetikai joghelyek pontosítása | 2, 5, 6, 7, 8 | Vhr. pontos §/melléklet/alpont és állításonkénti kapcsolat |
+| F-05 | Művelet- és bizonyítékkatalógus | 2–8 | minden alkalmazott modulhoz felelős művelet és ellenőrizhető bizonyíték |
+| F-06 | Funkciófüggőségek | 3, 7, 8 | hiányos azonosítási/adatkezelési kombinációt a profilkapu elutasít |
+| F-07 | Modul-életciklus és verzió | 2–8 | jóváhagyott modulok, verziózott új szabályzat és változásjegyzék |
+| F-08 | Adatfrissességi/jogosultsági napló | 2, 3, 5, 7, 8 | minden egyedi adatválasz forrása, ideje és jogosultsága visszakereshető |
+| F-09 | Hozzáférhető és emberi ügyintézés | 6, 7, 8 | ügyfélcsoporthoz igazított kommunikáció és sürgős átadás tesztelve |
+
+## Kötelező újratesztelés a javítások után
+
+1. mind a 2–8. profil minimális érvényes konfigurációja;
+2. minden kötelező funkció egyenkénti hiánya;
+3. minden tiltott funkció egyenkénti hozzáadása;
+4. mérőállás hibás, csökkenő, kirívó és duplikált értéke;
+5. panasz belépés nélkül, hiányos adattal és elektronikus visszaigazolással;
+6. tartozási/kikapcsolási adat elavult és jogosulatlan lekérése;
+7. védendőségi általános tájékoztatás személyes adat nélkül;
+8. védendőségi egyedi ügy különleges adattal;
+9. a kombinált profil összes kételemű és kockázatos háromelemű kombinációja;
+10. a komplex profil teljes moduluniója;
+11. változatlan szabályzat újragenerálása, amely nem hozhat létre új verziót;
+12. egyetlen jogforrás-, modul- vagy tényváltozás, amelynek új verziót kell létrehoznia.
+
+## Hivatalos jogforrások
+
+- [Az Európai Parlament és a Tanács (EU) 2024/1689 rendelete – AI Act, egységes szerkezet 2026-07-27](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX%3A02024R1689-20260727)
+- [Az Európai Parlament és a Tanács (EU) 2016/679 rendelete – GDPR](https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng)
+- [2007. évi LXXXVI. törvény a villamos energiáról](https://njt.jog.gov.hu/jogszabaly/2007-86-00-00)
+- [273/2007. (X. 19.) Korm. rendelet](https://njt.jog.gov.hu/jogszabaly/2007-273-20-22)
+- [1997. évi CLV. törvény a fogyasztóvédelemről](https://njt.jog.gov.hu/jogszabaly/1997-155-00-00)
+
+## Záró minősítés
+
+**A 2–8. profil auditja lezárható, de a szabályzatok készültsége még nem zárható le.**
+
+A technikai kiválasztás és a profilhatárok nagy része megfelelően működik. A szakemberi vizsgálat célja azonban nem az, hogy alapvető adatmodell- és forráshibákat találjon meg, hanem hogy egy technikailag és tartalmilag rendezett tervezetet hagyjon jóvá vagy pontosítson. Emiatt az F-01–F-09 javításokat, az újratesztelést és az új szabályzatverziók elkészítését a hivatalos szakmai/jogi átadás előtt el kell végezni.
+
+Javasolt következő állapot a javítások után: **„technikailag validált szabályzattervezet – szakmai és jogi jóváhagyásra átadható”**.
+
+Ez a jelentés megfelelőségi előaudit; nem helyettesíti a jogi, adatvédelmi, energetikai és információbiztonsági felelősök formális jóváhagyását.
