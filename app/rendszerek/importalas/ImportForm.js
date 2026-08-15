@@ -45,8 +45,8 @@ export default function ImportForm() {
         <span className="import-step-number">01</span>
         <div>
           <h2>Töltsd le és töltsd ki a sablont</h2>
-          <p>A sablon 10 kitöltött mintarendszert tartalmaz. Feltöltéskor az alkalmazás a működési adatokból automatikusan választ szabályzati profilt.</p>
-          <a className="secondary-button import-download" href="/energiaai-rendszerleltar-10-minta.xlsx" download>10 mintarendszer letöltése</a>
+          <p>A sablonban rendszertípust, rendeltetést és tényleges aktív funkciókat adhatsz meg. Használati profil nem szükséges.</p>
+          <a className="secondary-button import-download" href="/energiaai-rendszerimport-sablon.xlsx" download>Általános importsablon letöltése</a>
         </div>
       </section>
 
@@ -69,11 +69,11 @@ export default function ImportForm() {
           </div>
           <div className="import-table-wrap">
             <table>
-              <thead><tr><th>Sor</th><th>Rendszer neve</th><th>Automatikus besorolás</th><th>Állapot</th></tr></thead>
+              <thead><tr><th>Sor</th><th>Rendszer neve</th><th>Rendszertípus</th><th>Aktív funkciók</th><th>Állapot</th></tr></thead>
               <tbody>
                 {preview.rows.map((row) => (
                   <tr key={row.rowNumber} className={row.valid ? "is-valid" : "is-error"}>
-                    <td>{row.rowNumber}</td><td>{row.name || "—"}</td><td>{row.profile_name || "—"}</td>
+                    <td>{row.rowNumber}</td><td>{row.name || "—"}</td><td>{row.system_type_name || "—"}</td><td>{row.capability_codes?.length || 0}</td>
                     <td>{row.valid ? "Rendben" : row.errors.join(" ")}</td>
                   </tr>
                 ))}

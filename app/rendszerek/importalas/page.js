@@ -21,7 +21,7 @@ export default async function ImportPage() {
         <Link className="back-link" href="/rendszerek">← Vissza a mentett rendszerekhez</Link>
         <p className="system-form-eyebrow">{membership.aic_organisations?.name}</p>
         <h1>Több MI-rendszer feltöltése</h1>
-        <p className="system-form-intro">Az XLSX-sablonnal egyszerre több rendszert rögzíthetsz. Az alkalmazás mentés előtt minden sort ellenőriz.</p>
+        <p className="system-form-intro">Az XLSX-sablonnal bármilyen MI-rendszert rögzíthetsz. Az alkalmazás mentés előtt ellenőrzi a rendszertípust, az aktív funkciókat és azok függőségeit.</p>
         <ImportForm />
       </section>
     </main>

@@ -5,6 +5,8 @@ import { createClient } from "../../../lib/supabase/server";
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024;
 const MAX_ROWS = 100;
+const VALID_ROLES = new Set(["provider", "deployer", "importer", "distributor", "authorised_representative"]);
+const VALID_LIFECYCLES = new Set(["planned", "development", "testing", "pilot", "production", "suspended", "retired"]);
 
 function normalize(value) {
   return String(value ?? "").replace(/^\uFEFF/, "").trim().replace(/\s+/g, " ").toLocaleLowerCase("hu-HU");
@@ -25,15 +27,13 @@ function parseCsv(text) {
   let row = [];
   let value = "";
   let quoted = false;
-
   for (let index = 0; index < text.length; index += 1) {
     const char = text[index];
     if (char === '"' && quoted && text[index + 1] === '"') {
       value += '"';
       index += 1;
-    } else if (char === '"') {
-      quoted = !quoted;
-    } else if ((char === "," || char === ";") && !quoted) {
+    } else if (char === '"') quoted = !quoted;
+    else if ((char === "," || char === ";") && !quoted) {
       row.push(value);
       value = "";
     } else if ((char === "\n" || char === "\r") && !quoted) {
@@ -42,83 +42,54 @@ function parseCsv(text) {
       if (row.some((item) => item.trim())) rows.push(row);
       row = [];
       value = "";
-    } else {
-      value += char;
-    }
+    } else value += char;
   }
   row.push(value);
   if (row.some((item) => item.trim())) rows.push(row);
   return rows;
 }
 
-const factColumns = {
-  "számla és fogyasztás": "handles_billing_consumption",
-  "mérőállás fogadása": "accepts_meter_reading",
-  "panaszfelvétel": "accepts_complaints",
-  "tartozás és kikapcsolás": "handles_debt_disconnection",
-  "védendő fogyasztók": "handles_vulnerable_customers",
-  "generatív válasz": "generates_content",
-  "személyes ügyféladat": "processes_personal_data",
-  "emberi átadás": "requires_human_handoff",
-  "joghatású döntés": "makes_legally_effective_decisions",
-};
-
-function parseBoolean(value) {
-  const normalized = normalize(value);
-  if (["igen", "yes", "true", "1"].includes(normalized)) return true;
-  if (["nem", "no", "false", "0"].includes(normalized)) return false;
-  return null;
-}
-
 function findDataRows(rows) {
   const headerIndex = rows.findIndex((row) => {
-    const values = row.map(normalize);
-    return values.includes("rendszer neve") && values.includes("számla és fogyasztás");
+    const values = row.map((cell) => normalize(cellText(cell)));
+    return values.includes("rendszer neve") && values.includes("rendszertípus kód");
   });
-  if (headerIndex < 0) throw new Error("A feltöltött fájl nem az EnergiaAI Kontroll rendszerleltár-sablonja.");
+  if (headerIndex < 0) throw new Error("A feltöltött fájl nem az általános MI-rendszerimport sablonja.");
 
-  const headers = rows[headerIndex].map(normalize);
-  const nameIndex = headers.indexOf("rendszer neve");
+  const headers = rows[headerIndex].map((cell) => normalize(cellText(cell)));
+  const column = (name) => headers.indexOf(name);
+  const requiredHeaders = ["rendszer neve", "rendszertípus kód", "rendeltetés", "aktív funkciókódok"];
+  if (requiredHeaders.some((header) => column(header) < 0)) {
+    throw new Error("A sablon kötelező oszlopai hiányoznak vagy át lettek nevezve.");
+  }
+
   return rows.slice(headerIndex + 1).map((row, offset) => {
-    const facts = {
-      industry_code: "energy",
-      system_type_code: "CUSTOMER_CHATBOT",
-    };
-    const inputErrors = [];
-    for (const [header, factKey] of Object.entries(factColumns)) {
-      const columnIndex = headers.indexOf(header);
-      const parsed = parseBoolean(cellText(row[columnIndex]));
-      if (parsed === null) inputErrors.push(`A „${header}” mező csak Igen vagy Nem lehet.`);
-      else facts[factKey] = parsed;
-    }
+    const capabilityCodes = cellText(row[column("aktív funkciókódok")])
+      .split(/[;,|]/).map((code) => code.trim().toUpperCase()).filter(Boolean);
     return {
       rowNumber: headerIndex + offset + 2,
-      name: cellText(row[nameIndex]).trim().replace(/\s+/g, " "),
-      facts,
-      inputErrors,
+      name: cellText(row[column("rendszer neve")]).trim().replace(/\s+/g, " "),
+      system_type_code: cellText(row[column("rendszertípus kód")]).trim().toUpperCase(),
+      industry_code: cellText(row[column("iparág kód")]).trim().toLowerCase() || "general",
+      intended_purpose: cellText(row[column("rendeltetés")]).trim(),
+      capability_codes: [...new Set(capabilityCodes)].sort(),
+      organisation_role: cellText(row[column("szervezeti szerep")]).trim().toLowerCase() || "deployer",
+      lifecycle_stage: cellText(row[column("életciklus")]).trim().toLowerCase() || "planned",
     };
-  }).filter((row) => row.name || Object.values(row.facts).some((value) => value === true));
+  }).filter((row) => row.name || row.system_type_code || row.intended_purpose || row.capability_codes.length);
 }
 
 async function readRows(file) {
   const extension = file.name.split(".").pop()?.toLowerCase();
-  if (extension === "csv") {
-    return findDataRows(parseCsv(await file.text()));
-  }
+  if (extension === "csv") return findDataRows(parseCsv(await file.text()));
   if (extension !== "xlsx") throw new Error("Csak XLSX vagy CSV fájl tölthető fel.");
-
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.load(Buffer.from(await file.arrayBuffer()));
   const sheet = workbook.getWorksheet("Rendszerleltár") || workbook.worksheets[0];
   if (!sheet) throw new Error("A munkafüzet nem tartalmaz feldolgozható lapot.");
-
   const rows = [];
   sheet.eachRow({ includeEmpty: true }, (sheetRow) => {
-    const values = [];
-    for (let column = 1; column <= Math.max(sheetRow.cellCount, 10); column += 1) {
-      values.push(sheetRow.getCell(column).value);
-    }
-    rows.push(values);
+    rows.push(Array.from({ length: Math.max(sheetRow.cellCount, 7) }, (_, index) => sheetRow.getCell(index + 1).value));
   });
   return findDataRows(rows);
 }
@@ -127,12 +98,8 @@ async function getContext() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("A művelethez bejelentkezés szükséges.");
-
-  const { data: membership } = await supabase
-    .from("aic_organisation_members")
-    .select("organisation_id")
-    .eq("user_id", user.id)
-    .maybeSingle();
+  const { data: membership } = await supabase.from("aic_organisation_members")
+    .select("organisation_id").eq("user_id", user.id).maybeSingle();
   if (!membership) throw new Error("A szervezet nem érhető el.");
   return { supabase, organisationId: membership.organisation_id };
 }
@@ -142,38 +109,69 @@ export async function previewImport(formData) {
     const file = formData.get("file");
     if (!file || typeof file.arrayBuffer !== "function" || file.size === 0) return { error: "Válassz ki egy XLSX vagy CSV fájlt." };
     if (file.size > MAX_FILE_SIZE) return { error: "A fájl legfeljebb 2 MB méretű lehet." };
-
     const sourceRows = await readRows(file);
     if (!sourceRows.length) return { error: "A fájl nem tartalmaz kitöltött adatsort." };
     if (sourceRows.length > MAX_ROWS) return { error: `Egyszerre legfeljebb ${MAX_ROWS} rendszer ellenőrizhető.` };
 
     const { supabase, organisationId } = await getContext();
-    const [{ data: classified, error: classificationError }, { data: systems, error: systemError }] = await Promise.all([
-      supabase.rpc("aic_preview_energy_chatbot_import", { p_rows: sourceRows }),
+    const [typesResult, industriesResult, capabilitiesResult, dependenciesResult, systemsResult] = await Promise.all([
+      supabase.from("aic_system_type_templates").select("type_code,name_hu").eq("active", true),
+      supabase.from("aic_industries").select("code,name_hu").eq("active", true),
+      supabase.from("aic_capabilities").select("code,name_hu,system_type_codes,industry_codes").eq("active", true),
+      supabase.from("aic_capability_dependencies").select("capability_code,requires_capability_code,reason_hu"),
       supabase.from("aic_ai_systems").select("name").eq("organisation_id", organisationId).eq("inventory_status", "active"),
     ]);
-    if (classificationError || systemError) throw new Error("Az automatikus besorolás nem hajtható végre.");
-    const existingNames = new Set((systems || []).map((system) => normalize(system.name)));
+    if ([typesResult, industriesResult, capabilitiesResult, dependenciesResult, systemsResult].some((result) => result.error)) {
+      throw new Error("Az import ellenőrzéséhez szükséges törzsadatok nem tölthetők be.");
+    }
+
+    const types = new Map(typesResult.data.map((item) => [item.type_code, item]));
+    const industries = new Map(industriesResult.data.map((item) => [item.code, item]));
+    const capabilities = new Map(capabilitiesResult.data.map((item) => [item.code, item]));
+    const existingNames = new Set(systemsResult.data.map((item) => normalize(item.name)));
     const fileNames = new Map();
     for (const row of sourceRows) {
       const key = normalize(row.name);
       if (key) fileNames.set(key, (fileNames.get(key) || 0) + 1);
     }
 
-    const rows = (classified || []).map((row) => {
-      const errors = [...(row.inputErrors || []), ...(row.errors || [])];
+    const rows = sourceRows.map((row) => {
+      const errors = [];
       const nameKey = normalize(row.name);
       if (!row.name) errors.push("Hiányzik a rendszer neve.");
+      if (!row.intended_purpose) errors.push("Hiányzik a rendszer rendeltetése.");
+      if (!types.has(row.system_type_code)) errors.push(`Ismeretlen rendszertípus: ${row.system_type_code || "—"}.`);
+      if (!industries.has(row.industry_code)) errors.push(`Ismeretlen iparág: ${row.industry_code || "—"}.`);
+      if (!VALID_ROLES.has(row.organisation_role)) errors.push(`Érvénytelen szervezeti szerep: ${row.organisation_role}.`);
+      if (!VALID_LIFECYCLES.has(row.lifecycle_stage)) errors.push(`Érvénytelen életciklus: ${row.lifecycle_stage}.`);
       if (nameKey && fileNames.get(nameKey) > 1) errors.push("A név többször szerepel a fájlban.");
       if (nameKey && existingNames.has(nameKey)) errors.push("Ilyen nevű rendszer már létezik.");
 
+      for (const code of row.capability_codes) {
+        const capability = capabilities.get(code);
+        if (!capability) {
+          errors.push(`Ismeretlen aktív funkció: ${code}.`);
+          continue;
+        }
+        if (capability.system_type_codes?.length && !capability.system_type_codes.includes(row.system_type_code)) {
+          errors.push(`${code} nem használható a kiválasztott rendszertípusnál.`);
+        }
+        if (capability.industry_codes?.length && !capability.industry_codes.includes(row.industry_code)) {
+          errors.push(`${code} nem használható a kiválasztott iparágnál.`);
+        }
+      }
+      for (const dependency of dependenciesResult.data) {
+        if (row.capability_codes.includes(dependency.capability_code) && !row.capability_codes.includes(dependency.requires_capability_code)) {
+          errors.push(`${dependency.capability_code} mellől hiányzik: ${dependency.requires_capability_code}.`);
+        }
+      }
       return {
         ...row,
+        system_type_name: types.get(row.system_type_code)?.name_hu || "—",
         valid: errors.length === 0,
         errors,
       };
     });
-
     return { rows, validCount: rows.filter((row) => row.valid).length, errorCount: rows.filter((row) => !row.valid).length };
   } catch (error) {
     return { error: error.message || "A fájl feldolgozása nem sikerült." };
@@ -182,15 +180,17 @@ export async function previewImport(formData) {
 
 export async function importSystems(rows, confirmed) {
   try {
-    if (!confirmed) return { error: "Az importálás előtt erősítsd meg a profilfeltételeket." };
+    if (!confirmed) return { error: "Az importálás előtt erősítsd meg, hogy az adatok a rendszerek tényleges működését írják le." };
     if (!Array.isArray(rows) || rows.length === 0 || rows.length > MAX_ROWS) return { error: "Nincs importálható adatsor." };
-    if (rows.some((row) => !row.valid || !row.name || !row.facts)) return { error: "A hibás sorokat az importálás előtt javítani kell." };
-
+    if (rows.some((row) => !row.valid || !row.name || !row.system_type_code || !row.intended_purpose)) {
+      return { error: "A hibás sorokat az importálás előtt javítani kell." };
+    }
     const { supabase, organisationId } = await getContext();
-    const { data, error } = await supabase.rpc("aic_import_ai_systems_from_facts", {
+    const payload = rows.map(({ valid, errors, rowNumber, system_type_name, ...row }) => row);
+    const { data, error } = await supabase.rpc("aic_import_ai_systems", {
       p_organisation_id: organisationId,
-      p_rows: rows.map((row) => ({ name: row.name, facts: row.facts })),
-      p_conditions_confirmed: true,
+      p_rows: payload,
+      p_data_confirmed: true,
     });
     if (error) return { error: error.message || "Az importálás nem sikerült." };
     return { success: true, importedCount: data?.imported_count || rows.length };
