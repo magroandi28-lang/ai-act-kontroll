@@ -45,6 +45,22 @@ export default async function DashboardPage() {
               <small>Korábbi vizsgálatok megnyitása és kezelése.</small>
             </span>
           </Link>
+
+          <Link className="dashboard-action" href="/szabalyzatok">
+            <span className="dashboard-action-icon dashboard-action-icon-list" aria-hidden="true">✓</span>
+            <span>
+              <strong>Jóváhagyásra vár</strong>
+              <small>Szabályzatok beküldése és jóváhagyása.</small>
+            </span>
+          </Link>
+
+          <Link className="dashboard-action" href="/szervezet">
+            <span className="dashboard-action-icon dashboard-action-icon-list" aria-hidden="true">◍</span>
+            <span>
+              <strong>Tagok és szerepkörök</strong>
+              <small>Ki rögzíthet és ki hagyhat jóvá.</small>
+            </span>
+          </Link>
         </div>
 
         <p className="dashboard-disclaimer">
