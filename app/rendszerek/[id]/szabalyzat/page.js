@@ -18,7 +18,7 @@ export default async function PolicyPage({ params, searchParams }) {
 
   const { data: existingPolicy } = await supabase
     .from("aic_generated_policies")
-    .select("id")
+    .select("id,title,executive_summary,document_sections,version,status,created_at,updated_at")
     .eq("ai_system_id", system.id)
     .order("version", { ascending: false })
     .limit(1)
@@ -30,6 +30,7 @@ export default async function PolicyPage({ params, searchParams }) {
 
   let generationError = null;
   let policy = null;
+  let refreshWarning = null;
 
   // Minden megnyitáskor ellenőrzi a forrásmodulokat, de csak valódi
   // tartalmi változás esetén hoz létre új dokumentumverziót.
@@ -40,6 +41,10 @@ export default async function PolicyPage({ params, searchParams }) {
 
   if (generationRequestError) {
     generationError = generationRequestError.message;
+    if (existingPolicy) {
+      policy = existingPolicy;
+      refreshWarning = `A mentett ${existingPolicy.version}. verzió jelenik meg. Új verzió most nem készíthető: ${generationError}`;
+    }
   } else if (generation?.policy_id) {
     const result = await supabase
       .from("aic_generated_policies")
@@ -48,6 +53,10 @@ export default async function PolicyPage({ params, searchParams }) {
       .maybeSingle();
     policy = result.data;
     generationError = result.error?.message || null;
+    if (!policy && existingPolicy) {
+      policy = existingPolicy;
+      refreshWarning = `A mentett ${existingPolicy.version}. verzió jelenik meg, mert a frissített dokumentum betöltése nem sikerült.`;
+    }
   }
 
   if (!policy) {
@@ -59,6 +68,9 @@ export default async function PolicyPage({ params, searchParams }) {
         <section className="policy-generation-error" role="alert">
           <h1>A szabályzat most nem készíthető el</h1>
           <p>{generationError || "Ismeretlen adatbázishiba történt."}</p>
+          <Link className="primary-button" href={`/rendszerek/${system.id}/szerkesztes`}>
+            Rendszer adatainak ellenőrzése
+          </Link>
         </section>
       </main>
     );
@@ -72,6 +84,7 @@ export default async function PolicyPage({ params, searchParams }) {
       policy={policy}
       system={system}
       generatedDate={generatedDate}
+      refreshWarning={refreshWarning}
     />
   );
 }

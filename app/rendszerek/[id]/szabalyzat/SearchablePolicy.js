@@ -24,7 +24,7 @@ function moduleKindLabel(moduleKind) {
   return "Alkalmazási útmutató";
 }
 
-export default function SearchablePolicy({ policy, system, generatedDate }) {
+export default function SearchablePolicy({ policy, system, generatedDate, refreshWarning }) {
   const [query, setQuery] = useState("");
   const sections = Array.isArray(policy.document_sections) ? policy.document_sections : [];
   const normalisedQuery = normalise(query.trim());
@@ -55,6 +55,16 @@ export default function SearchablePolicy({ policy, system, generatedDate }) {
           </button>
         </div>
       </div>
+
+      {refreshWarning && (
+        <section className="policy-refresh-warning" role="status">
+          <div>
+            <strong>A szabályzat megtekinthető, de frissítésre vár</strong>
+            <p>{refreshWarning}</p>
+          </div>
+          <Link href={`/rendszerek/${system.id}/szerkesztes`}>Profil ellenőrzése és megerősítése</Link>
+        </section>
+      )}
 
       {normalisedQuery && (
         <p className="policy-search-status" role="status">
