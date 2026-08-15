@@ -43,6 +43,12 @@ export default function EditSystemForm({ system, compatibleProfiles, configurabl
 
     setSaving(true);
     const result = await updateSystem(system.id, { name: cleanName, lifecycleStage });
+    if (!result?.error && system.usage_profile_code) {
+      const allowed = configurableCapabilities.map((item) => item.code);
+      const selected = selectedCapabilities.filter((code) => allowed.includes(code));
+      const capabilityResult = await updateSystemCapabilities(system.id, selected);
+      if (capabilityResult?.error) result.error = capabilityResult.error;
+    }
     setSaving(false);
     if (result?.error) {
       setMessage(result.error);
@@ -85,22 +91,6 @@ export default function EditSystemForm({ system, compatibleProfiles, configurabl
       return;
     }
     setMessage("A hiányzó használati profilt sikeresen hozzárendeltük.");
-    setMessageType("success");
-    router.refresh();
-  }
-
-  async function handleCapabilitySave() {
-    const allowed = configurableCapabilities.map((item) => item.code);
-    const selected = selectedCapabilities.filter((code) => allowed.includes(code));
-    setSaving(true);
-    const result = await updateSystemCapabilities(system.id, selected);
-    setSaving(false);
-    if (result?.error) {
-      setMessage(result.error);
-      setMessageType("error");
-      return;
-    }
-    setMessage("A rendszer funkcióit sikeresen elmentettük.");
     setMessageType("success");
     router.refresh();
   }
@@ -162,9 +152,6 @@ export default function EditSystemForm({ system, compatibleProfiles, configurabl
               requiredCodes={system.aic_usage_profiles?.capability_codes || []}
               onChange={setSelectedCapabilities}
             />
-            <button className="primary-button" type="button" disabled={saving} onClick={handleCapabilitySave}>
-              {saving ? "Mentés…" : "Funkciók mentése"}
-            </button>
           </section>
         )}
 
