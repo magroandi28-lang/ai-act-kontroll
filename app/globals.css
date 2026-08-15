@@ -1008,3 +1008,27 @@ input:disabled {
   .policy-refresh-warning a { text-align: center; }
   .policy-toc ol { columns: 1; }
 }
+
+/* Jóváhagyási sáv a szabályzatoldalon. A világos, dokumentumszerű palettát követi. */
+.policy-approval { width: min(100%,900px); margin: 0 auto 18px; padding: 20px 22px; border: 1px solid #b6c4cc; border-left: 4px solid #7d8f99; border-radius: 10px; background: #fff; box-shadow: 0 8px 24px rgba(23,34,43,.07); }
+.policy-approval-draft { border-left-color: #7d8f99; }
+.policy-approval-in_review { border-left-color: #d5a25f; background: #fffaf1; }
+.policy-approval-approved { border-left-color: #2e8f6b; background: #f2fbf7; }
+.policy-approval-rejected { border-left-color: var(--orange); background: #fff5f2; }
+.policy-approval-header { display: flex; align-items: baseline; justify-content: space-between; gap: 18px; flex-wrap: wrap; }
+.policy-approval-header .profile-label { margin: 0 0 4px; color: #60737d; font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+.policy-approval-header strong { color: #102a37; font-size: 19px; }
+.policy-approval-meta { margin: 0; color: #5f727c; font-size: 12px; }
+.policy-approval-note { margin: 14px 0 0; padding: 12px 14px; color: #2b3d47; border-radius: 7px; background: rgba(23,55,70,.05); line-height: 1.55; }
+.policy-approval-note strong { color: #102a37; }
+.policy-approval-hash { margin: 12px 0 0; color: #60737d; font-size: 11px; }
+.policy-approval-hash code { padding: 2px 6px; border-radius: 4px; background: rgba(23,55,70,.07); font-size: 11px; }
+.policy-approval-actions { margin-top: 16px; padding-top: 16px; border-top: 1px solid #dde4e8; display: grid; gap: 12px; }
+.policy-approval-actions textarea { width: 100%; padding: 11px 13px; color: #17222b; border: 1px solid #9aabb4; border-radius: 7px; background: #fff; font: inherit; resize: vertical; }
+.policy-approval-actions textarea:focus { outline: 3px solid rgba(0,188,212,.2); border-color: #087d94; }
+.policy-approval-buttons { display: flex; flex-wrap: wrap; gap: 10px; }
+.policy-approval-buttons .primary-button { min-height: 44px; padding: 0 20px; color: #fff; border: 0; border-radius: 7px; background: var(--orange); font-weight: 700; cursor: pointer; }
+.policy-approval-buttons .secondary-button { min-height: 44px; padding: 0 20px; color: #1d3a49; border: 1px solid #9aabb4; border-radius: 7px; background: #fff; font-weight: 700; cursor: pointer; }
+.policy-approval-buttons button:disabled { opacity: .6; cursor: wait; }
+.policy-approval .system-form-message { margin: 12px 0 0; padding: 11px 14px; color: #8a2a10; border-radius: 7px; background: rgba(255,84,45,.08); }
+@media print { .policy-approval-actions { display: none; } .policy-approval { box-shadow: none; break-inside: avoid; } }
