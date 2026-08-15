@@ -803,23 +803,21 @@ input:disabled {
 .system-combobox-empty { margin: 0; padding: 18px 14px; color: #aebbc4; text-align: center; }
 .systems-list { display: grid; gap: 14px; }
 .system-row-wrap { position: relative; }
-.system-row { padding: 24px 24px 64px; display: grid; grid-template-columns: minmax(0,1.5fr) minmax(360px,1fr); gap: 32px; border: 1px solid var(--line); border-radius: 14px; background: rgba(8,29,44,.72); }
+.system-row { padding: 26px 28px; display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 32px; border: 1px solid var(--line); border-radius: 14px; background: rgba(8,29,44,.72); }
 .system-row { position: relative; color: var(--text); text-decoration: none; transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease, background .22s ease; }
 .system-row::before { content: ""; position: absolute; inset: 18px auto 18px 0; width: 2px; opacity: 0; background: linear-gradient(var(--cyan),var(--orange)); transition: opacity .22s ease; }
-.system-row:hover { transform: translateY(-3px); border-color: rgba(0,189,218,.62); background: rgba(9,33,50,.94); box-shadow: 0 18px 40px rgba(0,0,0,.2), 0 0 28px rgba(0,189,218,.05); }
+.system-row:hover { border-color: rgba(0,189,218,.45); background: rgba(9,33,50,.9); }
 .system-row:target { border-color: var(--cyan); background: rgba(9,39,57,.96); box-shadow: 0 0 0 3px rgba(0,189,218,.11),0 18px 42px rgba(0,0,0,.25); }
 .system-row:hover::before { opacity: 1; }
 .system-row-main > span { color: var(--cyan); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
 .system-row h2 { margin: 8px 0; font-size: 23px; }
 .system-row p { margin: 0; color: #aebbc4; font-size: 14px; line-height: 1.55; }
-.system-row-meta { margin: 0; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; align-items: center; }
-.system-row-meta div { min-width: 0; }
-.system-row-meta dt { margin-bottom: 5px; color: #80939e; font-size: 11px; text-transform: uppercase; }
-.system-row-meta dd { margin: 0; color: #e5ebee; font-size: 13px; line-height: 1.4; }
-.system-row-arrow { position: absolute; right: 20px; top: 18px; color: #617984; font-size: 22px; transition: color .22s, transform .22s; }
-.system-row:hover .system-row-arrow { color: var(--cyan); transform: translateX(4px); }
-.system-row-edit { position: absolute; right: 22px; bottom: 16px; z-index: 2; min-height: 34px; padding: 0 12px; display: inline-flex; align-items: center; color: #b8c9d1; border: 1px solid rgba(177,203,216,.28); border-radius: 7px; background: rgba(2,14,25,.48); font-size: 12px; font-weight: 700; text-decoration: none; }
+.system-row-buttons { display: flex; gap: 10px; align-items: center; justify-content: flex-end; }
+.system-row-edit,.system-row-policy { min-height: 42px; padding: 0 15px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 13px; font-weight: 700; text-decoration: none; white-space: nowrap; }
+.system-row-edit { color: #c8d5db; border: 1px solid rgba(177,203,216,.3); background: transparent; }
+.system-row-policy { color: #06141d; border: 1px solid var(--cyan); background: var(--cyan); }
 .system-row-edit:hover { color: #fff; border-color: var(--cyan); }
+.system-row-policy:hover { filter: brightness(1.08); }
 .systems-empty { padding: 52px 30px; text-align: center; border: 1px dashed var(--line); border-radius: 14px; background: rgba(8,29,44,.46); }
 .systems-empty h2 { margin: 0 0 10px; }
 .systems-empty p { margin: 0 0 24px; color: #aebbc4; }
@@ -842,6 +840,11 @@ input:disabled {
 .archive-confirmation { padding: 15px; border-radius: 9px; background: rgba(255,91,55,.1); }
 .archive-confirmation > div { margin-top: 13px; display: flex; gap: 9px; }
 .archive-confirmation .confirm-archive { color: #fff; background: #b83d25; }
+
+@media (max-width: 760px) {
+  .system-row { grid-template-columns: 1fr; gap: 20px; }
+  .system-row-buttons { justify-content: flex-start; flex-wrap: wrap; }
+}
 
 .system-detail-page { min-height: 100vh; padding: 48px 20px 70px; background: radial-gradient(circle at 82% 16%,rgba(0,189,218,.08),transparent 27%),var(--navy-950); }
 .system-detail-shell { width: min(100%,1080px); margin: 0 auto; }
