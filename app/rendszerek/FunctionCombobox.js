@@ -22,7 +22,11 @@ export default function FunctionCombobox({ capabilities, selectedCodes, required
     return capabilities.filter((item) => {
       if (selectedCodes.includes(item.code)) return false;
       if (!normalizedQuery) return true;
-      return `${item.name_hu} ${item.description_hu || ""}`.toLocaleLowerCase("hu-HU").includes(normalizedQuery);
+      // A választási útmutatóban is keresünk, mert gyakran az írja le
+      // a rögzítő szavaival, mit csinál a rendszer.
+      return `${item.name_hu} ${item.description_hu || ""} ${item.selection_hint_hu || ""}`
+        .toLocaleLowerCase("hu-HU")
+        .includes(normalizedQuery);
     });
   }, [capabilities, query, selectedCodes]);
 
@@ -73,6 +77,7 @@ export default function FunctionCombobox({ capabilities, selectedCodes, required
             <button type="button" role="option" aria-selected="false" key={item.code} onClick={() => add(item.code)}>
               <strong>{item.name_hu}</strong>
               <span>{item.description_hu}</span>
+              {item.selection_hint_hu && <em>{item.selection_hint_hu}</em>}
             </button>
           )) : <p>{query ? "Nincs ilyen hozzáadható funkció." : "Minden elérhető funkció hozzá van adva."}</p>}
         </div>
