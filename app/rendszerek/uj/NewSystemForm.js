@@ -15,29 +15,26 @@ const roleOptions = [
   ["authorised_representative", "Meghatalmazott képviselő", "A szervezet EU-n kívüli szolgáltatót képvisel írásbeli megbízás alapján."],
 ];
 
-const lifecycleOptions = [
-  ["planned", "Tervezett"],
-  ["development", "Fejlesztés alatt"],
-  ["testing", "Tesztelés alatt"],
-  ["pilot", "Próbaüzem"],
-  ["production", "Éles üzemben"],
-  ["suspended", "Felfüggesztett"],
-  ["retired", "Kivezetett"],
-];
-
 export default function NewSystemForm({ organisationId, industries, systemTypes, capabilities }) {
   const router = useRouter();
   const [name, setName] = useState("");
   const [systemTypeId, setSystemTypeId] = useState("");
   const [industryCode, setIndustryCode] = useState("general");
-  const [intendedPurpose, setIntendedPurpose] = useState("");
-  const [organisationRole, setOrganisationRole] = useState("");
-  const [lifecycleStage, setLifecycleStage] = useState("");
   const [selectedCapabilities, setSelectedCapabilities] = useState([]);
+  const [organisationRole, setOrganisationRole] = useState("");
+  const [providerName, setProviderName] = useState("");
+  const [intendedPurpose, setIntendedPurpose] = useState("");
   const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
 
+  // Az életciklus-állapot egyetlen szabálymodult sem befolyásol, ezért nem
+  // kérdezzük a felvitelnél. A szerkesztőoldalon módosítható.
+  const lifecycleStage = "planned";
+
   const selectedRole = roleOptions.find(([value]) => value === organisationRole);
+
+  // Szolgáltatói szerepkörnél a szervezet maga a szolgáltató, ezért nincs kitől.
+  const providerRelevant = organisationRole !== "" && organisationRole !== "provider";
 
   const selectedType = systemTypes.find((type) => type.id === systemTypeId);
   const compatibleCapabilities = useMemo(() => capabilities.filter((capability) => {
@@ -61,11 +58,6 @@ export default function NewSystemForm({ organisationId, industries, systemTypes,
       return;
     }
 
-    if (!lifecycleStage) {
-      setMessage("Válaszd ki a rendszer életciklus-állapotát.");
-      return;
-    }
-
     setSaving(true);
     const supabase = createClient();
     const { data: systemId, error } = await supabase.rpc("aic_create_ai_system", {
@@ -75,7 +67,7 @@ export default function NewSystemForm({ organisationId, industries, systemTypes,
       p_industry_code: industryCode,
       p_intended_purpose: intendedPurpose.trim(),
       p_description: null,
-      p_provider_name: null,
+      p_provider_name: providerRelevant ? (providerName.trim() || null) : null,
       p_organisation_role: organisationRole,
       p_deployment_context: null,
       p_lifecycle_stage: lifecycleStage,
@@ -134,15 +126,31 @@ export default function NewSystemForm({ organisationId, industries, systemTypes,
         </div>
       </div>
 
+      {selectedType && (
+        <section className="profile-confirmation">
+          <p className="profile-label">04 · Tényleges működés</p>
+          <h2>Eszköz funkciók</h2>
+          <p>Jelöld be, amit a rendszer ténylegesen csinál. Ezekből dől el, mely jogszabályok vonatkoznak rá.</p>
+          <div className="profile-functions">
+            <FunctionCombobox
+              capabilities={compatibleCapabilities}
+              selectedCodes={selectedCapabilities}
+              requiredCodes={[]}
+              onChange={setSelectedCapabilities}
+            />
+          </div>
+        </section>
+      )}
+
       <div className="quick-form-step">
-        <span>04</span>
+        <span>05</span>
         <div>
           <label htmlFor="intendedPurpose">Mi a rendszer tényleges rendeltetése?</label>
           <textarea
             id="intendedPurpose"
             value={intendedPurpose}
             onChange={(event) => setIntendedPurpose(event.target.value)}
-            placeholder="Például: beérkező dokumentumok osztályozása és az ügyintéző támogatása"
+            placeholder="Például: beérkező dokumentumok osztályozása és az ügyintéző támogatása. Ez a mondat szó szerint bekerül a szabályzatba."
             disabled={saving}
             rows={4}
           />
@@ -150,7 +158,7 @@ export default function NewSystemForm({ organisationId, industries, systemTypes,
       </div>
 
       <div className="quick-form-step">
-        <span>05</span>
+        <span>06</span>
         <div>
           <label htmlFor="organisationRole">Milyen szerepben használja a szervezet?</label>
           <select id="organisationRole" value={organisationRole} disabled={saving} onChange={(event) => setOrganisationRole(event.target.value)}>
@@ -162,31 +170,25 @@ export default function NewSystemForm({ organisationId, industries, systemTypes,
         </div>
       </div>
 
-      <div className="quick-form-step">
-        <span>06</span>
-        <div>
-          <label htmlFor="lifecycleStage">Hol tart a rendszer az életciklusában?</label>
-          <select id="lifecycleStage" value={lifecycleStage} disabled={saving} onChange={(event) => setLifecycleStage(event.target.value)}>
-            <option value="" disabled>Válassz életciklus-állapotot</option>
-            {lifecycleOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-          </select>
-        </div>
-      </div>
-
-      {selectedType && (
-        <section className="profile-confirmation">
-          <p className="profile-label">07 · Tényleges működés</p>
-          <h2>Aktív funkciók</h2>
-          <p>Csak azt válaszd ki, amit ez a konkrét rendszer valóban végez. A szabályzat az aktív funkciókat és az ellenőrzött alkalmazási adatokat követi.</p>
-          <div className="profile-functions">
-            <FunctionCombobox
-              capabilities={compatibleCapabilities}
-              selectedCodes={selectedCapabilities}
-              requiredCodes={[]}
-              onChange={setSelectedCapabilities}
+      {providerRelevant && (
+        <div className="quick-form-step">
+          <span>07</span>
+          <div>
+            <label htmlFor="providerName">Ki a rendszer szolgáltatója?</label>
+            <input
+              id="providerName"
+              value={providerName}
+              onChange={(event) => setProviderName(event.target.value)}
+              placeholder="Például: OpenAI, Microsoft, vagy a beszállító cég neve"
+              disabled={saving}
+              maxLength={160}
             />
+            <p className="quick-form-note">
+              A szolgáltató az, aki a rendszert forgalomba hozta vagy üzembe helyezte.
+              Nem kötelező — ha nem tudod, üresen hagyható.
+            </p>
           </div>
-        </section>
+        </div>
       )}
 
       {message && <p className="system-form-message" role="alert">{message}</p>}
