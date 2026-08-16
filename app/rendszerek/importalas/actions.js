@@ -16,10 +16,23 @@ const REQUIRED_HEADERS = [
   "rendszertípus kód",
   "iparág kód",
   "rendeltetés",
-  "aktív funkciókódok",
+  "eszköz funkciók kódjai",
   "szervezeti szerep",
   "életciklus",
+  "eu-ban használják",
+  "mi-használat egyértelmű",
+  "nincs tiltott gyakorlat",
+  "szabályozott termékbe épül",
 ];
+
+// A nyilatkozatoszlopok Igen/Nem értéket vesznek fel. Üres cellát nem
+// tekintünk válasznak: az importáló kifejezetten nyilatkozzon.
+function igenNem(ertek) {
+  const tisztitott = normalize(ertek);
+  if (tisztitott === "igen" || tisztitott === "i" || tisztitott === "yes") return true;
+  if (tisztitott === "nem" || tisztitott === "n" || tisztitott === "no") return false;
+  return null;
+}
 
 function normalize(value) {
   return String(value ?? "").replace(/^﻿/, "").trim().replace(/\s+/g, " ").toLocaleLowerCase("hu-HU");
@@ -81,7 +94,7 @@ function findDataRows(rows) {
   }
 
   return rows.slice(headerIndex + 1).map((row, offset) => {
-    const capabilityCodes = cellText(row[column("aktív funkciókódok")])
+    const capabilityCodes = cellText(row[column("eszköz funkciók kódjai")])
       .split(/[;,|]/).map((code) => code.trim().toUpperCase()).filter(Boolean);
     return {
       rowNumber: headerIndex + offset + 2,
@@ -92,6 +105,10 @@ function findDataRows(rows) {
       capability_codes: [...new Set(capabilityCodes)].sort(),
       organisation_role: cellText(row[column("szervezeti szerep")]).trim().toLowerCase(),
       lifecycle_stage: cellText(row[column("életciklus")]).trim().toLowerCase(),
+      eu_hasznalat: igenNem(cellText(row[column("eu-ban használják")])),
+      mi_egyertelmu: igenNem(cellText(row[column("mi-használat egyértelmű")])),
+      nincs_tiltott_gyakorlat: igenNem(cellText(row[column("nincs tiltott gyakorlat")])),
+      szabalyozott_termek: igenNem(cellText(row[column("szabályozott termékbe épül")])),
     };
   }).filter((row) => row.name || row.system_type_code || row.intended_purpose || row.capability_codes.length);
 }
@@ -106,7 +123,7 @@ async function readRows(file) {
   if (!sheet) throw new Error("A munkafüzet nem tartalmaz feldolgozható lapot.");
   const rows = [];
   sheet.eachRow({ includeEmpty: true }, (sheetRow) => {
-    rows.push(Array.from({ length: Math.max(sheetRow.cellCount, 7) }, (_, index) => sheetRow.getCell(index + 1).value));
+    rows.push(Array.from({ length: Math.max(sheetRow.cellCount, 11) }, (_, index) => sheetRow.getCell(index + 1).value));
   });
   return findDataRows(rows);
 }
@@ -188,6 +205,11 @@ function validateRows(sourceRows, master) {
     if (nameKey && fileNames.get(nameKey) > 1) errors.push("A név többször szerepel a fájlban.");
     if (nameKey && master.existingNames.has(nameKey)) errors.push("Ilyen nevű rendszer már létezik.");
 
+    if (row.eu_hasznalat === null) errors.push("Az „EU-ban használják” oszlop Igen vagy Nem lehet.");
+    if (row.mi_egyertelmu === null) errors.push("A „MI-használat egyértelmű” oszlop Igen vagy Nem lehet.");
+    if (row.nincs_tiltott_gyakorlat === null) errors.push("A „Nincs tiltott gyakorlat” oszlop Igen vagy Nem lehet.");
+    if (row.szabalyozott_termek === null) errors.push("A „Szabályozott termékbe épül” oszlop Igen vagy Nem lehet.");
+
     for (const code of row.capability_codes) {
       const capability = master.capabilities.get(code);
       if (!capability) {
@@ -230,6 +252,12 @@ function sanitizeRow(row) {
     capability_codes: [...new Set(capabilityCodes.map((code) => String(code).trim().toUpperCase()).filter(Boolean))].sort(),
     organisation_role: String(row?.organisation_role ?? "").trim().toLowerCase(),
     lifecycle_stage: String(row?.lifecycle_stage ?? "").trim().toLowerCase(),
+    eu_hasznalat: typeof row?.eu_hasznalat === "boolean" ? row.eu_hasznalat : null,
+    mi_egyertelmu: typeof row?.mi_egyertelmu === "boolean" ? row.mi_egyertelmu : null,
+    nincs_tiltott_gyakorlat:
+      typeof row?.nincs_tiltott_gyakorlat === "boolean" ? row.nincs_tiltott_gyakorlat : null,
+    szabalyozott_termek:
+      typeof row?.szabalyozott_termek === "boolean" ? row.szabalyozott_termek : null,
   };
 }
 
