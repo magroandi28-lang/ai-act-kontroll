@@ -24,6 +24,12 @@ export default function NewSystemForm({ organisationId, industries, systemTypes,
   const [organisationRole, setOrganisationRole] = useState("");
   const [providerName, setProviderName] = useState("");
   const [intendedPurpose, setIntendedPurpose] = useState("");
+  // A nyilatkozatok alapertelmezese a szokasos eset. Aki kiveszi valamelyiket,
+  // annak a szabalyzata is mas lesz.
+  const [euHasznalat, setEuHasznalat] = useState(true);
+  const [miEgyertelmu, setMiEgyertelmu] = useState(true);
+  const [nincsTiltottGyakorlat, setNincsTiltottGyakorlat] = useState(true);
+  const [szabalyozottTermek, setSzabalyozottTermek] = useState(false);
   const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -72,6 +78,10 @@ export default function NewSystemForm({ organisationId, industries, systemTypes,
       p_deployment_context: null,
       p_lifecycle_stage: lifecycleStage,
       p_capability_codes: selectedCapabilities,
+      p_eu_hasznalat: euHasznalat,
+      p_mi_egyertelmu: miEgyertelmu,
+      p_nincs_tiltott_gyakorlat: nincsTiltottGyakorlat,
+      p_szabalyozott_termekbe_epul: organisationRole === "provider" ? szabalyozottTermek : false,
     });
     setSaving(false);
 
@@ -84,7 +94,7 @@ export default function NewSystemForm({ organisationId, industries, systemTypes,
       return;
     }
 
-    router.push(`/rendszerek/${systemId}/vizsgalat`);
+    router.push(`/rendszerek/${systemId}`);
     router.refresh();
   }
 
@@ -191,9 +201,53 @@ export default function NewSystemForm({ organisationId, industries, systemTypes,
         </div>
       )}
 
+      <section className="declaration-block">
+        <h2>Nyilatkozat</h2>
+        <p>A szokásos eset be van jelölve. Ha valamelyik nem igaz a rendszeretekre, vedd ki — a szabályzat ehhez igazodik.</p>
+
+        <label className="declaration-row">
+          <input type="checkbox" checked={euHasznalat} disabled={saving}
+            onChange={(event) => setEuHasznalat(event.target.checked)} />
+          <span>A rendszert az Európai Unióban használjuk</span>
+        </label>
+
+        <label className="declaration-row">
+          <input type="checkbox" checked={miEgyertelmu} disabled={saving}
+            onChange={(event) => setMiEgyertelmu(event.target.checked)} />
+          <span>A felhasználó számára egyértelmű, hogy MI-rendszerrel kommunikál</span>
+        </label>
+
+        <label className="declaration-row">
+          <input type="checkbox" checked={nincsTiltottGyakorlat} disabled={saving}
+            onChange={(event) => setNincsTiltottGyakorlat(event.target.checked)} />
+          <span>
+            A rendszer nem alkalmaz manipulatív technikát, nem használja ki személyek
+            sérülékenységét, és nem végez társadalmi pontozást
+          </span>
+        </label>
+
+        {!nincsTiltottGyakorlat && (
+          <p className="declaration-warning" role="alert">
+            Ha ezt nem tudod megerősíteni, a szabályzat élére figyelmeztetés kerül:
+            a rendszer tiltott gyakorlatot valósíthat meg, ezért azonnali jogi vizsgálat szükséges.
+          </p>
+        )}
+
+        {organisationRole === "provider" && (
+          <label className="declaration-row">
+            <input type="checkbox" checked={szabalyozottTermek} disabled={saving}
+              onChange={(event) => setSzabalyozottTermek(event.target.checked)} />
+            <span>
+              A rendszer beépül egy szabályozott termékbe — orvostechnikai eszköz, gép, jármű, játék
+              <em>Ilyenkor a rendszer automatikusan magas kockázatúnak minősül.</em>
+            </span>
+          </label>
+        )}
+      </section>
+
       {message && <p className="system-form-message" role="alert">{message}</p>}
       <button className="primary-button" type="submit" disabled={saving || !selectedType}>
-        {saving ? "Mentés…" : "Mentés és adatok ellenőrzése"}
+        {saving ? "Mentés…" : "Rendszer mentése"}
       </button>
     </form>
   );
