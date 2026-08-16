@@ -9,7 +9,7 @@ export default async function SystemRoute({ params }) {
 
   const { data: system } = await supabase
     .from("aic_ai_systems")
-    .select("id,name,intended_purpose,aic_system_type_templates(name_hu),aic_ai_system_capabilities(capability_code),aic_system_facts(completion_status)")
+    .select("id,name,intended_purpose,aic_system_type_templates(name_hu),aic_ai_system_capabilities(capability_code)")
     .eq("id", params.id)
     .eq("inventory_status", "active")
     .maybeSingle();
@@ -23,8 +23,6 @@ export default async function SystemRoute({ params }) {
     .limit(1)
     .maybeSingle();
 
-  const assessmentComplete = system.aic_system_facts?.completion_status === "complete";
-
   return (
     <main className="system-form-page">
       <section className="system-form-shell edit-system-shell">
@@ -33,14 +31,7 @@ export default async function SystemRoute({ params }) {
         <h1>{system.name}</h1>
         <p className="system-form-intro">{system.intended_purpose}</p>
 
-        {!assessmentComplete ? (
-          <section className="profile-confirmation">
-            <h2>A szabályzat még nem készíthető el</h2>
-            <p>Előbb ellenőrizd a rendszer alkalmazási adatait. A szabálymotor ezek és az aktív funkciók alapján dolgozik.</p>
-            <Link className="primary-button" href={`/rendszerek/${system.id}/vizsgalat`}>Alkalmazási adatok ellenőrzése</Link>
-          </section>
-        ) : (
-          <section className="profile-confirmation">
+        <section className="profile-confirmation">
             <p className="profile-label">{system.aic_system_type_templates?.name_hu}</p>
             <h2>{latestPolicy ? "Megnyitod a szabályzatot?" : "Elkészíted a szabályzatot?"}</h2>
             <p>{latestPolicy
@@ -49,8 +40,7 @@ export default async function SystemRoute({ params }) {
             <Link className="primary-button" href={latestPolicy ? `/rendszerek/${system.id}/szabalyzat` : `/rendszerek/${system.id}/szabalyzat?inditas=1`}>
               {latestPolicy ? "Szabályzat megnyitása" : "Szabályzat elkészítése"}
             </Link>
-          </section>
-        )}
+        </section>
       </section>
     </main>
   );
