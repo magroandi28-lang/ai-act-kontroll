@@ -60,33 +60,38 @@ async function build() {
   workbook.creator = "EnergiaAI Kontroll";
   const systems = workbook.addWorksheet("Rendszerleltár", { views: [{ state: "frozen", ySplit: 4 }] });
   const types = workbook.addWorksheet("Rendszertípusok");
-  const functions = workbook.addWorksheet("Aktív funkciók");
+  const functions = workbook.addWorksheet("Eszköz funkciók");
   const values = workbook.addWorksheet("Engedélyezett értékek");
 
-  systems.columns = [{ width: 32 }, { width: 36 }, { width: 16 }, { width: 58 }, { width: 58 }, { width: 24 }, { width: 20 }];
-  systems.mergeCells("A1:G1");
+  systems.columns = [{ width: 32 }, { width: 36 }, { width: 16 }, { width: 58 }, { width: 58 }, { width: 24 }, { width: 20 },
+    { width: 20 }, { width: 26 }, { width: 26 }, { width: 26 }];
+  systems.mergeCells("A1:K1");
   systems.getCell("A1").value = "EnergiaAI Kontroll – általános MI-rendszerimport";
   systems.getCell("A1").font = { bold: true, size: 18, color: { argb: "FFFFFFFF" } };
   systems.getCell("A1").fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF061B2A" } };
   systems.getRow(1).height = 34;
-  systems.mergeCells("A2:G2");
-  systems.getCell("A2").value = "Egy sor egy MI-rendszer. Az aktív funkciókódokat | jellel válaszd el. A fejlécet ne módosítsd; használati profil nem szükséges.";
+  systems.mergeCells("A2:K2");
+  systems.getCell("A2").value = "Egy sor egy MI-rendszer. Az eszköz funkciók kódjait | jellel válaszd el. A fejlécet ne módosítsd. Az utolsó négy oszlop nyilatkozat: a szokásos eset Igen, a szabályozott termék Nem.";
   systems.getCell("A2").font = { color: { argb: "FF4F6570" }, italic: true };
   systems.getCell("A2").alignment = { wrapText: true };
   systems.getRow(2).height = 32;
-  systems.getRow(4).values = ["Rendszer neve", "Rendszertípus kód", "Iparág kód", "Rendeltetés", "Aktív funkciókódok", "Szervezeti szerep", "Életciklus"];
+  systems.getRow(4).values = [
+    "Rendszer neve", "Rendszertípus kód", "Iparág kód", "Rendeltetés", "Eszköz funkciók kódjai",
+    "Szervezeti szerep", "Életciklus",
+    "EU-ban használják", "MI-használat egyértelmű", "Nincs tiltott gyakorlat", "Szabályozott termékbe épül",
+  ];
   systems.getRow(4).eachCell((cell) => Object.assign(cell, headerStyle));
   systems.getRow(4).height = 38;
 
   const examples = [
-    ["Belső tudásasszisztens", "INTERNAL_ASSISTANT", "general", "Belső szabályzatok keresése és összefoglalása a munkatársaknak.", "GENERATIVE_RESPONSES|NATURAL_PERSON_INTERACTION|CONTENT_GENERATION", "deployer", "pilot"],
-    ["Számlafeldolgozó MI", "DOCUMENT_PROCESSING_AI", "general", "Beérkező számlák adatainak kinyerése és ellenőrzésre előkészítése.", "DOCUMENT_PROCESSING|PERSONAL_DATA_PROCESSING", "deployer", "production"],
-    ["Fogyasztás-előrejelző", "ENERGY_FORECAST_AI", "energy", "Másnapi villamosenergia-fogyasztás előrejelzése üzemirányítási támogatásra.", "FORECASTING", "provider", "testing"],
+    ["Belső tudásasszisztens", "INTERNAL_ASSISTANT", "general", "Belső szabályzatok keresése és összefoglalása a munkatársaknak.", "GENERATIVE_RESPONSES|NATURAL_PERSON_INTERACTION|CONTENT_GENERATION", "deployer", "pilot", "Igen", "Igen", "Igen", "Nem"],
+    ["Számlafeldolgozó MI", "DOCUMENT_PROCESSING_AI", "general", "Beérkező számlák adatainak kinyerése és ellenőrzésre előkészítése.", "DOCUMENT_PROCESSING|PERSONAL_DATA_PROCESSING", "deployer", "production", "Igen", "Igen", "Igen", "Nem"],
+    ["Fogyasztás-előrejelző", "ENERGY_FORECAST_AI", "energy", "Másnapi villamosenergia-fogyasztás előrejelzése üzemirányítási támogatásra.", "FORECASTING", "provider", "testing", "Igen", "Igen", "Igen", "Nem"],
   ];
   systems.addRows(examples);
   for (let row = 5; row <= 104; row += 1) {
     systems.getRow(row).height = 34;
-    for (let column = 1; column <= 7; column += 1) {
+    for (let column = 1; column <= 11; column += 1) {
       const cell = systems.getCell(row, column);
       cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: row % 2 ? "FFF4F8FA" : "FFFFFFFF" } };
       cell.border = { bottom: { style: "thin", color: { argb: "FFDDE7EB" } } };
@@ -96,8 +101,12 @@ async function build() {
     systems.getCell(row, 3).dataValidation = { type: "list", allowBlank: false, formulae: ['"general,energy"'] };
     systems.getCell(row, 6).dataValidation = { type: "list", allowBlank: false, formulae: ['"deployer,provider,importer,distributor,authorised_representative"'] };
     systems.getCell(row, 7).dataValidation = { type: "list", allowBlank: false, formulae: ['"planned,development,testing,pilot,production,suspended,retired"'] };
+    // A négy nyilatkozat Igen/Nem választással, hogy ne lehessen elgépelni.
+    for (let column = 8; column <= 11; column += 1) {
+      systems.getCell(row, column).dataValidation = { type: "list", allowBlank: false, formulae: ['"Igen,Nem"'] };
+    }
   }
-  systems.autoFilter = "A4:G104";
+  systems.autoFilter = "A4:K104";
 
   types.addRow(["Rendszertípus kód", "Megnevezés"]);
   types.addRows(systemTypes);
@@ -110,6 +119,10 @@ async function build() {
     ["Iparág kód", "general | energy"],
     ["Szervezeti szerep", "deployer | provider | importer | distributor | authorised_representative"],
     ["Életciklus", "planned | development | testing | pilot | production | suspended | retired"],
+    ["EU-ban használják", "Igen | Nem — a szokásos eset Igen"],
+    ["MI-használat egyértelmű", "Igen | Nem — egyértelmű-e a felhasználónak, hogy MI-vel kommunikál"],
+    ["Nincs tiltott gyakorlat", "Igen | Nem — Nem esetén figyelmeztetés kerül a szabályzatba"],
+    ["Szabályozott termékbe épül", "Igen | Nem — orvostechnikai eszköz, gép, jármű, játék. Igen esetén magas kockázatú."],
   ]);
   styleCatalog(values, [30, 90]);
   workbook.definedNames.add("Rendszertípusok!$A$2:$A$13", "RendszerTipusKodok");
