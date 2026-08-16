@@ -1,78 +1,57 @@
-"use server";
-
-import { revalidatePath } from "next/cache";
+import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
 import { createClient } from "../../../../lib/supabase/server";
+import EditSystemForm from "./EditSystemForm";
 
-export async function updateSystem(systemId, values) {
+export default async function EditSystemPage({ params }) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: "A módosításhoz bejelentkezés szükséges." };
+  if (!user) redirect("/");
 
-  const { error } = await supabase.rpc("aic_update_ai_system_basics", {
-    p_system_id: systemId,
-    p_name: values?.name,
-    p_lifecycle_stage: values?.lifecycleStage,
+  const { data: system } = await supabase
+    .from("aic_ai_systems")
+    .select("id,name,intended_purpose,lifecycle_stage,inventory_status,industry_code,system_type_id,organisation_role,aic_organisations(industry),aic_system_type_templates(type_code,name_hu),aic_ai_system_capabilities(capability_code),aic_system_facts(facts)")
+    .eq("id", params.id)
+    .eq("inventory_status", "active")
+    .maybeSingle();
+
+  if (!system) notFound();
+
+  const industryCode = system.industry_code || system.aic_organisations?.industry;
+  const typeCode = system.aic_system_type_templates?.type_code;
+  const { data: allCapabilities } = await supabase
+    .from("aic_capabilities")
+    .select("code,name_hu,description_hu,selection_hint_hu,system_type_codes,industry_codes,sort_order")
+    .eq("active", true)
+    .order("sort_order");
+  const configurableCapabilities = (allCapabilities || []).filter((capability) => {
+    const typeMatches = !capability.system_type_codes?.length || capability.system_type_codes.includes(typeCode);
+    const industryMatches = !capability.industry_codes?.length || capability.industry_codes.includes(industryCode);
+    return typeMatches && industryMatches;
   });
 
-  if (error) return { error: error.message || "A módosítás nem sikerült." };
-  revalidatePath("/rendszerek");
-  revalidatePath(`/rendszerek/${systemId}/szerkesztes`);
-  revalidatePath(`/rendszerek/${systemId}/szabalyzat`);
-  return { success: true };
-}
+  // A tarolt tenyekbol olvassuk vissza a nyilatkozatok allasat.
+  const facts = system.aic_system_facts?.facts || {};
+  const declarations = {
+    euHasznalat: facts.eu_scope_connection_exists !== false,
+    miEgyertelmu: facts.ai_interaction_obvious !== false,
+    nincsTiltottGyakorlat: facts.article_5_prohibition_relevant !== true,
+    szabalyozottTermek: facts.annex_i_product_or_safety_component === true,
+  };
 
-export async function archiveSystem(systemId) {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: "A törléshez bejelentkezés szükséges." };
-
-  const { error } = await supabase.rpc("aic_archive_ai_system", {
-    p_system_id: systemId,
-  });
-
-  if (error) return { error: error.message || "A rendszer törlése nem sikerült." };
-  revalidatePath("/rendszerek");
-  return { success: true };
-}
-
-export async function assignMissingProfile(systemId, profileCode, conditionsConfirmed) {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: "A profil pótlásához bejelentkezés szükséges." };
-
-  const { error } = await supabase.rpc("aic_assign_missing_usage_profile", {
-    p_system_id: systemId,
-    p_profile_code: profileCode,
-    p_conditions_confirmed: conditionsConfirmed,
-    p_eu_hasznalat: declarations?.euHasznalat ?? null,
-    p_mi_egyertelmu: declarations?.miEgyertelmu ?? null,
-    p_nincs_tiltott_gyakorlat: declarations?.nincsTiltottGyakorlat ?? null,
-    p_szabalyozott_termekbe_epul: declarations?.szabalyozottTermek ?? null,
-  });
-  if (error) return { error: error.message || "A profil hozzárendelése nem sikerült." };
-  revalidatePath("/rendszerek");
-  revalidatePath(`/rendszerek/${systemId}/szerkesztes`);
-  revalidatePath(`/rendszerek/${systemId}/szabalyzat`);
-  return { success: true };
-}
-
-export async function updateSystemCapabilities(systemId, capabilityCodes, conditionsConfirmed, declarations = null) {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: "A funkciók módosításához bejelentkezés szükséges." };
-
-  const { error } = await supabase.rpc("aic_update_system_capabilities", {
-    p_system_id: systemId,
-    p_capability_codes: capabilityCodes,
-    p_conditions_confirmed: conditionsConfirmed,
-    p_eu_hasznalat: declarations?.euHasznalat ?? null,
-    p_mi_egyertelmu: declarations?.miEgyertelmu ?? null,
-    p_nincs_tiltott_gyakorlat: declarations?.nincsTiltottGyakorlat ?? null,
-    p_szabalyozott_termekbe_epul: declarations?.szabalyozottTermek ?? null,
-  });
-  if (error) return { error: error.message || "A funkciók mentése nem sikerült." };
-  revalidatePath("/rendszerek");
-  revalidatePath(`/rendszerek/${systemId}/szerkesztes`);
-  revalidatePath(`/rendszerek/${systemId}/szabalyzat`);
-  return { success: true };
+  return (
+    <main className="system-form-page">
+      <section className="system-form-shell edit-system-shell">
+        <Link className="back-link" href={`/rendszerek?rendszer=${system.id}`}>← Vissza ehhez a rendszerhez</Link>
+        <p className="system-form-eyebrow">RENDSZERADATOK JAVÍTÁSA</p>
+        <h1>{system.name}</h1>
+        <p className="system-form-intro">A szabályzatot a rendszer tényleges aktív funkciói és az ellenőrzött alkalmazási adatai vezérlik.</p>
+        <EditSystemForm
+          system={system}
+          configurableCapabilities={configurableCapabilities}
+          declarations={declarations}
+        />
+      </section>
+    </main>
+  );
 }
