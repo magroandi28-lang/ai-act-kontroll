@@ -1059,3 +1059,10 @@ input:disabled {
 .queue-badge-rejected { color: #ffd1c5; border: 1px solid rgba(255,84,45,.35); background: rgba(255,84,45,.09); }
 .queue-empty { padding: 34px; color: #aebbc4; text-align: center; border: 1px dashed var(--line); border-radius: 13px; }
 @media (max-width: 640px) { .queue-card { flex-direction: column; align-items: stretch; } .queue-card .primary-button,.queue-card .secondary-button { justify-content: center; } }
+
+/* Felülvizsgálati állapot a szabályzatban. */
+.policy-review-notice { margin: 34px 0 0; padding: 16px 18px; border: 1px solid #d5a25f; border-left: 4px solid #d5a25f; border-radius: 0 9px 9px 0; background: #fff8ec; }
+.policy-review-notice strong { display: block; margin-bottom: 5px; color: #5d3b16; }
+.policy-review-notice p { margin: 0; color: #6b4a24; font-size: 13px; line-height: 1.55; }
+.policy-kind-pending { margin-left: 6px; color: #7a4a11; background: #fdecd0; }
+@media print { .policy-review-notice { break-inside: avoid; } }
