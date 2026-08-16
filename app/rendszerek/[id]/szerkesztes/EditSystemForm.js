@@ -15,7 +15,7 @@ const lifecycleOptions = [
   ["retired", "Kivezetett"],
 ];
 
-export default function EditSystemForm({ system, configurableCapabilities }) {
+export default function EditSystemForm({ system, configurableCapabilities, declarations }) {
   const router = useRouter();
   const [name, setName] = useState(system.name);
   const [lifecycleStage, setLifecycleStage] = useState(system.lifecycle_stage);
@@ -23,6 +23,15 @@ export default function EditSystemForm({ system, configurableCapabilities }) {
   const [messageType, setMessageType] = useState("");
   const [saving, setSaving] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [euHasznalat, setEuHasznalat] = useState(declarations?.euHasznalat ?? true);
+  const [miEgyertelmu, setMiEgyertelmu] = useState(declarations?.miEgyertelmu ?? true);
+  const [nincsTiltottGyakorlat, setNincsTiltottGyakorlat] = useState(
+    declarations?.nincsTiltottGyakorlat ?? true
+  );
+  const [szabalyozottTermek, setSzabalyozottTermek] = useState(
+    declarations?.szabalyozottTermek ?? false
+  );
+  const szolgaltato = system.organisation_role === "provider";
   const [selectedCapabilities, setSelectedCapabilities] = useState(
     (system.aic_ai_system_capabilities || []).map((item) => item.capability_code)
   );
@@ -42,10 +51,16 @@ export default function EditSystemForm({ system, configurableCapabilities }) {
     }
     setSaving(true);
     const result = await updateSystem(system.id, { name: cleanName, lifecycleStage });
-    if (!result?.error && capabilitiesChanged) {
+    if (!result?.error) {
+      // A funkciókat és a nyilatkozatokat együtt mentjük, mert egy tényhalmazt alkotnak.
       const allowed = configurableCapabilities.map((item) => item.code);
       const selected = selectedCapabilities.filter((code) => allowed.includes(code));
-      const capabilityResult = await updateSystemCapabilities(system.id, selected, true);
+      const capabilityResult = await updateSystemCapabilities(system.id, selected, true, {
+        euHasznalat,
+        miEgyertelmu,
+        nincsTiltottGyakorlat,
+        szabalyozottTermek: szolgaltato ? szabalyozottTermek : false,
+      });
       if (capabilityResult?.error) result.error = capabilityResult.error;
     }
     setSaving(false);
@@ -98,8 +113,50 @@ export default function EditSystemForm({ system, configurableCapabilities }) {
             requiredCodes={[]}
             onChange={setSelectedCapabilities}
           />
-          <p className="quick-form-note">A kockázati és alkalmazási adatokat külön ellenőrizheted.</p>
-          <a className="secondary-button" href={`/rendszerek/${system.id}/vizsgalat`}>Alkalmazási adatok ellenőrzése</a>
+        </section>
+
+        <section className="declaration-block">
+          <h2>Nyilatkozat</h2>
+          <p>Ha valamelyik nem igaz a rendszeretekre, vedd ki — a szabályzat ehhez igazodik.</p>
+
+          <label className="declaration-row">
+            <input type="checkbox" checked={euHasznalat} disabled={saving}
+              onChange={(event) => setEuHasznalat(event.target.checked)} />
+            <span>A rendszert az Európai Unióban használjuk</span>
+          </label>
+
+          <label className="declaration-row">
+            <input type="checkbox" checked={miEgyertelmu} disabled={saving}
+              onChange={(event) => setMiEgyertelmu(event.target.checked)} />
+            <span>A felhasználó számára egyértelmű, hogy MI-rendszerrel kommunikál</span>
+          </label>
+
+          <label className="declaration-row">
+            <input type="checkbox" checked={nincsTiltottGyakorlat} disabled={saving}
+              onChange={(event) => setNincsTiltottGyakorlat(event.target.checked)} />
+            <span>
+              A rendszer nem alkalmaz manipulatív technikát, nem használja ki személyek
+              sérülékenységét, és nem végez társadalmi pontozást
+            </span>
+          </label>
+
+          {!nincsTiltottGyakorlat && (
+            <p className="declaration-warning" role="alert">
+              Ha ezt nem tudod megerősíteni, a szabályzat élére figyelmeztetés kerül:
+              a rendszer tiltott gyakorlatot valósíthat meg, ezért azonnali jogi vizsgálat szükséges.
+            </p>
+          )}
+
+          {szolgaltato && (
+            <label className="declaration-row">
+              <input type="checkbox" checked={szabalyozottTermek} disabled={saving}
+                onChange={(event) => setSzabalyozottTermek(event.target.checked)} />
+              <span>
+                A rendszer beépül egy szabályozott termékbe — orvostechnikai eszköz, gép, jármű, játék
+                <em>Ilyenkor a rendszer automatikusan magas kockázatúnak minősül.</em>
+              </span>
+            </label>
+          )}
         </section>
 
         {message && (
