@@ -89,8 +89,8 @@ export default function EditSystemForm({ system, configurableCapabilities }) {
         </div>
 
         <section className="profile-confirmation edit-profile-assignment">
-          <p className="profile-label">Rendszerfunkciók</p>
-          <h2>Aktív funkciók módosítása</h2>
+          <p className="profile-label">Eszköz funkciók</p>
+          <h2>Eszköz funkciók módosítása</h2>
           <p>Egyik funkciót sem kényszeríti rá profil. Csak a rendszer tényleges működését jelöld.</p>
           <FunctionCombobox
             capabilities={configurableCapabilities}
