@@ -44,6 +44,10 @@ export async function assignMissingProfile(systemId, profileCode, conditionsConf
     p_system_id: systemId,
     p_profile_code: profileCode,
     p_conditions_confirmed: conditionsConfirmed,
+    p_eu_hasznalat: declarations?.euHasznalat ?? null,
+    p_mi_egyertelmu: declarations?.miEgyertelmu ?? null,
+    p_nincs_tiltott_gyakorlat: declarations?.nincsTiltottGyakorlat ?? null,
+    p_szabalyozott_termekbe_epul: declarations?.szabalyozottTermek ?? null,
   });
   if (error) return { error: error.message || "A profil hozzárendelése nem sikerült." };
   revalidatePath("/rendszerek");
@@ -52,7 +56,7 @@ export async function assignMissingProfile(systemId, profileCode, conditionsConf
   return { success: true };
 }
 
-export async function updateSystemCapabilities(systemId, capabilityCodes, conditionsConfirmed) {
+export async function updateSystemCapabilities(systemId, capabilityCodes, conditionsConfirmed, declarations = null) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "A funkciók módosításához bejelentkezés szükséges." };
@@ -61,6 +65,10 @@ export async function updateSystemCapabilities(systemId, capabilityCodes, condit
     p_system_id: systemId,
     p_capability_codes: capabilityCodes,
     p_conditions_confirmed: conditionsConfirmed,
+    p_eu_hasznalat: declarations?.euHasznalat ?? null,
+    p_mi_egyertelmu: declarations?.miEgyertelmu ?? null,
+    p_nincs_tiltott_gyakorlat: declarations?.nincsTiltottGyakorlat ?? null,
+    p_szabalyozott_termekbe_epul: declarations?.szabalyozottTermek ?? null,
   });
   if (error) return { error: error.message || "A funkciók mentése nem sikerült." };
   revalidatePath("/rendszerek");
