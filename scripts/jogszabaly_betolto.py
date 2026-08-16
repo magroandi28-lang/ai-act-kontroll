@@ -61,6 +61,32 @@ def szoveg(darab: str) -> str:
     return darab.strip()
 
 
+ALPONT_SOR = re.compile(r'<tr[^>]*>(.*?)</tr>', re.S | re.I)
+ALPONT_CELLA = re.compile(r'<td[^>]*>(.*?)</td>', re.S | re.I)
+ALPONT_JEL = re.compile(r'^([a-zA-Z])\)$')
+
+
+def alpontok_kinyerese(bekezdes_html: str, bekezdes: str):
+    """A bekezdesen beluli a) b) c) alpontokat szedi ki a tablazatbol."""
+    eredmeny = []
+    for sor in ALPONT_SOR.findall(bekezdes_html):
+        cellak = ALPONT_CELLA.findall(sor)
+        if len(cellak) < 2:
+            continue
+        jel = szoveg(cellak[0]).strip()
+        talalat = ALPONT_JEL.match(jel)
+        if not talalat:
+            continue
+        tartalom = szoveg(" ".join(cellak[1:]))
+        if len(tartalom) < 25:
+            continue
+        eredmeny.append({
+            "jel": f"{bekezdes}({talalat.group(1).lower()})",
+            "szoveg": f"{jel} {tartalom}",
+        })
+    return eredmeny
+
+
 def bekezdesek_kinyerese(blokk: str, cikkszam: str):
     """A cikk blokkjabol kiszedi a szamozott bekezdeseket."""
     talalatok = list(BEKEZDES_MINTA.finditer(blokk))
@@ -73,7 +99,11 @@ def bekezdesek_kinyerese(blokk: str, cikkszam: str):
             continue
         # A "026.006" masodik fele a bekezdes sorszama: 6.
         bekezdes = str(int(t.group(2)))
-        eredmeny.append({"bekezdes": bekezdes, "szoveg": tartalom})
+        eredmeny.append({
+            "bekezdes": bekezdes,
+            "szoveg": tartalom,
+            "alpontok": alpontok_kinyerese(nyers, bekezdes),
+        })
     return eredmeny
 
 
@@ -156,6 +186,7 @@ def main():
         f"-- CELEX: {args.celex}",
         f"-- Cikkek: {len(cikkek)}",
         f"-- Bekezdesek: {sum(len(c['bekezdesek']) for c in cikkek)}",
+        f"-- Alpontok: {sum(len(b['alpontok']) for c in cikkek for b in c['bekezdesek'])}",
         "-- Ezt a fajlt a scripts/jogszabaly_betolto.py allitotta elo.",
         "-- Futtatas: Supabase Dashboard -> SQL Editor.",
         "",
@@ -170,14 +201,19 @@ def main():
         # Bekezdesszint: a pontos osszevetesnek.
         for b in cikk["bekezdesek"]:
             sorok.append(hivas(args.celex, cikk["szam"], b["bekezdes"], b["szoveg"], args.url, link))
+            # Alpontszint: a "1(a)" alaku hivatkozasoknak.
+            for a in b["alpontok"]:
+                sorok.append(hivas(args.celex, cikk["szam"], a["jel"], a["szoveg"], args.url, link))
 
     sorok.extend(["", "commit;", ""])
     Path(args.output).write_text("\n".join(sorok), encoding="utf-8")
 
     osszes_bekezdes = sum(len(c["bekezdesek"]) for c in cikkek)
+    osszes_alpont = sum(len(b["alpontok"]) for c in cikkek for b in c["bekezdesek"])
     hosszak = [len(c["szoveg"]) for c in cikkek]
     print(f"Megtalalt cikkek:   {len(cikkek)}")
     print(f"Ebbol bekezdes:     {osszes_bekezdes}")
+    print(f"Ebbol alpont:       {osszes_alpont}")
     print(f"Elso cikk:          {cikkek[0]['szam']}. - {cikkek[0]['cim'][:55]}")
     print(f"Utolso cikk:        {cikkek[-1]['szam']}. - {cikkek[-1]['cim'][:55]}")
     print(f"Atlagos cikkhossz:  {sum(hosszak)//len(hosszak)} karakter")
