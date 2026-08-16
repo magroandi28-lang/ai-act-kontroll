@@ -157,6 +157,13 @@ export default function SearchablePolicy({ policy, system, generatedDate, refres
 
   const matchCount = matches.filter(Boolean).length;
 
+  // Hány fejezet mögött áll még szakmailag jóvá nem hagyott szabály.
+  const pendingReview = sections.filter(
+    (section) =>
+      (section.module_lifecycle_status && section.module_lifecycle_status !== "approved") ||
+      section.requires_human_review
+  ).length;
+
   return (
     <main className="policy-page">
       <div className="policy-toolbar">
@@ -207,6 +214,16 @@ export default function SearchablePolicy({ policy, system, generatedDate, refres
           </dl>
         </header>
 
+        {pendingReview > 0 && (
+          <section className="policy-review-notice" role="note">
+            <strong>Szakmai felülvizsgálatra vár: {pendingReview} fejezet a {sections.length}-ből</strong>
+            <p>
+              Az így megjelölt fejezetek mögött álló szabályt még nem hagyta jóvá szakember.
+              A dokumentum ezért felülvizsgálati tervezetnek tekintendő.
+            </p>
+          </section>
+        )}
+
         <section className="policy-section policy-summary">
           <h2>Vezetői összefoglaló</h2>
           <p>{policy.executive_summary}</p>
@@ -234,6 +251,10 @@ export default function SearchablePolicy({ policy, system, generatedDate, refres
               <span className={`policy-kind policy-kind-${section.module_kind || "guidance"}`}>
                 {moduleKindLabel(section.module_kind)}
               </span>
+              {(section.module_lifecycle_status && section.module_lifecycle_status !== "approved") ||
+              section.requires_human_review ? (
+                <span className="policy-kind policy-kind-pending">Szakértői jóváhagyásra vár</span>
+              ) : null}
               <h3>{section.number || index + 1}. {section.title}</h3>
               <p>{section.content}</p>
               {section.legal_references?.length > 0 && (
