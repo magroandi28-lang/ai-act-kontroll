@@ -1075,3 +1075,13 @@ input:disabled {
 /* Választási útmutató a funkciólistában: mikor kell választani és mikor nem. */
 .function-options button em { display: block; margin-top: 3px; color: #8fc9d6; font-size: 11.5px; font-style: normal; line-height: 1.4; }
 .function-options button em::before { content: "→ "; color: var(--cyan); }
+
+/* Nyilatkozat blokk a felvitelen es a szerkeszteson. */
+.declaration-block { margin-top: 8px; padding: 24px 26px; border: 1px solid rgba(184,215,229,.27); border-radius: 14px; background: rgba(8,29,44,.72); }
+.declaration-block h2 { margin: 0 0 8px; font-size: 20px; }
+.declaration-block > p { margin: 0 0 18px; color: #aebbc4; font-size: 13px; line-height: 1.55; }
+.declaration-row { display: grid; grid-template-columns: 20px minmax(0,1fr); gap: 12px; align-items: start; margin-bottom: 14px; color: #dce5e9; font-size: 14px; line-height: 1.55; cursor: pointer; }
+.declaration-row:last-child { margin-bottom: 0; }
+.declaration-row input { width: 18px; height: 18px; margin: 2px 0 0; accent-color: var(--cyan); cursor: pointer; }
+.declaration-row em { display: block; margin-top: 4px; color: #8297a2; font-size: 12px; font-style: normal; }
+.declaration-warning { margin: 4px 0 14px 32px; padding: 12px 14px; color: #ffd1c5; border: 1px solid rgba(255,84,45,.3); border-radius: 8px; background: rgba(255,84,45,.07); font-size: 13px; line-height: 1.55; }
