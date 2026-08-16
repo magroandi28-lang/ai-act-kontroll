@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/jogszabaly-frissites",
+      "schedule": "0 4 * * 1"
+    }
+  ]
+}
