@@ -21,7 +21,7 @@ export default async function EditSystemPage({ params }) {
   const typeCode = system.aic_system_type_templates?.type_code;
   const { data: allCapabilities } = await supabase
     .from("aic_capabilities")
-    .select("code,name_hu,description_hu,system_type_codes,industry_codes,sort_order")
+    .select("code,name_hu,description_hu,selection_hint_hu,system_type_codes,industry_codes,sort_order")
     .eq("active", true)
     .order("sort_order");
   const configurableCapabilities = (allCapabilities || []).filter((capability) => {
