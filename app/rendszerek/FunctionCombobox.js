@@ -43,7 +43,7 @@ export default function FunctionCombobox({ capabilities, selectedCodes, required
 
   return (
     <div className="function-picker" ref={rootRef}>
-      <div className="function-chips" aria-label="Aktív funkciók">
+      <div className="function-chips" aria-label="Eszköz funkciók">
         {selected.map((item) => (
           <span className={`function-chip ${required.has(item.code) ? "is-required" : ""}`} key={item.code}>
             {item.name_hu}
