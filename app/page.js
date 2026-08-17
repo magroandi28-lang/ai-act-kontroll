@@ -1,132 +1,177 @@
-"use client";
+"use server";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { createClient } from "../lib/supabase/client";
+import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
+import { createClient as createAdminClient } from "@supabase/supabase-js";
+import { createClient } from "../../lib/supabase/server";
 
-function Logo() {
-  return (
-    <div className="brand" aria-label="EnergiaAI Kontroll">
-      <svg className="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
-        <path d="M32 3 56 17v30L32 61 8 47V17L32 3Z" fill="none" stroke="currentColor" strokeWidth="6" />
-        <path d="M22 19h24M20 32h21M22 45h24" fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
-      </svg>
-      <span>EnergiaAI Kontroll</span>
-    </div>
-  );
+const ROLES = new Set(["owner", "admin", "compliance", "editor"]);
+
+// A meghívólevél kiküldéséhez szolgálati kulcs kell: egy sima felhasználó
+// nem hozhat létre másik felhasználót. A jogosultság ellenőrzése viszont
+// NEM itt történik, hanem az adatbázisban – lásd aic_tag_felvetele.
+function adminClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) {
+    throw new Error(
+      "Hiányzik a NEXT_PUBLIC_SUPABASE_URL vagy a SUPABASE_SERVICE_ROLE_KEY környezeti változó."
+    );
+  }
+  return createAdminClient(url, key, { auth: { persistSession: false } });
 }
 
-function NeuralBackground() {
-  return (
-    <svg className="neural-network" viewBox="0 0 900 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-      <g className="network-lines">
-        <path d="M-50 790C130 660 215 805 355 610S570 415 770 250 930 55 980-40" />
-        <path d="M-70 850C105 720 265 845 410 650S625 465 810 300 940 145 990 80" />
-        <path d="M95 245 245 155 370 275 515 120 650 235 790 130" />
-        <path d="M70 420 205 330 370 275 475 390 650 235 725 415 840 335" />
-        <path d="M205 330 260 505 475 390 535 550 725 415 790 590" />
-        <path d="M260 505 355 610 535 550 640 690 790 590" />
-      </g>
-      <g className="network-nodes">
-        {["95,245,6","245,155,9","370,275,7","515,120,6","650,235,10","790,130,5","70,420,5","205,330,8","475,390,11","725,415,7","840,335,5","260,505,6","535,550,9","790,590,6","355,610,8","640,690,5"].map((node) => {
-          const [cx, cy, r] = node.split(",");
-          return <circle key={node} cx={cx} cy={cy} r={r} />;
-        })}
-      </g>
-    </svg>
-  );
+// A Supabase hibaüzenetei angolul érkeznek. A gyakoriakat lefordítjuk,
+// mert a felhasználónak tudnia kell, mit tegyen.
+function forditottHiba(message) {
+  const szoveg = String(message || "");
+  if (/rate limit|too many requests|for security purposes/i.test(szoveg)) {
+    return (
+      "A Supabase óránként korlátozott számú levelet küld ki saját levelezőszerver nélkül. " +
+      "Várj egy órát, vagy állíts be saját SMTP-t a Supabase Authentication beállításainál."
+    );
+  }
+  if (/already registered|already been registered|user already exists/i.test(szoveg)) {
+    return "Ez az e-mail cím már regisztrált. A meghívás helyett hozzáadtuk a szervezethez.";
+  }
+  if (/invalid email|unable to validate email/i.test(szoveg)) {
+    return "Az e-mail cím formátuma nem megfelelő.";
+  }
+  return szoveg || "A művelet nem sikerült.";
 }
 
-function MailIcon() {
-  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v12H3zM3 7l9 7 9-7" /></svg>;
+// A régebbi Supabase-kiadásokban nincs e-mail szerinti keresés, ezért
+// lapozva keressük meg a meglévő felhasználót.
+async function meglevoFelhasznalo(admin, email) {
+  const keresett = email.trim().toLowerCase();
+  for (let page = 1; page <= 20; page += 1) {
+    const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 200 });
+    if (error) return null;
+    const users = data?.users || [];
+    const talalat = users.find(
+      (user) => String(user.email || "").toLowerCase() === keresett
+    );
+    if (talalat) return talalat;
+    if (users.length < 200) return null;
+  }
+  return null;
 }
 
-function LockIcon() {
-  return <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3" /></svg>;
+async function bejelentkezettFelhasznalo() {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("A művelethez bejelentkezés szükséges.");
+  return supabase;
 }
 
-function EyeIcon({ hidden }) {
-  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6S2 12 2 12Z" /><circle cx="12" cy="12" r="2.5" />{hidden && <path d="m4 4 16 16" />}</svg>;
-}
+export async function inviteMember(organisationId, formData) {
+  const nev = String(formData.get("full_name") || "").trim().replace(/\s+/g, " ");
+  const email = String(formData.get("email") || "").trim();
+  const role = String(formData.get("member_role") || "").trim();
 
-export default function LoginPage() {
-  const router = useRouter();
-  const [showPassword, setShowPassword] = useState(false);
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
+  if (!email) return { error: "Add meg a meghívandó személy e-mail címét." };
+  if (!ROLES.has(role)) return { error: "Válassz szerepkört." };
 
-  function rememberPrivacyChoice(event) {
-    const form = event.currentTarget.closest("form");
-    if (form?.elements?.privacy?.checked) {
-      sessionStorage.setItem("energiaai_privacy_accepted", "true");
-    } else {
-      sessionStorage.removeItem("energiaai_privacy_accepted");
-    }
+  let supabase;
+  try {
+    supabase = await bejelentkezettFelhasznalo();
+  } catch (error) {
+    return { error: error.message };
   }
 
-  async function handleSubmit(event) {
-    event.preventDefault();
-    setMessage("");
-    const data = new FormData(event.currentTarget);
-
-    if (!data.get("privacy")) {
-      setMessage("A belépéshez fogadd el az adatkezelési nyilatkozatot.");
-      return;
-    }
-
-    setLoading(true);
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({
-      email: String(data.get("email") || "").trim(),
-      password: String(data.get("password") || ""),
-    });
-
-    if (error) {
-      setLoading(false);
-      setMessage("Hibás e-mail-cím vagy jelszó.");
-      return;
-    }
-
-    router.replace("/vezerlopult");
-    router.refresh();
+  let admin;
+  try {
+    admin = adminClient();
+  } catch (error) {
+    return { error: error.message };
   }
 
-  return (
-    <main className="login-page">
-      <NeuralBackground />
-      <header><Logo /></header>
+  let userId = null;
+  let uzenet = "A meghívólevél elment.";
 
-      <section className="hero" aria-labelledby="hero-title">
-        <div className="hero-copy">
-          <h1 id="hero-title">Vállalati<span>MI-megfelelőség</span>egyszerűen</h1>
-          <p>Rögzítsd az MI-rendszert.<br />A szükséges szabályokat<br />mi kiválasztjuk.</p>
-        </div>
+  // A célcímet mi adjuk meg, nem a Supabase Site URL mezőjéből vesszük: az
+  // fejlesztői értéken maradhat, és akkor a meghívó levél a localhostra vinne.
+  const fejlecek = headers();
+  const gazda = fejlecek.get("x-forwarded-host") || fejlecek.get("host") || "";
+  const protokoll = fejlecek.get("x-forwarded-proto") || (gazda.startsWith("localhost") ? "http" : "https");
+  const cel = gazda ? `${protokoll}://${gazda}/auth/confirm?tovabb=/jelszo/uj` : undefined;
 
-        <form className="login-card" onSubmit={handleSubmit} noValidate>
-          <h2>Belépés</h2>
-          <label htmlFor="email">E-mail-cím</label>
-          <div className="input-wrap">
-            <MailIcon />
-            <input id="email" name="email" type="email" placeholder="E-mail-cím" autoComplete="email" required disabled={loading} />
-          </div>
-          <label htmlFor="password">Jelszó</label>
-          <div className="input-wrap">
-            <LockIcon />
-            <input id="password" name="password" type={showPassword ? "text" : "password"} placeholder="Jelszó" autoComplete="current-password" required disabled={loading} />
-            <button className="eye-button" type="button" onClick={() => setShowPassword((value) => !value)} aria-label={showPassword ? "Jelszó elrejtése" : "Jelszó megjelenítése"}>
-              <EyeIcon hidden={showPassword} />
-            </button>
-          </div>
-          <label className="privacy-row">
-            <input name="privacy" type="checkbox" disabled={loading} />
-            <span>Elfogadom az <a href="/adatkezeles">adatkezelési nyilatkozatot</a></span>
-          </label>
-          {message && <p className="form-message" role="alert">{message}</p>}
-          <button className="primary-button" type="submit" disabled={loading}>{loading ? "Belépés…" : "Belépés"}</button>
-          <div className="divider" />
-          <a className="register-link" href="/regisztracio" onClick={rememberPrivacyChoice}>Regisztráció</a>
-        </form>
-      </section>
-    </main>
+  const { data: invited, error: inviteError } = await admin.auth.admin.inviteUserByEmail(
+    email,
+    { data: nev ? { full_name: nev } : {}, redirectTo: cel }
   );
+
+  if (inviteError) {
+    // Ha a felhasználó már létezik, nem hiba: csak nem kell új levél.
+    const meglevo = await meglevoFelhasznalo(admin, email);
+    if (!meglevo) {
+      return { error: forditottHiba(inviteError.message) };
+    }
+    userId = meglevo.id;
+    uzenet = "Ez a felhasználó már regisztrált, ezért levél nélkül hozzáadtuk a szervezethez.";
+  } else {
+    userId = invited?.user?.id || null;
+  }
+
+  if (!userId) {
+    return { error: "A felhasználó azonosítója nem állapítható meg." };
+  }
+
+  // A jogosultság ellenőrzése az adatbázisban történik, a bejelentkezett
+  // felhasználó nevében – nem a szolgálati kulccsal.
+  const { error: memberError } = await supabase.rpc("aic_tag_felvetele", {
+    p_organisation_id: organisationId,
+    p_user_id: userId,
+    p_member_role: role,
+  });
+
+  if (memberError) {
+    return { error: memberError.message || "A tag felvétele nem sikerült." };
+  }
+
+  revalidatePath("/szervezet");
+  return { success: true, message: uzenet };
+}
+
+export async function changeRole(organisationId, userId, role) {
+  if (!ROLES.has(role)) return { error: "Ismeretlen szerepkör." };
+
+  let supabase;
+  try {
+    supabase = await bejelentkezettFelhasznalo();
+  } catch (error) {
+    return { error: error.message };
+  }
+
+  const { error } = await supabase.rpc("aic_tag_szerepkore", {
+    p_organisation_id: organisationId,
+    p_user_id: userId,
+    p_member_role: role,
+  });
+
+  if (error) return { error: error.message || "A szerepkör módosítása nem sikerült." };
+
+  revalidatePath("/szervezet");
+  return { success: true, message: "A szerepkör módosult." };
+}
+
+export async function removeMember(organisationId, userId) {
+  let supabase;
+  try {
+    supabase = await bejelentkezettFelhasznalo();
+  } catch (error) {
+    return { error: error.message };
+  }
+
+  const { error } = await supabase.rpc("aic_tag_torlese", {
+    p_organisation_id: organisationId,
+    p_user_id: userId,
+  });
+
+  if (error) return { error: error.message || "A tag eltávolítása nem sikerült." };
+
+  revalidatePath("/szervezet");
+  return { success: true, message: "A tagot eltávolítottuk a szervezetből." };
 }
