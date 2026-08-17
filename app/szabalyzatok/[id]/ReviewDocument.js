@@ -14,7 +14,13 @@ function Fejezet({ fejezet, policyId, dontheteek, pending, run }) {
   const [cim, setCim] = useState(fejezet.cim || "");
   const [tartalom, setTartalom] = useState(fejezet.tartalom || "");
 
-  const jelzesek = fejezet.elemzes?.jelzesek || [];
+  // Csak a bizonyítható jelzést mutatjuk. A cikkszintű becslés arról szól,
+  // hogy a fejezetet a TELJES cikkhez mértük, ezért téves is lehet - ilyet
+  // nem teszünk a jogász elé. Ha később pontos jelzés keletkezik, magától
+  // megjelenik, a kódot nem kell módosítani.
+  const jelzesek = (fejezet.elemzes?.jelzesek || []).filter(
+    (jel) => jel.pontossag && jel.pontossag !== "cikkszintu"
+  );
   const kesz = fejezet.szabaly_jovahagyva;
 
   if (kesz && !szerkeszt) {
@@ -92,11 +98,7 @@ function Fejezet({ fejezet, policyId, dontheteek, pending, run }) {
         </div>
       )}
 
-      {jelzesek.length === 0 && fejezet.elemzes?.elemezheto && (
-        <p className="rev-signals rev-signals-clean">
-          Az automatikus ellenőrzés nem talált eltérést a jogszabály szövegéhez képest.
-        </p>
-      )}
+
 
       {fejezet.jogszabaly?.length > 0 && (
         <div className="rev-legal">
@@ -146,6 +148,19 @@ export default function ReviewDocument({ doc, catalogue }) {
   const osszesen = Number(doc.osszesen || 0);
   const hatra = osszesen - jovahagyott;
 
+  const ellenorzes = doc.ellenorzes || null;
+  // A fejezetenkénti szűréssel összhangban: csak a bizonyítható jelzést
+  // számoljuk bele az összegzésbe.
+  const figyelmet = fejezetek.filter((f) =>
+    (f.elemzes?.jelzesek || []).some(
+      (jel) => jel.pontossag && jel.pontossag !== "cikkszintu"
+    )
+  ).length;
+  const ellenorzesDatum = ellenorzes?.lefutott
+    ? new Intl.DateTimeFormat("hu-HU", { dateStyle: "medium", timeStyle: "short" })
+        .format(new Date(ellenorzes.lefutott))
+    : null;
+
   const beemelheto = useMemo(
     () => (catalogue || []).filter((m) => !m.already_in_document),
     [catalogue]
@@ -177,6 +192,22 @@ export default function ReviewDocument({ doc, catalogue }) {
             {hatra > 0 ? ` · ${hatra} vár rád` : " · minden fejezet kész"}
           </p>
         </div>
+
+        {/* Az ellenorzes a bekuldeskor futott le az egesz dokumentumra.
+            A jogasz igy elore latja, hova erdemes odafigyelnie. */}
+        {ellenorzes && figyelmet > 0 && (
+          <div className={`rev-check${figyelmet > 0 ? " rev-check-warn" : " rev-check-ok"}`}>
+            <strong>
+              {figyelmet > 0
+                ? `Az automatikus ellenőrzés ${figyelmet} fejezetnél jelez eltérést.`
+                : "Az automatikus ellenőrzés nem talált eltérést."}
+            </strong>
+            <span>
+              {ellenorzes.elemezheto_fejezet} fejezet volt összevethető a jogszabály
+              szövegével{ellenorzesDatum ? ` · lefutott: ${ellenorzesDatum}` : ""}
+            </span>
+          </div>
+        )}
 
         {!dontheteek && (
           <p className="rev-notice" role="status">
