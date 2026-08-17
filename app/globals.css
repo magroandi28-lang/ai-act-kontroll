@@ -1085,3 +1085,64 @@ input:disabled {
 .declaration-row input { width: 18px; height: 18px; margin: 2px 0 0; accent-color: var(--cyan); cursor: pointer; }
 .declaration-row em { display: block; margin-top: 4px; color: #8297a2; font-size: 12px; font-style: normal; }
 .declaration-warning { margin: 4px 0 14px 32px; padding: 12px 14px; color: #ffd1c5; border: 1px solid rgba(255,84,45,.3); border-radius: 8px; background: rgba(255,84,45,.07); font-size: 13px; line-height: 1.55; }
+
+/* --- Szervezet: tagok es szerepkorok --- */
+.org-shell { width: min(900px, calc(100% - 48px)); margin: 0 auto; padding: 48px 0 64px; }
+.org-back { display: inline-block; margin-bottom: 22px; color: #9fb3bf; font-size: 14px; text-decoration: none; }
+.org-back:hover { color: var(--text); }
+.org-shell h1 { margin: 0; font-size: clamp(30px, 5vw, 44px); line-height: 1.15; }
+.org-intro { max-width: 640px; margin: 16px 0 34px; color: #c7d0d6; font-size: 16px; line-height: 1.65; }
+.org-error { margin: 0 0 22px; padding: 13px 16px; color: #ffd9cf; border: 1px solid rgba(255,84,45,.45); border-radius: 10px; background: rgba(255,84,45,.1); line-height: 1.55; }
+
+.org-panel { display: grid; gap: 20px; }
+.org-block { padding: 24px 26px; border: 1px solid var(--line); border-radius: 15px; background: rgba(8,29,44,.7); }
+.org-block h2 { margin: 0 0 6px; font-size: 19px; font-weight: 700; }
+.org-note { margin: 0 0 18px; color: #aebbc4; font-size: 14px; line-height: 1.6; }
+
+.org-message { margin: 0; padding: 13px 16px; border-radius: 10px; font-size: 14px; line-height: 1.55; }
+.org-message-ok { color: #c6f2e2; border: 1px solid rgba(46,143,107,.5); background: rgba(46,143,107,.14); }
+.org-message-error { color: #ffd9cf; border: 1px solid rgba(255,84,45,.45); background: rgba(255,84,45,.1); }
+
+.org-members { margin: 14px 0 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.org-member { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border: 1px solid rgba(184,215,229,.16); border-radius: 12px; background: rgba(2,13,24,.5); flex-wrap: wrap; }
+.org-avatar { display: grid; flex: 0 0 40px; width: 40px; height: 40px; place-items: center; color: var(--cyan); border-radius: 50%; background: rgba(0,189,218,.12); font-size: 14px; font-weight: 700; }
+.org-member-main { flex: 1 1 200px; min-width: 0; display: grid; gap: 2px; }
+.org-member-main strong { font-size: 15px; font-weight: 600; }
+.org-member-main small { color: #9fb3bf; font-size: 13px; word-break: break-all; }
+.org-self { color: var(--cyan); font-style: normal; font-weight: 400; }
+.org-pending { color: #e5b877 !important; }
+
+.org-member-actions { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+.org-role-badge { padding: 6px 13px; color: #c7d0d6; border: 1px solid rgba(184,215,229,.22); border-radius: 999px; font-size: 13px; white-space: nowrap; }
+.org-role-select { min-height: 40px; padding: 0 12px; color: var(--text); border: 1px solid rgba(184,215,229,.32); border-radius: 8px; background: var(--navy-900); font-size: 14px; }
+.org-role-select:focus { outline: 3px solid rgba(0,189,218,.25); border-color: var(--cyan); }
+.org-role-select option { color: var(--text); background: var(--navy-900); }
+.org-remove { min-height: 40px; padding: 0 14px; color: #ffb9a5; border: 1px solid rgba(255,84,45,.4); border-radius: 8px; background: transparent; font-size: 13px; font-weight: 600; cursor: pointer; }
+.org-remove:hover { color: #fff; border-color: var(--orange); background: rgba(255,84,45,.16); }
+.org-remove:disabled, .org-role-select:disabled { opacity: .55; cursor: wait; }
+
+.org-invite { display: grid; gap: 16px; }
+.org-field { display: grid; gap: 7px; }
+.org-field label { color: #c7d0d6; font-size: 14px; font-weight: 600; }
+.org-field input, .org-field select { min-height: 46px; padding: 0 14px; color: var(--text); border: 1px solid rgba(184,215,229,.32); border-radius: 9px; background: var(--navy-900); font-size: 15px; }
+.org-field input::placeholder { color: #7c8d98; }
+.org-field input:focus, .org-field select:focus { outline: 3px solid rgba(0,189,218,.25); border-color: var(--cyan); }
+.org-field select option { color: var(--text); background: var(--navy-900); }
+.org-field input:disabled, .org-field select:disabled { opacity: .55; cursor: wait; }
+.org-role-help { margin: 0; color: #9fb3bf; font-size: 13px; line-height: 1.55; }
+.org-invite-button { justify-self: start; min-height: 48px; padding: 0 24px; color: #fff; border: 0; border-radius: 9px; background: var(--orange); font-size: 15px; font-weight: 700; cursor: pointer; }
+.org-invite-button:hover { background: var(--orange-dark); }
+.org-invite-button:disabled { opacity: .6; cursor: wait; }
+
+.org-roles { margin: 14px 0 0; display: grid; gap: 12px; }
+.org-role-row { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 14px; align-items: baseline; }
+.org-role-row dt { color: var(--cyan); font-size: 14px; font-weight: 700; }
+.org-role-row dd { margin: 0; color: #aebbc4; font-size: 14px; line-height: 1.6; }
+
+.org-visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+@media (max-width: 620px) {
+  .org-role-row { grid-template-columns: 1fr; gap: 4px; }
+  .org-member-actions { width: 100%; }
+  .org-role-select { flex: 1 1 auto; }
+}
