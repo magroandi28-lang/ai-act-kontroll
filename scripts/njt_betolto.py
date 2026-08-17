@@ -35,7 +35,19 @@ import unicodedata
 from pathlib import Path
 from urllib.request import Request, urlopen
 
-# "12. §", "4/A. §", "12/B. §" - utana opcionalis labjegyzetszam.
+# A mellekletek jelolese jogszabalyonkent elter:
+#   "1. melleklet a 2022. evi XVII. torvenyhez"
+#   "1. szamu melleklet a 273/2007. (X. 19.) Korm. rendelethez"
+#   "22/a. szamu melleklet ..."
+# A "szamu" szo opcionalis, a sorszam kaphat betutoldatot.
+# Cimkent csak akkor ismerjuk fel, ha sorkezdo, vagy ha utana a jogszabaly
+# megjelolese all (szam kezdi) - igy a szovegkozi hivatkozasok
+# ("az 1. melleklet szerinti") nem tevesztenek meg.
+MELLEKLET = re.compile(
+    r'(?m)(?:^\s*(\d+(?:/[a-zA-Z])?)\.\s*(?:sz(?:\.|ámú)\s*)?mell[ée]klet\b'
+    r'|(\d+(?:/[a-zA-Z])?)\.\s*(?:sz(?:\.|ámú)\s*)?mell[ée]klet\s+a[z]?\s+\d)'
+)
+
 SZAKASZ = re.compile(r'(?m)^\s*(\d+(?:/[A-ZÁÉÍÓÖŐÚÜŰ])?)\.\s*§\s*(?:\d{1,4})?\s*')
 # "(1)" a sor elejen, utana opcionalis labjegyzetszam.
 BEKEZDES = re.compile(r'(?m)^\s*\((\d{1,3})\)\s*(?:\d{1,4})?\s*')
@@ -71,6 +83,36 @@ def bekezdesek(torzs: str):
             continue
         eredmeny.append({"bekezdes": t.group(1), "szoveg": tartalom})
     return eredmeny
+
+
+def mellekletek_kinyerese(tiszta: str):
+    """A jogszabaly vegen allo mellekleteket szedi ki.
+
+    A mellekletek nem szakaszokra tagolodnak, ezert egyben taroljuk oket,
+    "1. melleklet" kulccsal – pontosan ugy, ahogy a szabalykatalogus hivatkozik
+    rajuk. Igy a kereses megtalalja oket.
+    """
+    talalatok = list(MELLEKLET.finditer(tiszta))
+    if not talalatok:
+        return []
+    eredmeny = {}
+    for i, t in enumerate(talalatok):
+        vege = talalatok[i + 1].start() if i + 1 < len(talalatok) else len(tiszta)
+        tartalom = tiszta[t.start():vege].strip()
+        if len(tartalom) < 60:
+            continue
+        kulcs = f"{t.group(1) or t.group(2)}. melléklet"
+        # Tartalomjegyzekben is szerepelhet a cim; a hosszabb valtozat a valodi.
+        if len(tartalom) > len(eredmeny.get(kulcs, "")):
+            eredmeny[kulcs] = tartalom
+    def rendez(tetel):
+        # "23/b. melléklet" -> (23, "b"). A puszta int() elszallt a betutoldaton.
+        kulcs = tetel[0].split(".")[0]
+        m = re.match(r'(\d+)(?:/([a-zA-Z]))?$', kulcs)
+        return (int(m.group(1)), (m.group(2) or "").lower()) if m else (9999, kulcs)
+
+    return [{"szakasz": k, "szoveg": v, "bekezdesek": []}
+            for k, v in sorted(eredmeny.items(), key=rendez)]
 
 
 def szakaszok_kinyerese(nyers: str):
@@ -140,7 +182,12 @@ def main():
     p.add_argument("--azonosito", required=True,
                    help="A jogforras azonositoja az adatbazisban, pl. NJT-2007-86-00-00")
     p.add_argument("-o", "--output", default="njt_betoltes.sql")
+    p.add_argument("--szakaszok", default="",
+                   help="Csak ezeket a szakaszokat tolti be, vesszovel elvalasztva, "
+                        "pl. 47,56/A,57,64,65. Ures ertek eseten mindet.")
     p.add_argument("--report", action="store_true")
+    p.add_argument("--diagnosztika", action="store_true",
+                   help="Kiirja, mit talalt az oldalon: hossz, szakaszok, melleklet-emlitesek.")
     args = p.parse_args()
 
     if args.url:
@@ -155,7 +202,38 @@ def main():
     else:
         raise SystemExit("Adj meg --url cimet vagy egy mentett HTML fajlt.")
 
+    if args.diagnosztika:
+        tiszta = szoveg(nyers)
+        print(f"Letoltott nyers hossz: {len(nyers)} karakter")
+        print(f"Szoveggé alakitva:     {len(tiszta)} karakter")
+        print(f"§ elofordulas:         {tiszta.count('§')}")
+        print(f"'mellékl' elofordulas: {tiszta.lower().count('mellékl')}")
+        print("--- sorok, amelyek a 'mellékl' szot tartalmazzak (max 25) ---")
+        n = 0
+        for sor in tiszta.split("\n"):
+            if "mellékl" in sor.lower():
+                print("   |" + sor[:160])
+                n += 1
+                if n >= 25:
+                    break
+        if n == 0:
+            print("   (egy sem)")
+        raise SystemExit(0)
+
     szakaszok = szakaszok_kinyerese(nyers)
+    szakaszok += mellekletek_kinyerese(szoveg(nyers))
+
+    # A teljes torveny SQL-je tul nagy lehet a Supabase szerkesztojenek.
+    # A szabalyaink amugy is csak nehany szakaszra hivatkoznak, ezert
+    # alapertelmezes helyett szurhetunk.
+    if args.szakaszok:
+        kert = {k.strip() for k in args.szakaszok.split(",") if k.strip()}
+        szakaszok = [sz for sz in szakaszok if sz["szakasz"] in kert]
+        hianyzo = kert - {sz["szakasz"] for sz in szakaszok}
+        if hianyzo:
+            print("FIGYELEM - ezek a szakaszok nem talalhatok az oldalon: "
+                  + ", ".join(sorted(hianyzo)), file=sys.stderr)
+
     if not szakaszok:
         raise SystemExit(
             "Nem talaltam szakaszt (§) a tartalomban.\n"
