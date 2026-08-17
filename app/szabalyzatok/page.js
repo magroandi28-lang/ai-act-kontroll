@@ -133,7 +133,7 @@ export default async function PolicyQueuePage({ searchParams }) {
 
                 <Link
                   className={row.status === "in_review" ? "queue-open" : "queue-open-quiet"}
-                  href={`/rendszerek/${row.ai_system_id}/szabalyzat`}
+                  href={`/szabalyzatok/${row.policy_id}`}
                 >
                   {row.status === "in_review" ? "Felülvizsgálat" : "Megnyitás"}
                 </Link>
