@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { createClient } from "../../lib/supabase/server";
 
@@ -90,9 +91,16 @@ export async function inviteMember(organisationId, formData) {
   let userId = null;
   let uzenet = "A meghívólevél elment.";
 
+  // A célcímet mi adjuk meg, nem a Supabase Site URL mezőjéből vesszük: az
+  // fejlesztői értéken maradhat, és akkor a meghívó levél a localhostra vinne.
+  const fejlecek = headers();
+  const gazda = fejlecek.get("x-forwarded-host") || fejlecek.get("host") || "";
+  const protokoll = fejlecek.get("x-forwarded-proto") || (gazda.startsWith("localhost") ? "http" : "https");
+  const cel = gazda ? `${protokoll}://${gazda}/auth/confirm?tovabb=/jelszo/uj` : undefined;
+
   const { data: invited, error: inviteError } = await admin.auth.admin.inviteUserByEmail(
     email,
-    { data: nev ? { full_name: nev } : {} }
+    { data: nev ? { full_name: nev } : {}, redirectTo: cel }
   );
 
   if (inviteError) {
