@@ -1146,3 +1146,25 @@ input:disabled {
   .org-member-actions { width: 100%; }
   .org-role-select { flex: 1 1 auto; }
 }
+
+/* --- Jelszo-kezelo oldalak --- */
+.auth-simple-page { min-height: 100vh; display: grid; place-items: center; padding: 40px 20px; background: radial-gradient(circle at 20% 15%,rgba(0,189,218,.09),transparent 30%),radial-gradient(circle at 85% 90%,rgba(255,84,45,.07),transparent 30%),var(--navy-950); }
+.auth-simple-card { width: min(100%, 460px); padding: 34px 32px; border: 1px solid var(--line); border-radius: 16px; background: rgba(8,29,44,.78); }
+.auth-simple-card h1 { margin: 0 0 12px; font-size: clamp(26px,4vw,32px); line-height: 1.2; }
+.auth-simple-intro { margin: 0 0 22px; color: #aebbc4; font-size: 15px; line-height: 1.65; }
+.auth-simple-card form { display: grid; gap: 8px; }
+.auth-simple-card label { margin-top: 8px; color: #c7d0d6; font-size: 14px; font-weight: 600; }
+.auth-simple-card input { min-height: 48px; padding: 0 14px; color: var(--text); border: 1px solid rgba(184,215,229,.32); border-radius: 9px; background: var(--navy-900); font-size: 15px; }
+.auth-simple-card input::placeholder { color: #7c8d98; }
+.auth-simple-card input:focus { outline: 3px solid rgba(0,189,218,.25); border-color: var(--cyan); }
+.auth-simple-card input:disabled { opacity: .55; cursor: wait; }
+.auth-simple-card .primary-button { margin-top: 18px; min-height: 50px; padding: 0 22px; color: #fff; border: 0; border-radius: 9px; background: var(--orange); font-size: 16px; font-weight: 700; cursor: pointer; }
+.auth-simple-card .primary-button:hover { background: var(--orange-dark); }
+.auth-simple-card .primary-button:disabled { opacity: .6; cursor: wait; }
+.auth-simple-message { margin: 16px 0 0; padding: 12px 14px; border-radius: 9px; font-size: 14px; line-height: 1.55; }
+.auth-simple-message-ok { color: #c6f2e2; border: 1px solid rgba(46,143,107,.5); background: rgba(46,143,107,.14); }
+.auth-simple-message-error { color: #ffd9cf; border: 1px solid rgba(255,84,45,.45); background: rgba(255,84,45,.1); }
+.auth-simple-back { display: inline-block; margin-top: 22px; color: #9fb3bf; font-size: 14px; text-decoration: none; }
+.auth-simple-back:hover { color: var(--text); }
+.forgot-link { margin-top: 10px; color: #9fb3bf; font-size: 13px; text-align: right; text-decoration: none; }
+.forgot-link:hover { color: var(--cyan); }
