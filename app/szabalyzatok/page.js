@@ -67,9 +67,7 @@ export default async function PolicyQueuePage({ searchParams }) {
         <p className="queue-intro">
           {varakozoOsszesen > 0
             ? `${varakozoOsszesen} dokumentum vár a jóváhagyásodra.`
-            : "Jelenleg nincs jóváhagyásra váró dokumentum."}{" "}
-          Egy fejezet jóváhagyása a mögötte álló szabályt hagyja jóvá, ezért a
-          következő dokumentumokban ugyanaz a fejezet már készen érkezik.
+            : "Nincs jóváhagyásra váró dokumentum."}
         </p>
 
         {!organisation && (
@@ -114,14 +112,15 @@ export default async function PolicyQueuePage({ searchParams }) {
                   <p className="queue-card-meta">
                     {row.version}. verzió · {row.section_count} fejezet
                     {row.pending_rule_count > 0
-                      ? ` · ${row.pending_rule_count} még nem jóváhagyott szabályon alapul`
-                      : " · minden szabály jóváhagyott"}
+                      ? ` · ebből ${row.pending_rule_count} még jóváhagyásra vár`
+                      : " · mind jóváhagyva"}
+                  </p>
+                  <p className="queue-card-meta">
                     {row.status === "in_review" && row.submitted_at
-                      ? ` · beküldve: ${datum(row.submitted_at)}`
-                      : ""}
-                    {row.status === "approved" && row.reviewed_at
-                      ? ` · jóváhagyva: ${datum(row.reviewed_at)}`
-                      : ""}
+                      ? `Beküldve ${datum(row.submitted_at)}`
+                      : row.status === "approved" && row.reviewed_at
+                        ? `Jóváhagyva ${datum(row.reviewed_at)}`
+                        : `Módosítva ${datum(row.updated_at)}`}
                   </p>
 
                   {row.status === "rejected" && row.review_note && (
@@ -133,7 +132,7 @@ export default async function PolicyQueuePage({ searchParams }) {
                 </div>
 
                 <Link
-                  className={row.status === "in_review" ? "primary-button" : "secondary-button"}
+                  className={row.status === "in_review" ? "queue-open" : "queue-open-quiet"}
                   href={`/rendszerek/${row.ai_system_id}/szabalyzat`}
                 >
                   {row.status === "in_review" ? "Felülvizsgálat" : "Megnyitás"}
