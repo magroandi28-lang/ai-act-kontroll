@@ -124,6 +124,24 @@ export default function JogtarView({ kezdoLista, iparagak, dontheto }) {
     [supabase, szerepkor, reteg]
   );
 
+  // Szűrőváltás után a korábban megnyitott cikk gyakran kikerül a listából –
+  // például az energetikai rétegben nincs szolgáltatói jogszabályhely. Ha
+  // bent hagynánk, a jobb oldalon egy odanem illő törvényszöveg maradna
+  // szabályok nélkül, és úgy tűnne, hogy a jogtár elromlott.
+  useEffect(() => {
+    if (!nyitottCikk) return;
+    const bent = (lista?.forrasok || []).some((f) =>
+      (f.cikkek || []).some(
+        (c) => c.source_id === nyitottCikk.sourceId && c.cikk === nyitottCikk.cikkszam
+      )
+    );
+    if (!bent) {
+      setNyitottCikk(null);
+      setCikk(null);
+      setNyitottSzabaly(null);
+    }
+  }, [lista, nyitottCikk]);
+
   // Induláskor az első olyan cikkre nyitunk, ahol van jóváhagyásra váró
   // szabály. Üres cikkel indulni azt a látszatot kelti, hogy nem működik.
   useEffect(() => {
@@ -273,6 +291,19 @@ export default function JogtarView({ kezdoLista, iparagak, dontheto }) {
 
         <article className="jogtar-tartalom">
           {betolt && <p className="jogtar-ures">Betöltés…</p>}
+
+          {!betolt && !cikk && (
+            <div className="jogtar-nincs-talalat">
+              <p className="jogtar-blokkcim">Ehhez a szűréshez nincs jogszabályhely</p>
+              <p>
+                {reteg !== "torzs" && reteg !== "mind" && szerepkor
+                  ? `Az ágazati jog ezt a szerepkört nem szabályozza külön — az ágazati előírások a rendszer üzemeltetőjére vonatkoznak. A(z) ${
+                      SZEREPKOROK.find(([k]) => k === szerepkor)?.[1] || szerepkor
+                    } kötelezettségei az MI-rendeletből és a GDPR-ból erednek: válaszd a Törzs réteget.`
+                  : "Válts réteget vagy szerepkört."}
+              </p>
+            </div>
+          )}
 
           {!betolt && cikk && (
             <>
