@@ -4,7 +4,9 @@
 
 .jogtar-page {
   min-height: 100vh;
-  background: #FDFCFA;
+  /* Meleg, papírszerű háttér. A tiszta fehér nagy felületen fárasztó, és
+     nem különül el tőle az olvasófelület. */
+  background: #E7E3DA;
   color: #2C2C2A;
 }
 
@@ -33,8 +35,11 @@
   justify-content: space-between;
   gap: 18px;
   flex-wrap: wrap;
-  padding: 16px 6px 18px;
-  border-bottom: 1px solid #E8E6DF;
+  padding: 20px 26px;
+  background: #FFFDF9;
+  border: 1px solid #DED9CE;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(44, 44, 42, 0.05);
 }
 
 .jogtar-eyebrow {
@@ -127,12 +132,12 @@
   display: grid;
   grid-template-columns: minmax(0, 210px) minmax(0, 1fr);
   gap: 0;
-  margin-top: 0;
-  border: 1px solid #E8E6DF;
-  border-top: none;
-  border-radius: 0 0 12px 12px;
+  margin-top: 14px;
+  border: 1px solid #DED9CE;
+  border-radius: 12px;
   overflow: hidden;
-  background: #FDFCFA;
+  background: #FFFDF9;
+  box-shadow: 0 1px 3px rgba(44, 44, 42, 0.07);
 }
 
 @media (max-width: 760px) {
@@ -142,8 +147,8 @@
 
 /* Bal oldali navigáció */
 .jogtar-nav {
-  border-right: 1px solid #E8E6DF;
-  background: #F7F5F0;
+  border-right: 1px solid #E4E0D6;
+  background: #F4F1EA;
   padding: 14px 0;
   max-height: 76vh;
   overflow-y: auto;
@@ -179,7 +184,7 @@
 .jogtar-nav-cikk:hover { background: #F1EFE8; }
 
 .jogtar-nav-cikk.is-active {
-  background: #FDFCFA;
+  background: #FFFDF9;
   border-left-color: #2C2C2A;
   color: #2C2C2A;
   font-weight: 500;
@@ -456,4 +461,19 @@
    a folytatás beljebb kezdődik – így látszik, hogy összetartoznak. */
 .jogtar-torvenyszoveg + .jogtar-torvenyszoveg {
   padding-left: 18px;
+}
+
+
+/* Üres találat: a szűrés jogilag helyes eredménye is lehet nulla. Meg kell
+   mondani, hol vannak akkor a szabályok, különben hibának látszik. */
+.jogtar-nincs-talalat {
+  max-width: 520px;
+  padding: 22px 0 8px;
+}
+
+.jogtar-nincs-talalat p:last-child {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #5F5E5A;
 }
