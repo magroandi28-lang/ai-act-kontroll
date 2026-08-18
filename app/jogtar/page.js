@@ -2,6 +2,10 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "../../lib/supabase/server";
 import JogtarView from "./JogtarView";
+// A jogtár saját stíluslapja. Külön fájlban van, hogy a globals.css-t ne
+// kelljen bővíteni – így a világos olvasófelület nem keveredik a sötét
+// alkalmazás stílusaival, és bármikor cserélhető egy fájl felülírásával.
+import "./jogtar.css";
 
 // A jogtár a katalógusból dolgozik: aic_provision_coverage, aic_trigger_catalogue,
 // aic_rule_legal_bases. A régi, használati profilokra és capability-listára épülő
