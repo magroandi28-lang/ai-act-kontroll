@@ -1,0 +1,35 @@
+-- EnergiaAI Kontroll – a hiányzó MI-rendeleti mellékletek betöltése.
+--
+-- MIÉRT
+-- A katalógusban 35 gyártói, 2 importőri, 2 forgalmazói és 2 meghatalmazott
+-- képviselői szabály van. Ezek a 43., 47., 48., 49., 51., 53. és 55. cikkre
+-- hivatkoznak, azok szövege pedig továbbmutat a VI., VII., IX. és XIII.
+-- mellékletre. Ezek eddig nem voltak betöltve, így a jogász a cikk olvasása
+-- közben zsákutcába futott.
+--
+-- MI KERÜL BE
+-- II.   bűncselekmények jegyzéke az 5. cikkhez (felsorolás, nem számozott)
+-- VI.   belső ellenőrzésen alapuló megfelelőségértékelés
+-- VII.  minőségirányítási rendszeren alapuló megfelelőségértékelés
+-- IX.   nyilvántartásba vétel a III. melléklet 1. pontjához
+-- X.    nagyméretű uniós IT-rendszerek
+-- XIII. rendszerszintű kockázat kritériumai
+-- XIV.  az (EU) 2026/1744 rendelettel bevezetett új melléklet
+--
+-- 3/3. rész – sorrendben futtatandó. Futtatás: Supabase Dashboard -> SQL Editor -> beilleszt -> Run.
+-- Helye ezután: supabase/migrations/
+
+begin;
+
+insert into aic_legal_text (source_id,article_number,paragraph_number,scope,content,content_sha256,deep_link,source_url,retrieved_at)
+select s.id,'Annex XIV','4','paragraph','A kijelölés iránti kérelem A megfelelőségértékelő szervezetek az MI-rendszerek típusainak a 29. cikkben említett kijelölés iránti kérelemben történő meghatározásakor az MI-rendszerek kódjainak, kategóriáinak és megfelelő típusainak e mellékletben meghatározott listáit használják. ( 1 ) Az Európai Parlamenti és a Tanács 1025/2012/EU rendelete (2012. október 25.) az európai szabványosításról, a 89/686/EGK és a 93/15/EGK tanácsi irányelv, a 94/9/EK, a 94/25/EK, a 95/16/EK, a 97/23/EK, a 98/34/EK, a 2004/22/EK, a 2007/23/EK, a 2009/23/EK és a 2009/105/EK európai parlamenti és tanácsi irányelv módosításáról, valamint a 87/95/EGK tanácsi határozat és az 1673/2006/EK európai parlamenti és tanácsi határozat hatályon kívül helyezéséről (HL L 316., 2012.11.14., 12. o., ELI: http://data.europa.eu/eli/reg/2012/1025/oj). ( 1 ) Az Európai Parlament és a Tanács (EU) 2016/943 irányelve (2016. június 8.) a nem nyilvános know-how és üzleti információk (üzleti titkok) jogosulatlan megszerzésével, hasznosításával és felfedésével szembeni védelemről (HL L 157., 2016.6.15., 1. o.). ( *1 ) Az Európai Parlament és a Tanács (EU) 2024/1689 rendelete (2024. június 13.) a mesterséges intelligenciára vonatkozó harmonizált szabályok megállapításáról, valamint a 300/2008/EK, a 167/2013/EU, a 168/2013/EU, az (EU) 2018/858, az (EU) 2018/1139 és az (EU) 2019/2144 rendelet, továbbá a 2014/90/EU, az (EU) 2016/797 és az (EU) 2020/1828 irányelv módosításáról (a mesterséges intelligenciáról szóló rendelet) (HL L, 2024/1689, 2024.7.12., ELI: http://data.europa.eu/eli/reg/2024/1689/oj).” ( *2 ) Az Európai Parlament és a Tanács (EU) 2024/1689 rendelete (2024. június 13.) a mesterséges intelligenciára vonatkozó harmonizált szabályok megállapításáról, valamint a 300/2008/EK, a 167/2013/EU, a 168/2013/EU, az (EU) 2018/858, az (EU) 2018/1139 és az (EU) 2019/2144 rendelet, továbbá a 2014/90/EU, az (EU) 2016/797 és az (EU) 2020/1828 irányelv módosításáról (a mesterséges intelligenciáról szóló rendelet) (HL L, 2024/1689, 2024.7.12., ELI: http://data.europa.eu/eli/reg/2024/1689/oj).” ( *3 ) Az Európai Parlament és a Tanács (EU) 2024/1689 rendelete (2024. június 13.) a mesterséges intelligenciára vonatkozó harmonizált szabályok megállapításáról, valamint a 300/2008/EK, a 167/2013/EU, a 168/2013/EU, az (EU) 2018/858, az (EU) 2018/1139 és az (EU) 2019/2144 rendelet, továbbá a 2014/90/EU, az (EU) 2016/797 és az (EU) 2020/1828 irányelv módosításáról (a mesterséges intelligenciáról szóló rendelet) (HL L, 2024/1689, 2024.7.12., ELI: http://data.europa.eu/eli/reg/2024/1689/oj).” ( *4 ) Az Európai Parlament és a Tanács (EU) 2024/1689 rendelete (2024. június 13.) a mesterséges intelligenciára vonatkozó harmonizált szabályok megállapításáról, valamint a 300/2008/EK, a 167/2013/EU, a 168/2013/EU, az (EU) 2018/858, az (EU) 2018/1139 és az (EU) 2019/2144 rendelet, továbbá a 2014/90/EU, az (EU) 2016/797 és az (EU) 2020/1828 irányelv módosításáról (a mesterséges intelligenciáról szóló rendelet) (HL L, 2024/1689, 2024.7.12., ELI: http://data.europa.eu/eli/reg/2024/1689/oj).” ( *5 ) Az Európai Parlament és a Tanács (EU) 2024/1689 rendelete (2024. június 13.) a mesterséges intelligenciára vonatkozó harmonizált szabályok megállapításáról, valamint a 300/2008/EK, a 167/2013/EU, a 168/2013/EU, az (EU) 2018/858, az (EU) 2018/1139 és az (EU) 2019/2144 rendelet, továbbá a 2014/90/EU, az (EU) 2016/797 és az (EU) 2020/1828 irányelv módosításáról (a mesterséges intelligenciáról szóló rendelet) (HL L, 2024/1689, 2024.7.12., ELI: http://data.europa.eu/eli/reg/2024/1689/oj).” ( *6 ) Az Európai Parlament és a Tanács (EU) 2024/1689 rendelete (2024. június 13.) a mesterséges intelligenciára vonatkozó harmonizált szabályok megállapításáról, valamint a 300/2008/EK, a 167/2013/EU, a 168/2013/EU, az (EU) 2018/858, az (EU) 2018/1139 és az (EU) 2019/2144 rendelet, továbbá a 2014/90/EU, az (EU) 2016/797 és az (EU) 2020/1828 irányelv módosításáról (a mesterséges intelligenciáról szóló rendelet) (HL L, 2024/1689, 2024.7.12., ELI: http://data.europa.eu/eli/reg/2024/1689/oj).” ( *7 ) Az Európai Parlament és a Tanács (EU) 2024/1689 rendelete (2024. június 13.) a mesterséges intelligenciára vonatkozó harmonizált szabályok megállapításáról, valamint a 300/2008/EK, a 167/2013/EU, a 168/2013/EU, az (EU) 2018/858, az (EU) 2018/1139 és az (EU) 2019/2144 rendelet, továbbá a 2014/90/EU, az (EU) 2016/797 és az (EU) 2020/1828 irányelv módosításáról (a mesterséges intelligenciáról szóló rendelet) (HL L, 2024/1689, 2024.7.12., ELI: http://data.europa.eu/eli/reg/2024/1689/oj).” ( *8 ) Az Európai Parlament és a Tanács (EU) 2024/1689 rendelete (2024. június 13.) a mesterséges intelligenciára vonatkozó harmonizált szabályok megállapításáról, valamint a 300/2008/EK, a 167/2013/EU, a 168/2013/EU, az (EU) 2018/858, az (EU) 2018/1139 és az (EU) 2019/2144 rendelet, továbbá a 2014/90/EU, az (EU) 2016/797 és az (EU) 2020/1828 irányelv módosításáról (a mesterséges intelligenciáról szóló rendelet) (HL L, 2024/1689, 2024.7.12., ELI: http://data.europa.eu/eli/reg/2024/1689/oj).” ( 1 ) Az Európai Parlament és a Tanács (EU) 2020/1828 irányelve (2020. november 25.) a fogyasztók kollektív érdekeinek védelmére irányuló képviseleti keresetekről és a 2009/22/EK irányelv hatályon kívül helyezéséről (HL L 409., 2020.12.4., 1. o.).','a80e62a8ca805594089ec9c99ed604ab4b93a818a9351fc76b8983b09f1b46ee','https://eur-lex.europa.eu/eli/reg/2024/1689/oj/hun#anx_XIV','https://eur-lex.europa.eu/eli/reg/2024/1689/oj/hun',now()
+from aic_legal_sources s where s.celex_number='02024R1689-20260727';
+
+select t.article_number,
+       count(*) filter (where t.paragraph_number is null) as melleklet_szint,
+       count(*) filter (where t.paragraph_number is not null) as pontok
+from aic_legal_text t join aic_legal_sources s on s.id = t.source_id
+where s.celex_number = '02024R1689-20260727' and t.article_number like 'Annex%'
+group by t.article_number order by t.article_number;
+
+commit;
