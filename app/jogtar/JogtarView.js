@@ -3,19 +3,17 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createClient } from "../../lib/supabase/client";
 
-// A jogtár világos olvasófelület a sötét alkalmazáson belül. Ez szándékos:
-// itt hosszú törvényszöveget kell olvasni, néha órákig. A többi oldal marad
-// sötét.
+// A jogtár világos olvasófelület a sötét alkalmazáson belül. Itt hosszú
+// törvényszöveget kell olvasni, ezért a tipográfia fontosabb, mint a kezelőelemek.
 
 const ALLAPOTOK = [
-  ["mind", "Mind"],
   ["jovahagyasra_var", "Jóváhagyásra vár"],
   ["jovahagyott", "Jóváhagyva"],
-  ["nincs_szabaly", "Nincs szabály"],
+  ["mind", "Mind"],
 ];
 
 const SZEREPKOROK = [
-  [null, "Minden szerepkör"],
+  ["", "Minden szerepkör"],
   ["deployer", "Alkalmazó"],
   ["provider", "Szolgáltató"],
   ["importer", "Importőr"],
@@ -38,27 +36,57 @@ function datum(ertek) {
   return new Intl.DateTimeFormat("hu-HU", { dateStyle: "medium" }).format(new Date(ertek));
 }
 
+// A törvény néha egyetlen bekezdésbe zsúfol több tucat számozott pontot – a
+// fogalommeghatározások tipikusan ilyenek. Olvashatatlan egy tömbben, ezért a
+// számozásnál tördeljük. A szöveget nem változtatjuk, csak sortörést teszünk be.
+function tordel(szoveg) {
+  if (!szoveg) return [];
+  const tiszta = szoveg.replace(/\r\n/g, "\n").trim();
+  if (tiszta.length < 400) return [tiszta];
+
+  const darabok = tiszta
+    .split(/(?=(?:^|\s)\d{1,3}\.\s+[„"])/g)
+    .map((d) => d.trim())
+    .filter(Boolean);
+
+  if (darabok.length > 1) return darabok;
+
+  const betus = tiszta
+    .split(/(?=(?:^|\s)[a-z]\)\s)/g)
+    .map((d) => d.trim())
+    .filter(Boolean);
+
+  return betus.length > 1 ? betus : [tiszta];
+}
+
 export default function JogtarView({ kezdoLista, iparagak, dontheto }) {
   const supabase = useMemo(() => createClient(), []);
 
   const [lista, setLista] = useState(kezdoLista);
-  const [reteg, setReteg] = useState("mind");
-  const [szerepkor, setSzerepkor] = useState(null);
-  const [allapot, setAllapot] = useState("mind");
-  const [kereses, setKereses] = useState("");
+  const [reteg, setReteg] = useState("torzs");
+  const [szerepkor, setSzerepkor] = useState("");
+  const [allapot, setAllapot] = useState("jovahagyasra_var");
 
   const [nyitottCikk, setNyitottCikk] = useState(null);
   const [cikk, setCikk] = useState(null);
+  const [nyitottSzabaly, setNyitottSzabaly] = useState(null);
   const [betolt, setBetolt] = useState(false);
   const [uzenet, setUzenet] = useState("");
 
   const [szerkesztett, setSzerkesztett] = useState({});
   const [mentesFolyik, setMentesFolyik] = useState(null);
 
+  // A törzs önálló szűrő, ezért az ugyanezt jelentő iparágat nem mutatjuk
+  // külön gombként.
+  const valodiIparagak = useMemo(
+    () => (iparagak || []).filter((i) => !["general", "all", "any"].includes(i.code)),
+    [iparagak]
+  );
+
   const listaFrissites = useCallback(async () => {
     const { data, error } = await supabase.rpc("aic_jogtar_lista", {
       p_reteg: reteg,
-      p_szerepkor: szerepkor,
+      p_szerepkor: szerepkor || null,
       p_allapot: allapot,
     });
     if (error) {
@@ -77,9 +105,12 @@ export default function JogtarView({ kezdoLista, iparagak, dontheto }) {
       setNyitottCikk({ sourceId, cikkszam });
       setBetolt(true);
       setSzerkesztett({});
+      setNyitottSzabaly(null);
       const { data, error } = await supabase.rpc("aic_jogtar_cikk", {
         p_source_id: sourceId,
         p_cikk: cikkszam,
+        p_szerepkor: szerepkor || null,
+        p_reteg: reteg,
       });
       setBetolt(false);
       if (error) {
@@ -87,17 +118,31 @@ export default function JogtarView({ kezdoLista, iparagak, dontheto }) {
         return;
       }
       setCikk(data);
+      const elso = (data?.szabalyok || []).find((sz) => !sz.jovahagyva);
+      setNyitottSzabaly(elso?.rule_code || null);
     },
-    [supabase]
+    [supabase, szerepkor, reteg]
   );
 
-  // Az első cikk megnyitása induláskor, hogy ne üres képernyő fogadjon.
+  // Induláskor az első olyan cikkre nyitunk, ahol van jóváhagyásra váró
+  // szabály. Üres cikkel indulni azt a látszatot kelti, hogy nem működik.
   useEffect(() => {
     if (nyitottCikk || !lista?.forrasok?.length) return;
-    const elso = lista.forrasok[0];
-    const elsoCikk = elso?.cikkek?.[0];
-    if (elsoCikk) cikkMegnyitasa(elsoCikk.source_id, elsoCikk.cikk);
+    let cel = null;
+    for (const f of lista.forrasok) {
+      cel = (f.cikkek || []).find((c) => c.szabaly_szam > c.jovahagyott);
+      if (cel) break;
+    }
+    if (!cel) cel = lista.forrasok[0]?.cikkek?.[0];
+    if (cel) cikkMegnyitasa(cel.source_id, cel.cikk);
   }, [lista, nyitottCikk, cikkMegnyitasa]);
+
+  // Szűrőváltásnál a megnyitott cikket is újra kell kérni, mert más szabályok
+  // tartoznak hozzá.
+  useEffect(() => {
+    if (nyitottCikk) cikkMegnyitasa(nyitottCikk.sourceId, nyitottCikk.cikkszam);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [szerepkor, reteg]);
 
   async function jovahagyas(ruleCode) {
     setMentesFolyik(ruleCode);
@@ -134,29 +179,17 @@ export default function JogtarView({ kezdoLista, iparagak, dontheto }) {
     await listaFrissites();
   }
 
-  const szurtForrasok = useMemo(() => {
-    if (!kereses.trim()) return lista?.forrasok || [];
-    const k = kereses.trim().toLowerCase();
-    return (lista?.forrasok || [])
-      .map((f) => ({
-        ...f,
-        cikkek: (f.cikkek || []).filter(
-          (c) =>
-            `${c.cikk}`.toLowerCase().includes(k) ||
-            (c.cim || "").toLowerCase().includes(k)
-        ),
-      }))
-      .filter((f) => f.cikkek.length > 0);
-  }, [lista, kereses]);
-
   const ossz = lista?.osszesites || {};
+  const szabalyok = cikk?.szabalyok || [];
 
   return (
     <div className="jogtar">
       <header className="jogtar-fejlec">
         <div>
           <p className="jogtar-eyebrow">Jogtár</p>
-          <h1>{cikk ? `${cikk.forras?.split("–")[0]?.trim()} — ${cikk.cikk}. cikk` : "Jogtár"}</h1>
+          <h1>
+            {cikk ? `${cikk.forras?.split("–")[0]?.trim()} — ${cikk.cikk}. cikk` : "Jogtár"}
+          </h1>
           {cikk?.cim && <p className="jogtar-cikkcim">{cikk.cim}</p>}
         </div>
         <div className="jogtar-szamlalo">
@@ -176,7 +209,7 @@ export default function JogtarView({ kezdoLista, iparagak, dontheto }) {
           >
             Törzs
           </button>
-          {iparagak.map((i) => (
+          {valodiIparagak.map((i) => (
             <button
               key={i.code}
               type="button"
@@ -196,9 +229,9 @@ export default function JogtarView({ kezdoLista, iparagak, dontheto }) {
         </div>
 
         <div className="jogtar-szuro-csoport">
-          <select value={szerepkor || ""} onChange={(e) => setSzerepkor(e.target.value || null)}>
+          <select value={szerepkor} onChange={(e) => setSzerepkor(e.target.value)}>
             {SZEREPKOROK.map(([ertek, cimke]) => (
-              <option key={cimke} value={ertek || ""}>{cimke}</option>
+              <option key={cimke} value={ertek}>{cimke}</option>
             ))}
           </select>
           <select value={allapot} onChange={(e) => setAllapot(e.target.value)}>
@@ -206,12 +239,6 @@ export default function JogtarView({ kezdoLista, iparagak, dontheto }) {
               <option key={ertek} value={ertek}>{cimke}</option>
             ))}
           </select>
-          <input
-            type="search"
-            value={kereses}
-            onChange={(e) => setKereses(e.target.value)}
-            placeholder="Keresés cikkszám vagy cím szerint"
-          />
         </div>
       </div>
 
@@ -219,11 +246,11 @@ export default function JogtarView({ kezdoLista, iparagak, dontheto }) {
 
       <div className="jogtar-torzs">
         <nav className="jogtar-nav" aria-label="Jogszabályhelyek">
-          {szurtForrasok.length === 0 && <p className="jogtar-ures">Nincs találat.</p>}
-          {szurtForrasok.map((f) => (
+          {(lista?.forrasok || []).length === 0 && <p className="jogtar-ures">Nincs találat.</p>}
+          {(lista?.forrasok || []).map((f) => (
             <section key={f.forras}>
               <p className="jogtar-nav-forras">{f.forras}</p>
-              {f.cikkek.map((c) => {
+              {(f.cikkek || []).map((c) => {
                 const aktiv =
                   nyitottCikk?.sourceId === c.source_id && nyitottCikk?.cikkszam === c.cikk;
                 return (
@@ -235,9 +262,7 @@ export default function JogtarView({ kezdoLista, iparagak, dontheto }) {
                   >
                     <span>{c.cikk}</span>
                     {c.szabaly_szam > 0 && (
-                      <em>
-                        {c.jovahagyott}/{c.szabaly_szam}
-                      </em>
+                      <em>{c.jovahagyott}/{c.szabaly_szam}</em>
                     )}
                   </button>
                 );
@@ -253,119 +278,156 @@ export default function JogtarView({ kezdoLista, iparagak, dontheto }) {
             <>
               <p className="jogtar-blokkcim">Hatályos jogszabályszöveg</p>
 
-              {(cikk.bekezdesek || []).length > 0 ? (
-                (cikk.bekezdesek || []).map((b) => (
-                  <p key={b.bekezdes} className="jogtar-torvenyszoveg">
-                    <span className="jogtar-bekezdesjel">({b.bekezdes})</span> {b.szoveg}
-                  </p>
-                ))
-              ) : (
-                <p className="jogtar-torvenyszoveg">{cikk.teljes_szoveg}</p>
-              )}
+              {(cikk.bekezdesek || []).length > 0
+                ? (cikk.bekezdesek || []).map((b) => (
+                    <div key={b.bekezdes}>
+                      {tordel(b.szoveg).map((resz, i) => (
+                        <p key={i} className="jogtar-torvenyszoveg">
+                          {i === 0 && <span className="jogtar-bekezdesjel">({b.bekezdes})</span>}{" "}
+                          {resz}
+                        </p>
+                      ))}
+                    </div>
+                  ))
+                : tordel(cikk.teljes_szoveg).map((resz, i) => (
+                    <p key={i} className="jogtar-torvenyszoveg">{resz}</p>
+                  ))}
 
               {cikk.melylink && (
-                <a className="jogtar-forraslink" href={cikk.melylink} target="_blank" rel="noreferrer">
+                <a
+                  className="jogtar-forraslink"
+                  href={cikk.melylink}
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   Hivatalos szöveg ↗
                 </a>
               )}
 
               <div className="jogtar-valaszto" />
 
-              {(cikk.szabalyok || []).length === 0 && (
+              {szabalyok.length === 0 && (
                 <div className="jogtar-nincs-szabaly">
-                  <p className="jogtar-blokkcim">Ehhez a helyhez nem tartozik szabály</p>
+                  <p className="jogtar-blokkcim">Ehhez a helyhez nem tartozik szabályzati előírás</p>
                   <p>{cikk.lefedettseg?.indok || "Nincs rögzített indoklás."}</p>
                 </div>
               )}
 
-              {(cikk.szabalyok || []).map((sz) => {
-                const jovahagyva = sz.jovahagyva;
+              {szabalyok.length > 0 && (
+                <p className="jogtar-blokkcim">
+                  Szabályzat — {szabalyok.length} előírás
+                </p>
+              )}
+
+              {/* A szabályok összecsukva állnak. Egyszerre egy van nyitva, mert
+                  a jóváhagyás egyenkénti döntés, nem átfutás. */}
+              {szabalyok.map((sz) => {
+                const nyitva = nyitottSzabaly === sz.rule_code;
                 const szoveg =
                   szerkesztett[sz.rule_code] !== undefined
                     ? szerkesztett[sz.rule_code]
                     : sz.szoveg;
-                const valtozott = szerkesztett[sz.rule_code] !== undefined
-                  && szerkesztett[sz.rule_code] !== sz.szoveg;
-
-                if (jovahagyva) {
-                  return (
-                    <div key={sz.rule_code} className="jogtar-kesz">
-                      <span>{sz.cim}</span>
-                      <em>jóváhagyva · {datum(sz.jovahagyva_mikor)}</em>
-                    </div>
-                  );
-                }
+                const valtozott =
+                  szerkesztett[sz.rule_code] !== undefined &&
+                  szerkesztett[sz.rule_code] !== sz.szoveg;
 
                 return (
-                  <section key={sz.rule_code} className="jogtar-szabaly">
-                    <div className="jogtar-szabaly-fejlec">
-                      <p className="jogtar-blokkcim">Amit ebből írtunk</p>
-                      <span className="jogtar-szerep">{SZEREP_CIMKE[sz.szerep] || sz.szerep}</span>
-                    </div>
-                    <h2>{sz.cim}</h2>
+                  <section
+                    key={sz.rule_code}
+                    className={
+                      sz.jovahagyva
+                        ? "jogtar-szabaly is-kesz"
+                        : nyitva
+                          ? "jogtar-szabaly is-nyitva"
+                          : "jogtar-szabaly"
+                    }
+                  >
+                    <button
+                      type="button"
+                      className="jogtar-szabaly-fej"
+                      onClick={() => setNyitottSzabaly(nyitva ? null : sz.rule_code)}
+                      aria-expanded={nyitva}
+                    >
+                      <span className="jogtar-szabaly-cim">{sz.cim}</span>
+                      <span className="jogtar-szerep">
+                        {SZEREP_CIMKE[sz.szerep] || sz.szerep}
+                      </span>
+                      {sz.jovahagyva && (
+                        <span className="jogtar-kesz-jel">
+                          jóváhagyva · {datum(sz.jovahagyva_mikor)}
+                        </span>
+                      )}
+                    </button>
 
-                    {(sz.kapcsolok || []).length > 0 && (
-                      <>
-                        <p className="jogtar-kapcsolo-cim">Akkor lép be, ha az eszközre igaz</p>
-                        <div className="jogtar-kapcsolok">
-                          {sz.kapcsolok.map((k) => (
-                            <span key={k.kulcs}>{k.nev}</span>
-                          ))}
-                        </div>
-                      </>
-                    )}
+                    {nyitva && (
+                      <div className="jogtar-szabaly-torzs">
+                        {(sz.kapcsolok || []).length > 0 && (
+                          <>
+                            <p className="jogtar-kapcsolo-cim">Akkor lép be, ha az eszközre igaz</p>
+                            <div className="jogtar-kapcsolok">
+                              {sz.kapcsolok.map((k) => (
+                                <span key={k.kulcs}>{k.nev}</span>
+                              ))}
+                            </div>
+                          </>
+                        )}
 
-                    <textarea
-                      className="jogtar-szoveg"
-                      value={szoveg}
-                      rows={5}
-                      disabled={!dontheto || mentesFolyik === sz.rule_code}
-                      onChange={(e) =>
-                        setSzerkesztett((elozo) => ({ ...elozo, [sz.rule_code]: e.target.value }))
-                      }
-                    />
+                        <textarea
+                          className="jogtar-szoveg"
+                          value={szoveg}
+                          rows={Math.min(14, Math.max(3, Math.ceil((szoveg || "").length / 90)))}
+                          disabled={!dontheto || mentesFolyik === sz.rule_code}
+                          onChange={(e) =>
+                            setSzerkesztett((elozo) => ({
+                              ...elozo,
+                              [sz.rule_code]: e.target.value,
+                            }))
+                          }
+                        />
 
-                    {sz.ertelmezes && (
-                      <div className="jogtar-ertelmezes">
-                        <strong>Értelmezés.</strong> {sz.ertelmezes}
-                      </div>
-                    )}
+                        {sz.ertelmezes && (
+                          <div className="jogtar-ertelmezes">
+                            <strong>Értelmezés.</strong> {sz.ertelmezes}
+                          </div>
+                        )}
 
-                    {sz.hatalyos_tol && new Date(sz.hatalyos_tol) > new Date() && (
-                      <p className="jogtar-jovobeli">
-                        Ez a kötelezettség {datum(sz.hatalyos_tol)} napjától alkalmazandó.
-                      </p>
-                    )}
+                        {sz.hatalyos_tol && new Date(sz.hatalyos_tol) > new Date() && (
+                          <p className="jogtar-jovobeli">
+                            Ez a kötelezettség {datum(sz.hatalyos_tol)} napjától alkalmazandó.
+                          </p>
+                        )}
 
-                    {dontheto && (
-                      <div className="jogtar-gombok">
-                        <button
-                          type="button"
-                          className="jogtar-gomb-elsodleges"
-                          disabled={mentesFolyik === sz.rule_code || valtozott}
-                          onClick={() => jovahagyas(sz.rule_code)}
-                        >
-                          {mentesFolyik === sz.rule_code ? "Mentés…" : "Jóváhagyom"}
-                        </button>
-                        <button
-                          type="button"
-                          disabled={!valtozott || mentesFolyik === sz.rule_code}
-                          onClick={() => szovegMentese(sz.rule_code)}
-                        >
-                          Mentés jóváhagyás nélkül
-                        </button>
-                        {valtozott && (
-                          <span className="jogtar-figyelmeztetes">
-                            A szöveget módosítottad — előbb mentsd, utána hagyhatod jóvá.
-                          </span>
+                        {dontheto && !sz.jovahagyva && (
+                          <div className="jogtar-gombok">
+                            <button
+                              type="button"
+                              className="jogtar-gomb-elsodleges"
+                              disabled={mentesFolyik === sz.rule_code || valtozott}
+                              onClick={() => jovahagyas(sz.rule_code)}
+                            >
+                              {mentesFolyik === sz.rule_code ? "Mentés…" : "Jóváhagyom"}
+                            </button>
+                            <button
+                              type="button"
+                              disabled={!valtozott || mentesFolyik === sz.rule_code}
+                              onClick={() => szovegMentese(sz.rule_code)}
+                            >
+                              Mentés jóváhagyás nélkül
+                            </button>
+                            {valtozott && (
+                              <span className="jogtar-figyelmeztetes">
+                                Módosítottad — előbb mentsd, utána hagyhatod jóvá.
+                              </span>
+                            )}
+                          </div>
+                        )}
+
+                        {!dontheto && (
+                          <p className="jogtar-figyelmeztetes">
+                            A jóváhagyás jogász vagy tulajdonos jogosultsághoz kötött.
+                          </p>
                         )}
                       </div>
-                    )}
-
-                    {!dontheto && (
-                      <p className="jogtar-figyelmeztetes">
-                        A szabályok jóváhagyása jogász vagy tulajdonos jogosultsághoz kötött.
-                      </p>
                     )}
                   </section>
                 );
