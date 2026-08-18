@@ -1,0 +1,456 @@
+/* EnergiaAI Kontroll – a jogtár teljes stíluslapja.
+   Ez a fájl önálló: csak a jogtár oldal importálja, a globals.css-hez nem kell nyúlni.
+   Helye: app/jogtar/jogtar.css  */
+
+.jogtar-page {
+  min-height: 100vh;
+  background: #FDFCFA;
+  color: #2C2C2A;
+}
+
+.jogtar-topbar {
+  padding: 14px 26px 0;
+}
+
+.jogtar-back {
+  font-size: 13px;
+  color: #5F5E5A;
+  text-decoration: none;
+}
+
+.jogtar-back:hover { color: #2C2C2A; }
+
+.jogtar {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 8px 20px 60px;
+}
+
+/* Fejléc */
+.jogtar-fejlec {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+  padding: 16px 6px 18px;
+  border-bottom: 1px solid #E8E6DF;
+}
+
+.jogtar-eyebrow {
+  margin: 0 0 4px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #888780;
+}
+
+.jogtar-fejlec h1 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 26px;
+  line-height: 1.25;
+  font-weight: 400;
+  color: #2C2C2A;
+}
+
+.jogtar-cikkcim {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: #5F5E5A;
+}
+
+.jogtar-szamlalo { text-align: right; }
+.jogtar-szamlalo span { display: block; font-size: 12px; color: #888780; }
+.jogtar-szamlalo strong { font-size: 22px; font-weight: 500; }
+.jogtar-szamlalo em { font-style: normal; font-size: 14px; color: #888780; }
+
+/* Szűrők */
+.jogtar-szurok {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 12px 6px;
+  border-bottom: 1px solid #E8E6DF;
+}
+
+.jogtar-szuro-csoport {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.jogtar-chip {
+  font-size: 12px;
+  padding: 6px 13px;
+  border-radius: 999px;
+  border: 1px solid #D3D1C7;
+  background: transparent;
+  color: #5F5E5A;
+  cursor: pointer;
+}
+
+.jogtar-chip:hover { border-color: #888780; }
+
+.jogtar-chip.is-active {
+  background: #2C2C2A;
+  border-color: #2C2C2A;
+  color: #FDFCFA;
+}
+
+.jogtar-szuro-csoport select,
+.jogtar-szuro-csoport input[type="search"] {
+  font-size: 13px;
+  padding: 7px 11px;
+  border: 1px solid #D3D1C7;
+  border-radius: 8px;
+  background: #FFFFFF;
+  color: #2C2C2A;
+  min-width: 150px;
+}
+
+.jogtar-uzenet {
+  margin: 12px 6px 0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #FCEBEB;
+  border: 1px solid #F09595;
+  color: #501313;
+  font-size: 13px;
+}
+
+/* Kéthasábos törzs */
+.jogtar-torzs {
+  display: grid;
+  grid-template-columns: minmax(0, 210px) minmax(0, 1fr);
+  gap: 0;
+  margin-top: 0;
+  border: 1px solid #E8E6DF;
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  overflow: hidden;
+  background: #FDFCFA;
+}
+
+@media (max-width: 760px) {
+  .jogtar-torzs { grid-template-columns: minmax(0, 1fr); }
+  .jogtar-nav { max-height: 220px; }
+}
+
+/* Bal oldali navigáció */
+.jogtar-nav {
+  border-right: 1px solid #E8E6DF;
+  background: #F7F5F0;
+  padding: 14px 0;
+  max-height: 76vh;
+  overflow-y: auto;
+}
+
+.jogtar-nav-forras {
+  margin: 12px 0 6px;
+  padding: 0 16px;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #888780;
+}
+
+.jogtar-nav section:first-child .jogtar-nav-forras { margin-top: 0; }
+
+.jogtar-nav-cikk {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 16px;
+  border: none;
+  border-left: 3px solid transparent;
+  background: transparent;
+  color: #5F5E5A;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.jogtar-nav-cikk:hover { background: #F1EFE8; }
+
+.jogtar-nav-cikk.is-active {
+  background: #FDFCFA;
+  border-left-color: #2C2C2A;
+  color: #2C2C2A;
+  font-weight: 500;
+}
+
+.jogtar-nav-cikk em {
+  font-style: normal;
+  font-size: 11px;
+  color: #888780;
+}
+
+/* Jobb oldali tartalom */
+.jogtar-tartalom {
+  padding: 26px 32px 34px;
+  max-width: 660px;
+}
+
+.jogtar-blokkcim {
+  margin: 0 0 12px;
+  font-size: 11px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #888780;
+}
+
+/* A törvényszöveg. Talpas betű, széles sortáv, keskeny hasáb – ez a rész
+   olvasásra való, nem átfutásra. */
+.jogtar-torvenyszoveg {
+  margin: 0 0 16px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 16px;
+  line-height: 1.85;
+  color: #2C2C2A;
+}
+
+.jogtar-bekezdesjel {
+  font-family: inherit;
+  font-size: 13px;
+  color: #888780;
+  margin-right: 2px;
+}
+
+.jogtar-forraslink {
+  font-size: 13px;
+  color: #185FA5;
+}
+
+.jogtar-valaszto {
+  height: 1px;
+  background: #E8E6DF;
+  margin: 26px 0;
+}
+
+/* A szabály – ez kerül a szabályzatba */
+.jogtar-szabaly { margin-bottom: 30px; }
+
+.jogtar-szabaly-fejlec {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.jogtar-szerep {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #EEEDFE;
+  color: #3C3489;
+}
+
+.jogtar-szabaly h2 {
+  margin: 0 0 12px;
+  font-size: 19px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.jogtar-kapcsolo-cim {
+  margin: 0 0 6px;
+  font-size: 12px;
+  color: #888780;
+}
+
+.jogtar-kapcsolok {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.jogtar-kapcsolok span {
+  font-size: 12px;
+  padding: 4px 11px;
+  border-radius: 999px;
+  background: #F1EFE8;
+  color: #444441;
+}
+
+.jogtar-szoveg {
+  width: 100%;
+  border: 1px solid #D3D1C7;
+  border-radius: 10px;
+  padding: 16px 18px;
+  background: #FFFFFF;
+  color: #2C2C2A;
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 1.8;
+  resize: vertical;
+}
+
+.jogtar-szoveg:focus {
+  outline: none;
+  border-color: #888780;
+}
+
+.jogtar-szoveg:disabled { background: #F7F5F0; color: #5F5E5A; }
+
+/* Az értelmezés. Semleges homokszín – jelzés, nem figyelmeztetés. */
+.jogtar-ertelmezes {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-left: 3px solid #B4B2A9;
+  background: #F1EFE8;
+  font-size: 13px;
+  line-height: 1.7;
+  color: #2C2C2A;
+}
+
+.jogtar-ertelmezes strong { font-weight: 500; }
+
+.jogtar-jovobeli {
+  margin: 12px 0 0;
+  font-size: 13px;
+  color: #854F0B;
+}
+
+.jogtar-gombok {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.jogtar-gombok button {
+  font-size: 13px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid #B4B2A9;
+  background: transparent;
+  color: #2C2C2A;
+  cursor: pointer;
+}
+
+.jogtar-gombok button:hover:not(:disabled) { border-color: #5F5E5A; }
+
+.jogtar-gomb-elsodleges {
+  background: #2C2C2A !important;
+  border-color: #2C2C2A !important;
+  color: #FDFCFA !important;
+}
+
+.jogtar-gombok button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.jogtar-figyelmeztetes {
+  font-size: 12px;
+  color: #854F0B;
+}
+
+/* Jóváhagyott szabály – nem zöld, csak lezárt */
+.jogtar-kesz {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  background: #F7F5F0;
+  border-left: 3px solid #2C2C2A;
+}
+
+.jogtar-kesz span { flex: 1; font-size: 14px; }
+.jogtar-kesz em { font-style: normal; font-size: 12px; color: #888780; }
+
+.jogtar-nincs-szabaly {
+  padding: 14px 16px;
+  border: 1px solid #E8E6DF;
+  border-radius: 10px;
+  background: #F7F5F0;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #5F5E5A;
+}
+
+.jogtar-nincs-szabaly p:last-child { margin: 0; }
+
+.jogtar-ures {
+  padding: 20px 16px;
+  font-size: 13px;
+  color: #888780;
+}
+
+.jogtar-empty {
+  max-width: 560px;
+  margin: 60px auto;
+  padding: 28px;
+  background: #FDFCFA;
+  border: 1px solid #E8E6DF;
+  border-radius: 12px;
+  color: #2C2C2A;
+}
+
+  margin-bottom: 10px;
+  background: #FFFFFF;
+  overflow: hidden;
+}
+
+.jogtar-szabaly.is-nyitva {
+  border-color: #B4B2A9;
+}
+
+.jogtar-szabaly.is-kesz {
+  background: #F7F5F0;
+  border-left: 3px solid #2C2C2A;
+}
+
+/* A becsukott sor: cím, szerepkör, és ha kész, a dátum. */
+.jogtar-szabaly-fej {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px;
+  border: none;
+  background: transparent;
+  color: #2C2C2A;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.jogtar-szabaly-fej:hover { background: #FAF9F6; }
+
+.jogtar-szabaly-cim {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.jogtar-kesz-jel {
+  font-size: 12px;
+  color: #888780;
+  white-space: nowrap;
+}
+
+.jogtar-szabaly-torzs {
+  padding: 4px 16px 18px;
+  border-top: 1px solid #F1EFE8;
+}
+
+.jogtar-szabaly-torzs .jogtar-kapcsolo-cim { margin-top: 12px; }
+
+/* A törvényszöveg tördelése miatt a bekezdésjel csak az első darabon van,
+   a folytatás beljebb kezdődik – így látszik, hogy összetartoznak. */
+.jogtar-torvenyszoveg + .jogtar-torvenyszoveg {
+  padding-left: 18px;
+}
