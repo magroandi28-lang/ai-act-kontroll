@@ -46,11 +46,11 @@ export default async function DashboardPage() {
             </span>
           </Link>
 
-          <Link className="dashboard-action" href="/szabalyzatok">
+          <Link className="dashboard-action" href="/jogtar">
             <span className="dashboard-action-icon dashboard-action-icon-list" aria-hidden="true">✓</span>
             <span>
-              <strong>Jóváhagyásra vár</strong>
-              <small>Szabályzatok beküldése és jóváhagyása.</small>
+              <strong>Jogtár</strong>
+              <small>Jogszabályok és szabályzatok jóváhagyása.</small>
             </span>
           </Link>
 
