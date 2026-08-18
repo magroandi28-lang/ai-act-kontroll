@@ -3,13 +3,13 @@ import { redirect } from "next/navigation";
 import { createClient } from "../../lib/supabase/server";
 import JogtarView from "./JogtarView";
 // A jogtár saját stíluslapja. Külön fájlban van, hogy a globals.css-t ne
-// kelljen bővíteni – így a világos olvasófelület nem keveredik a sötét
-// alkalmazás stílusaival, és bármikor cserélhető egy fájl felülírásával.
+// kelljen bővíteni: a világos olvasófelület nem keveredik a sötét alkalmazás
+// stílusaival, és egy fájl cseréjével áttervezhető.
 import "./jogtar.css";
 
-// A jogtár a katalógusból dolgozik: aic_provision_coverage, aic_trigger_catalogue,
-// aic_rule_legal_bases. A régi, használati profilokra és capability-listára épülő
-// modellből semmi nem kerül ide.
+// A jogtár szabályközpontú. Nem a törvényt olvastatjuk végig, hanem
+// szabályonként egy döntést kérünk: helyes következmény-e a megjelölt
+// jogszabályhelyből. A törvényszöveg ehhez bizonyíték, nem olvasnivaló.
 export const dynamic = "force-dynamic";
 
 export default async function JogtarPage() {
@@ -22,18 +22,16 @@ export default async function JogtarPage() {
   const { data: organisations } = await supabase.rpc("aic_szervezeteim");
   const organisation = organisations?.[0] || null;
 
-  // Az iparágak a szűrő harmadik oszlopához kellenek. Ma csak az energetika
-  // szerepel a szabályokon, de a lista magától bővül.
   const { data: industries } = await supabase
     .from("aic_industries")
     .select("code, name_hu")
     .eq("active", true)
     .order("sort_order");
 
-  const { data: lista, error } = await supabase.rpc("aic_jogtar_lista", {
+  const { data: lista, error } = await supabase.rpc("aic_jogtar_szabalyok", {
     p_reteg: "mind",
     p_szerepkor: null,
-    p_allapot: "mind",
+    p_allapot: "jovahagyasra_var",
   });
 
   return (
@@ -43,7 +41,7 @@ export default async function JogtarPage() {
       </div>
 
       {error ? (
-        <section className="jogtar-empty">
+        <section className="jogtar-hibalap">
           <h1>A jogtár nem tölthető be</h1>
           <p>{error.message}</p>
         </section>
