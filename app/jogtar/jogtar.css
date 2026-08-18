@@ -398,6 +398,9 @@
   color: #2C2C2A;
 }
 
+.jogtar-szabaly {
+  border: 1px solid #E8E6DF;
+  border-radius: 10px;
   margin-bottom: 10px;
   background: #FFFFFF;
   overflow: hidden;
