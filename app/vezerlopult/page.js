@@ -7,6 +7,10 @@ export default async function DashboardPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/");
 
+  // A Jogtár kártyán látszania kell, hány teendő van – enélkül csak az látja,
+  // aki magától benyit.
+  const { data: jogtar } = await supabase.rpc("aic_jogtar_allapot");
+
   const { data: profile } = await supabase
     .from("aic_user_profiles")
     .select("full_name")
@@ -51,6 +55,18 @@ export default async function DashboardPage() {
             <span>
               <strong>Jogtár</strong>
               <small>Jogszabályok és szabályzatok jóváhagyása.</small>
+              {jogtar && (
+                <small className="dashboard-action-jelzes">
+                  {jogtar.jovahagyasra_var > 0
+                    ? `${jogtar.jovahagyasra_var} jóváhagyásra vár`
+                    : "Minden szabály jóváhagyva"}
+                  {jogtar.felulvizsgalando > 0 && (
+                    <em className="dashboard-jelzes-valtozas">
+                      {jogtar.felulvizsgalando} változás miatt felülvizsgálandó
+                    </em>
+                  )}
+                </small>
+              )}
             </span>
           </Link>
 
