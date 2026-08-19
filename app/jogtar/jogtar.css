@@ -1,9 +1,9 @@
 /* EnergiaAI Kontroll – a jogtár stíluslapja.
-   Önálló fájl: csak az app/jogtar oldal importálja, a globals.css-hez nem kell nyúlni.
+   Önálló fájl: csak az app/jogtar oldal importálja.
    Helye: app/jogtar/jogtar.css
 
-   A felület világos és papírszerű, mert itt jogi szöveget kell olvasni és
-   dönteni. A háttér meleg tónusú, hogy a fehér lapok elkülönüljenek tőle. */
+   A szabály a főszöveg, a törvény bizonyíték. A tipográfia is ezt követi:
+   a szabály nagyobb és talpas, a törvényszöveg kisebb és összecsukott. */
 
 .jogtar-page {
   min-height: 100vh;
@@ -11,454 +11,311 @@
   color: #2C2C2A;
 }
 
-.jogtar-topbar {
-  padding: 14px 26px 0;
-}
+.jogtar-topbar { padding: 14px 26px 0; }
 
-.jogtar-back {
-  font-size: 13px;
-  color: #5F5E5A;
-  text-decoration: none;
-}
-
+.jogtar-back { font-size: 13px; color: #5F5E5A; text-decoration: none; }
 .jogtar-back:hover { color: #2C2C2A; }
 
 .jogtar {
   max-width: 1240px;
   margin: 0 auto;
-  padding: 10px 20px 60px;
+  /* Alul hely a rögzített döntési sávnak. */
+  padding: 10px 20px 96px;
 }
 
 .jogtar-hibalap {
-  max-width: 560px;
-  margin: 60px auto;
-  padding: 28px;
-  background: #FFFDF9;
-  border: 1px solid #DED9CE;
-  border-radius: 12px;
+  max-width: 560px; margin: 60px auto; padding: 28px;
+  background: #FFFDF9; border: 1px solid #DED9CE; border-radius: 12px;
 }
 
-/* Fejléc: a megnyitott szabály címe, mert a döntés tárgya ez. */
+/* Fejléc */
 .jogtar-fejlec {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 20px;
-  flex-wrap: wrap;
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 20px; flex-wrap: wrap;
   padding: 20px 26px;
-  background: #FFFDF9;
-  border: 1px solid #DED9CE;
-  border-radius: 12px;
+  background: #FFFDF9; border: 1px solid #DED9CE; border-radius: 12px;
   box-shadow: 0 1px 2px rgba(44, 44, 42, 0.05);
 }
 
 .jogtar-fejlec-bal { min-width: 0; }
 
 .jogtar-eyebrow {
-  margin: 0 0 6px;
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #8A8880;
+  margin: 0 0 6px; font-size: 11px; letter-spacing: 0.08em;
+  text-transform: uppercase; color: #8A8880;
 }
 
 .jogtar-fejlec h1 {
-  margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 25px;
-  line-height: 1.3;
-  font-weight: 400;
-  color: #23231F;
+  margin: 0; font-family: Georgia, "Times New Roman", serif;
+  font-size: 25px; line-height: 1.3; font-weight: 400; color: #23231F;
 }
 
-.jogtar-alcim {
-  margin: 6px 0 0;
-  font-size: 13px;
-  color: #5F5E5A;
+.jogtar-alcim { margin: 6px 0 0; font-size: 13px; color: #5F5E5A; }
+
+.jogtar-szamlalo { text-align: right; white-space: nowrap; }
+
+.jogtar-helyzet {
+  display: block; margin-bottom: 6px; font-size: 12px; color: #6B6A63;
 }
 
-.jogtar-szamlalo {
-  text-align: right;
-  white-space: nowrap;
-}
-
-.jogtar-szamlalo span {
-  display: block;
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #8A8880;
+.jogtar-szamlalo > span {
+  display: block; font-size: 11px; letter-spacing: 0.06em;
+  text-transform: uppercase; color: #8A8880;
 }
 
 .jogtar-szamlalo strong {
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 24px;
-  font-weight: 400;
+  font-family: Georgia, "Times New Roman", serif; font-size: 24px; font-weight: 400;
 }
 
-.jogtar-szamlalo em {
-  font-style: normal;
-  font-size: 15px;
-  color: #8A8880;
-}
+.jogtar-szamlalo em { font-style: normal; font-size: 15px; color: #8A8880; }
 
 /* Szűrők */
 .jogtar-szurok {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  flex-wrap: wrap;
-  padding: 14px 2px 4px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 14px; flex-wrap: wrap; padding: 14px 2px 4px;
 }
 
-.jogtar-szuro-csoport {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
+.jogtar-szuro-csoport { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 
 .jogtar-chip {
-  padding: 6px 14px;
-  border: 1px solid #CFCABD;
-  border-radius: 999px;
-  background: transparent;
-  color: #5F5E5A;
-  font-size: 13px;
-  cursor: pointer;
+  padding: 6px 14px; border: 1px solid #CFCABD; border-radius: 999px;
+  background: transparent; color: #5F5E5A; font-size: 13px; cursor: pointer;
 }
 
 .jogtar-chip:hover { border-color: #A9A498; color: #2C2C2A; }
 
 .jogtar-chip.is-active {
-  background: #2C2C2A;
-  border-color: #2C2C2A;
-  color: #FFFDF9;
+  background: #2C2C2A; border-color: #2C2C2A; color: #FFFDF9;
 }
 
+.jogtar-kereso {
+  width: 260px; padding: 6px 12px;
+  border: 1px solid #CFCABD; border-radius: 8px;
+  background: #FFFDF9; color: #2C2C2A; font-size: 13px;
+}
+
+.jogtar-kereso:focus { outline: 2px solid #B9B3A4; outline-offset: 1px; }
+
 .jogtar-szuro-csoport select {
-  padding: 6px 10px;
-  border: 1px solid #CFCABD;
-  border-radius: 8px;
-  background: #FFFDF9;
-  color: #2C2C2A;
-  font-size: 13px;
+  padding: 6px 10px; border: 1px solid #CFCABD; border-radius: 8px;
+  background: #FFFDF9; color: #2C2C2A; font-size: 13px;
 }
 
 .jogtar-uzenet {
-  margin: 10px 2px 0;
-  padding: 10px 14px;
-  border-radius: 8px;
-  background: #FBE9E7;
-  border: 1px solid #E8C4BE;
-  color: #8A2B20;
-  font-size: 13px;
+  margin: 10px 2px 0; padding: 10px 14px; border-radius: 8px;
+  background: #FBE9E7; border: 1px solid #E8C4BE; color: #8A2B20; font-size: 13px;
 }
 
-/* Két hasáb: szabálylista és döntési lap */
+/* Két hasáb */
 .jogtar-torzs {
-  display: grid;
-  grid-template-columns: minmax(0, 290px) minmax(0, 1fr);
-  margin-top: 12px;
-  border: 1px solid #DED9CE;
-  border-radius: 12px;
-  overflow: hidden;
-  background: #FFFDF9;
+  display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+  margin-top: 12px; border: 1px solid #DED9CE; border-radius: 12px;
+  overflow: hidden; background: #FFFDF9;
   box-shadow: 0 1px 3px rgba(44, 44, 42, 0.07);
 }
 
-@media (max-width: 860px) {
+@media (max-width: 900px) {
   .jogtar-torzs { grid-template-columns: minmax(0, 1fr); }
   .jogtar-nav { max-height: 260px; }
+  .jogtar-kereso { width: 100%; }
 }
 
-/* Bal oldal: szabályok, jogszabály szerint csoportosítva */
+/* Bal oldal */
 .jogtar-nav {
-  border-right: 1px solid #E4E0D6;
-  background: #F4F1EA;
-  padding: 12px 0 16px;
-  max-height: 78vh;
-  overflow-y: auto;
+  border-right: 1px solid #E4E0D6; background: #F4F1EA;
+  padding: 12px 0 16px; max-height: 74vh; overflow-y: auto;
 }
 
 .jogtar-nav-forras {
-  margin: 14px 0 6px;
-  padding: 0 16px;
-  font-size: 10px;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: #8A8880;
-  line-height: 1.5;
+  margin: 14px 0 6px; padding: 0 16px; font-size: 10px;
+  letter-spacing: 0.07em; text-transform: uppercase; color: #8A8880; line-height: 1.5;
 }
 
 .jogtar-nav section:first-child .jogtar-nav-forras { margin-top: 0; }
 
 .jogtar-nav-szabaly {
-  display: block;
-  width: 100%;
-  padding: 9px 16px;
-  border: none;
-  border-left: 3px solid transparent;
-  background: transparent;
-  text-align: left;
-  cursor: pointer;
+  display: block; width: 100%; padding: 9px 16px;
+  border: none; border-left: 3px solid transparent;
+  background: transparent; text-align: left; cursor: pointer;
 }
 
 .jogtar-nav-szabaly:hover { background: #EDE9DF; }
 
 .jogtar-nav-szabaly.is-active {
-  background: #FFFDF9;
-  border-left-color: #2C2C2A;
+  background: #FFFDF9; border-left-color: #2C2C2A;
 }
 
-.jogtar-nav-cim {
-  display: block;
-  font-size: 13px;
-  line-height: 1.45;
-  color: #2C2C2A;
-}
+/* Az elintézett tételek halványak – így látszik a haladás. */
+.jogtar-nav-szabaly.is-kesz { opacity: 0.45; }
+.jogtar-nav-szabaly.is-kesz.is-active { opacity: 0.75; }
 
+.jogtar-nav-cim { display: block; font-size: 13px; line-height: 1.45; color: #2C2C2A; }
 .jogtar-nav-szabaly.is-active .jogtar-nav-cim { font-weight: 500; }
 
-.jogtar-nav-meta {
-  display: block;
-  margin-top: 2px;
-  font-size: 11px;
-  color: #8A8880;
-}
+.jogtar-nav-meta { display: block; margin-top: 2px; font-size: 11px; color: #8A8880; }
 
-.jogtar-nav-pipa {
-  display: inline-block;
-  margin-top: 4px;
-  font-size: 10px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: #6B6A63;
-}
-
-/* Jobb oldal: a döntési lap */
-.jogtar-tartalom {
-  padding: 26px 34px 34px;
-  max-width: 720px;
-}
+/* Jobb oldal */
+.jogtar-tartalom { padding: 26px 34px 34px; max-width: 760px; }
 
 .jogtar-allapotsav {
-  margin: 0 0 18px;
-  padding: 8px 14px;
-  border-radius: 8px;
-  background: #F1EFE8;
-  border: 1px solid #E0DCD1;
-  font-size: 12px;
-  color: #5F5E5A;
+  margin: 0 0 18px; padding: 8px 14px; border-radius: 8px;
+  background: #F1EFE8; border: 1px solid #E0DCD1;
+  font-size: 12px; color: #5F5E5A;
+}
+
+/* Okker: figyelmeztetés, nem hiba. */
+.jogtar-allapotsav.is-figyelmeztet {
+  background: #F7EFDD; border-color: #E3D3AE; color: #7A5F22;
 }
 
 .jogtar-blokk {
-  margin: 0 0 28px;
-  padding: 0 0 24px;
-  border-bottom: 1px solid #EBE7DD;
+  margin: 0 0 26px; padding: 0 0 22px; border-bottom: 1px solid #EBE7DD;
 }
 
 .jogtar-blokk:last-of-type { border-bottom: none; padding-bottom: 8px; }
 
 .jogtar-blokkcim {
-  margin: 0 0 12px;
-  font-size: 11px;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: #8A8880;
+  margin: 0 0 12px; font-size: 11px; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #8A8880;
 }
 
+/* A szabály a főszöveg. */
 .jogtar-osszefoglalo {
-  margin: 0 0 14px;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 17px;
-  line-height: 1.6;
-  color: #23231F;
+  margin: 0 0 14px; font-family: Georgia, "Times New Roman", serif;
+  font-size: 19px; line-height: 1.55; color: #23231F;
 }
 
 .jogtar-szoveg {
-  width: 100%;
-  padding: 14px 16px;
-  border: 1px solid #DED9CE;
-  border-radius: 10px;
-  background: #FFFFFF;
-  color: #2C2C2A;
-  font-family: inherit;
-  font-size: 14px;
-  line-height: 1.7;
-  resize: vertical;
+  width: 100%; padding: 16px 18px;
+  border: 1px solid #DED9CE; border-radius: 10px; background: #FFFFFF;
+  color: #2C2C2A; font-family: Georgia, "Times New Roman", serif;
+  font-size: 16px; line-height: 1.75; resize: vertical;
 }
 
 .jogtar-szoveg:focus { outline: 2px solid #B9B3A4; outline-offset: 1px; }
 .jogtar-szoveg:disabled { background: #F7F5F0; color: #5F5E5A; }
 
-.jogtar-meta {
-  margin: 8px 0 0;
-  font-size: 12px;
-  color: #8A8880;
-}
+.jogtar-meta { margin: 8px 0 0; font-size: 12px; color: #8A8880; }
 
 /* Feltételek */
-.jogtar-kapcsolok {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
+.jogtar-kapcsolok { display: flex; flex-wrap: wrap; gap: 8px; }
 
 .jogtar-kapcsolok span {
-  padding: 5px 12px;
-  border-radius: 999px;
-  background: #F1EFE8;
-  border: 1px solid #E0DCD1;
-  font-size: 12px;
-  color: #4A4945;
-  cursor: help;
+  padding: 5px 12px; border-radius: 999px;
+  background: #F1EFE8; border: 1px solid #E0DCD1;
+  font-size: 12px; color: #4A4945; cursor: help;
 }
 
-/* Teendők */
-.jogtar-teendok {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.jogtar-teendok li {
-  padding: 10px 0;
-  border-bottom: 1px dotted #E0DCD1;
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-.jogtar-teendok li:last-child { border-bottom: none; }
-
-.jogtar-teendok strong { display: block; font-weight: 500; color: #23231F; }
-.jogtar-teendok span { display: block; margin-top: 3px; color: #5F5E5A; }
-
-/* Jogalap – a bizonyíték */
+/* Jogalap – bizonyíték, alapból összecsukva */
 .jogtar-jogalap {
-  padding: 16px 18px;
-  margin-bottom: 12px;
-  background: #FAF8F2;
-  border: 1px solid #E4E0D6;
-  border-left: 3px solid #B9B3A4;
-  border-radius: 8px;
+  margin-bottom: 10px; background: #F6F3EC;
+  border: 1px solid #DFD9CB; border-left: 4px solid #B0A98F;
+  border-radius: 8px; overflow: hidden;
 }
 
 .jogtar-jogalap-fej {
-  margin: 0;
-  font-size: 12px;
-  letter-spacing: 0.03em;
-  color: #6B6A63;
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 14px; width: 100%; padding: 12px 16px;
+  border: none; background: transparent; text-align: left; cursor: pointer;
+  font-size: 13px; line-height: 1.5; color: #4A4945;
 }
 
-.jogtar-jogalap-cim {
-  margin: 3px 0 12px;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 15px;
-  color: #23231F;
+.jogtar-jogalap-fej:hover { background: #F1EDE3; }
+.jogtar-jogalap-fej strong { font-weight: 500; color: #2C2C2A; }
+
+.jogtar-jogalap-fej em {
+  flex: none; font-style: normal; font-size: 12px;
+  color: #6B6A63; text-decoration: underline; text-underline-offset: 3px;
 }
 
-/* A törvényszöveg: talpas betű, széles sortáv, keskeny hasáb. */
+.jogtar-jogalap-torzs { padding: 4px 16px 16px; }
+
+/* A törvényszöveg kisebb, mint a szabály. */
 .jogtar-torvenyszoveg {
-  margin: 0 0 14px;
+  margin: 0 0 12px; font-family: Georgia, "Times New Roman", serif;
+  font-size: 14px; line-height: 1.75; color: #3A3A36;
+}
+
+.jogtar-bekezdesjel { font-size: 11px; color: #8A8880; vertical-align: 2px; }
+
+.jogtar-tobbi { margin-top: 14px; padding-top: 12px; border-top: 1px dotted #DCD6C7; }
+
+.jogtar-tobbi-cim {
+  margin: 0 0 8px; font-size: 11px; letter-spacing: 0.04em; color: #8A8880;
+}
+
+/* Bekezdésenként nyitható – így nem ömlik ki a teljes szakasz. */
+.jogtar-bekezdes {
+  display: block; width: 100%; margin-bottom: 4px; padding: 7px 10px;
+  border: none; border-radius: 6px; background: transparent;
+  text-align: left; cursor: pointer;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 15px;
-  line-height: 1.8;
-  color: #2C2C2A;
+  font-size: 13px; line-height: 1.6; color: #6E6C64;
 }
 
-.jogtar-torvenyszoveg.is-halvany { color: #77756E; font-size: 14px; }
-
-.jogtar-bekezdesjel {
-  font-size: 12px;
-  color: #8A8880;
-  vertical-align: 2px;
-}
-
-.jogtar-tobbi-gomb {
-  margin: 4px 0 12px;
-  padding: 0;
-  border: none;
-  background: transparent;
-  color: #6B6A63;
-  font-size: 12px;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  cursor: pointer;
-}
-
-.jogtar-tobbi-gomb:hover { color: #2C2C2A; }
+.jogtar-bekezdes:hover { background: #EFEBE0; color: #3A3A36; }
+.jogtar-bekezdes.is-nyitva { background: #FFFDF9; color: #3A3A36; }
 
 .jogtar-forraslink {
-  display: inline-block;
-  font-size: 12px;
-  color: #5F5E5A;
+  display: inline-block; margin-top: 6px; font-size: 12px; color: #5F5E5A;
 }
 
-.jogtar-tamogato {
-  margin: 8px 0 0;
-  font-size: 12px;
-  color: #8A8880;
+.jogtar-tamogato { margin: 8px 0 0; font-size: 12px; color: #8A8880; }
+
+.jogtar-indokolas {
+  width: 100%; padding: 14px 16px;
+  border: 1px solid #DED9CE; border-radius: 10px; background: #FFFFFF;
+  color: #3A3A36; font-family: inherit; font-size: 14px; line-height: 1.7;
+  resize: vertical;
 }
 
-.jogtar-ertelmezes {
-  margin: 0;
-  padding: 12px 14px;
-  background: #F1EFE8;
-  border-radius: 8px;
-  font-size: 14px;
-  line-height: 1.7;
-  color: #4A4945;
+.jogtar-indokolas:focus { outline: 2px solid #B9B3A4; outline-offset: 1px; }
+.jogtar-indokolas:disabled { background: #F7F5F0; color: #5F5E5A; }
+
+.jogtar-nincs-ertelmezes {
+  margin: 0; padding: 12px 14px; background: #F1EFE8; border-radius: 8px;
+  font-size: 13px; color: #6B6A63;
 }
 
-/* Döntés */
-.jogtar-dontes {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  padding-top: 6px;
+.jogtar-kovetkezmeny {
+  margin: 0; padding: 10px 14px; border-radius: 8px;
+  background: #F4F1EA; border: 1px solid #E4E0D6;
+  font-size: 13px; color: #5F5E5A;
 }
 
-.jogtar-dontes button {
-  padding: 9px 18px;
-  border: 1px solid #CFCABD;
-  border-radius: 8px;
-  background: #FFFDF9;
-  color: #2C2C2A;
-  font-size: 13px;
-  cursor: pointer;
+/* Döntési sáv – az ablak aljára ragadva */
+.jogtar-dontessav {
+  position: sticky; bottom: 0; z-index: 5;
+  margin: 16px -20px -96px;
+  padding: 12px 20px 16px;
+  background: rgba(231, 227, 218, 0.94);
+  backdrop-filter: blur(6px);
+  border-top: 1px solid #D5CFC2;
 }
 
-.jogtar-dontes button:hover:not(:disabled) { border-color: #A9A498; }
-.jogtar-dontes button:disabled { opacity: 0.45; cursor: default; }
+.jogtar-dontessav-belso {
+  max-width: 1240px; margin: 0 auto;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+
+.jogtar-dontessav button {
+  padding: 10px 20px; border: 1px solid #CFCABD; border-radius: 8px;
+  background: #FFFDF9; color: #2C2C2A; font-size: 14px; cursor: pointer;
+}
+
+.jogtar-dontessav button:hover:not(:disabled) { border-color: #A9A498; }
+.jogtar-dontessav button:disabled { opacity: 0.45; cursor: default; }
 
 .jogtar-gomb-elsodleges {
-  background: #2C2C2A !important;
-  border-color: #2C2C2A !important;
+  background: #2C2C2A !important; border-color: #2C2C2A !important;
   color: #FFFDF9 !important;
 }
 
-.jogtar-figyelmeztetes {
-  font-size: 12px;
-  color: #8A2B20;
-}
+.jogtar-figyelmeztetes { font-size: 12px; color: #8A2B20; }
 
-.jogtar-ures {
-  padding: 20px 16px;
-  font-size: 13px;
-  color: #8A8880;
-}
+.jogtar-ures { padding: 20px 16px; font-size: 13px; color: #8A8880; }
 
-.jogtar-nincs-talalat {
-  max-width: 540px;
-  padding: 10px 0;
-}
+.jogtar-nincs-talalat { max-width: 540px; padding: 10px 0; }
 
 .jogtar-nincs-talalat p:last-child {
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.75;
-  color: #5F5E5A;
+  margin: 0; font-size: 14px; line-height: 1.75; color: #5F5E5A;
 }
