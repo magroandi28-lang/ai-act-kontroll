@@ -283,13 +283,16 @@
 }
 
 /* Döntési sáv – az ablak aljára ragadva */
+/* Rögzítve az ablak aljához. A sticky itt nem megbízható, mert a szülő
+   magassága a tartalomtól függ; a fixed mindig látszik. */
 .jogtar-dontessav {
-  position: sticky; bottom: 0; z-index: 5;
-  margin: 16px -20px -96px;
+  position: fixed;
+  left: 0; right: 0; bottom: 0; z-index: 20;
   padding: 12px 20px 16px;
-  background: rgba(231, 227, 218, 0.94);
+  background: rgba(231, 227, 218, 0.96);
   backdrop-filter: blur(6px);
-  border-top: 1px solid #D5CFC2;
+  border-top: 1px solid #C9C2B2;
+  box-shadow: 0 -2px 10px rgba(44, 44, 42, 0.08);
 }
 
 .jogtar-dontessav-belso {
@@ -319,3 +322,56 @@
 .jogtar-nincs-talalat p:last-child {
   margin: 0; font-size: 14px; line-height: 1.75; color: #5F5E5A;
 }
+
+
+/* Jogszabályváltozás. Okker, mert figyelmeztetés és nem hiba – a piros a
+   hibáé marad. A régi szöveg áthúzva, a hatályos kiemelve. */
+.jogtar-valtozas {
+  margin: 0 0 22px;
+  padding: 14px 16px;
+  background: #F9F2E1;
+  border: 1px solid #E3D3AE;
+  border-left: 4px solid #C99B3A;
+  border-radius: 8px;
+}
+
+.jogtar-valtozas-fej {
+  margin: 0 0 10px;
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  color: #7A5F22;
+}
+
+.jogtar-valtozas-szoveg {
+  margin: 0 0 8px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.jogtar-valtozas-szoveg.is-regi {
+  color: #8A8880;
+  text-decoration: line-through;
+}
+
+.jogtar-valtozas-szoveg.is-uj {
+  color: #3A3A36;
+  text-decoration: underline;
+  text-decoration-color: #C99B3A;
+  text-underline-offset: 3px;
+}
+
+.jogtar-valtozas-labjegyzet {
+  margin: 10px 0 0;
+  font-size: 11px;
+  color: #8A8880;
+}
+
+/* A listában is látszik, melyik szabályt érintette változás. */
+.jogtar-nav-szabaly.is-valtozott {
+  background: #F9F2E1;
+  border-left-color: #C99B3A;
+  opacity: 1;
+}
+
+.jogtar-nav-szabaly.is-valtozott:hover { background: #F4EAD3; }
