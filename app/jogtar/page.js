@@ -49,7 +49,8 @@ export default async function JogtarPage() {
         <JogtarView
           kezdoLista={lista || { osszesites: {}, forrasok: [], sorrend: [] }}
           iparagak={industries || []}
-          dontheto={["compliance", "owner"].includes(organisation?.szerepem)}
+          // A lekérdezés member_role néven adja vissza a szerepkört.
+          dontheto={["compliance", "owner"].includes(organisation?.member_role)}
         />
       )}
     </main>
