@@ -52,6 +52,34 @@ function elsoMondat(szoveg, hossz = 110) {
   return tiszta.slice(0, hossz).replace(/\s\S*$/, "") + "…";
 }
 
+
+// Szóalapú összehasonlítás: a két szöveget egyetlen folyamban mutatjuk, a
+// törölt részt áthúzva, az újat kiemelve. Kétszer kiírni a teljes bekezdést
+// olvashatatlan, mert a szöveg nagy része azonos.
+function osszehasonlitas(regi, uj) {
+  const a = (regi || "").split(/(\s+)/);
+  const b = (uj || "").split(/(\s+)/);
+
+  // Közös eleje
+  let elol = 0;
+  while (elol < a.length && elol < b.length && a[elol] === b[elol]) elol += 1;
+
+  // Közös vége
+  let hatul = 0;
+  while (
+    hatul < a.length - elol &&
+    hatul < b.length - elol &&
+    a[a.length - 1 - hatul] === b[b.length - 1 - hatul]
+  ) hatul += 1;
+
+  return {
+    elotte: a.slice(0, elol).join(""),
+    torolt: a.slice(elol, a.length - hatul).join(""),
+    uj: b.slice(elol, b.length - hatul).join(""),
+    utana: a.slice(a.length - hatul).join(""),
+  };
+}
+
 export default function JogtarView({ kezdoLista, iparagak, dontheto }) {
   const supabase = useMemo(() => createClient(), []);
 
@@ -316,25 +344,33 @@ export default function JogtarView({ kezdoLista, iparagak, dontheto }) {
 
           {!betolt && szabaly && (
             <>
-              {szabaly.valtozas && (
-                <section className="jogtar-valtozas">
-                  <p className="jogtar-valtozas-fej">
-                    A jogalap megváltozott — {szabaly.valtozas.forras}{" "}
-                    {helyJelolese(szabaly.valtozas.cikk, null)} ·{" "}
-                    {datum(szabaly.valtozas.mikor)}
-                  </p>
-                  <p className="jogtar-valtozas-szoveg is-regi">
-                    {szabaly.valtozas.regi_szoveg}
-                  </p>
-                  <p className="jogtar-valtozas-szoveg is-uj">
-                    {szabaly.valtozas.uj_szoveg}
-                  </p>
-                  <p className="jogtar-valtozas-labjegyzet">
-                    Felül: a korábbi szöveg. Alul: a hatályos. A jóváhagyás a
-                    hatályos szövegre fog szólni.
-                  </p>
-                </section>
-              )}
+              {szabaly.valtozas && (() => {
+                const d = osszehasonlitas(
+                  szabaly.valtozas.regi_szoveg,
+                  szabaly.valtozas.uj_szoveg
+                );
+                return (
+                  <section className="jogtar-valtozas">
+                    <p className="jogtar-valtozas-fej">
+                      A jogalap megváltozott — {szabaly.valtozas.forras}{" "}
+                      {helyJelolese(szabaly.valtozas.cikk, null)} ·{" "}
+                      {datum(szabaly.valtozas.mikor)}
+                    </p>
+
+                    <p className="jogtar-valtozas-szoveg">
+                      <span className="jogtar-valtozatlan">{d.elotte}</span>
+                      {d.torolt && <del>{d.torolt}</del>}
+                      {d.uj && <ins>{d.uj}</ins>}
+                      <span className="jogtar-valtozatlan">{d.utana}</span>
+                    </p>
+
+                    <p className="jogtar-valtozas-labjegyzet">
+                      Áthúzva a törölt, kiemelve az új szövegrész. A halvány rész
+                      változatlan. A jóváhagyás a hatályos szövegre szól.
+                    </p>
+                  </section>
+                );
+              })()}
 
               {szabaly.jovahagyva && (
                 <p className="jogtar-allapotsav">
