@@ -1644,3 +1644,19 @@ input:disabled {
   border-radius: 12px;
   color: #2C2C2A;
 }
+
+/* Vezérlőpult – teendők jelzése a kártyán. Enélkül csak az látja a függő
+   feladatot, aki magától benyit az adott oldalra. */
+.dashboard-action-jelzes {
+  display: block;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #7FA9C8;
+}
+
+.dashboard-jelzes-valtozas {
+  display: block;
+  margin-top: 3px;
+  font-style: normal;
+  color: #D9A441;
+}
