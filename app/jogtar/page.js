@@ -7,9 +7,8 @@ import JogtarView from "./JogtarView";
 // stílusaival, és egy fájl cseréjével áttervezhető.
 import "./jogtar.css";
 
-// A jogtár szabályközpontú. Nem a törvényt olvastatjuk végig, hanem
-// szabályonként egy döntést kérünk: helyes következmény-e a megjelölt
-// jogszabályhelyből. A törvényszöveg ehhez bizonyíték, nem olvasnivaló.
+// A jogtár szabályközpontú: egy képernyő, egy döntés. A törvényszöveg
+// bizonyíték, ezért összecsukva áll a szabály alatt.
 export const dynamic = "force-dynamic";
 
 export default async function JogtarPage() {
@@ -32,6 +31,7 @@ export default async function JogtarPage() {
     p_reteg: "mind",
     p_szerepkor: null,
     p_allapot: "jovahagyasra_var",
+    p_kereses: null,
   });
 
   return (
@@ -47,7 +47,7 @@ export default async function JogtarPage() {
         </section>
       ) : (
         <JogtarView
-          kezdoLista={lista || { osszesites: {}, forrasok: [] }}
+          kezdoLista={lista || { osszesites: {}, forrasok: [], sorrend: [] }}
           iparagak={industries || []}
           dontheto={["compliance", "owner"].includes(organisation?.szerepem)}
         />
