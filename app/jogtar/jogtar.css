@@ -349,16 +349,24 @@
   line-height: 1.7;
 }
 
-.jogtar-valtozas-szoveg.is-regi {
-  color: #8A8880;
+/* A változatlan rész halvány, hogy a szem a módosításra essen. */
+.jogtar-valtozatlan { color: #9A978E; }
+
+.jogtar-valtozas-szoveg del {
+  color: #8A2B20;
+  background: #F6E2DE;
   text-decoration: line-through;
+  padding: 0 2px;
+  border-radius: 3px;
 }
 
-.jogtar-valtozas-szoveg.is-uj {
-  color: #3A3A36;
-  text-decoration: underline;
-  text-decoration-color: #C99B3A;
-  text-underline-offset: 3px;
+.jogtar-valtozas-szoveg ins {
+  color: #5A4410;
+  background: #F3E4BE;
+  text-decoration: none;
+  padding: 0 2px;
+  border-radius: 3px;
+  font-weight: 500;
 }
 
 .jogtar-valtozas-labjegyzet {
