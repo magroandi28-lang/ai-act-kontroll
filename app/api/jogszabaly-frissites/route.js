@@ -12,6 +12,7 @@
 
 import { createClient } from "@supabase/supabase-js";
 import { cikkekKinyerese, betoltendoTetelek } from "../../../lib/jogszabaly-feldolgozo";
+import { njtTetelek } from "../../../lib/njt-feldolgozo";
 
 // A feldolgozás percekig tarthat, ezért nem futhat élettartam-korlátos módban.
 export const dynamic = "force-dynamic";
@@ -67,15 +68,28 @@ async function forrastFrissit(supabase, forras) {
     }
 
     const html = await valasz.text();
-    const cikkek = cikkekKinyerese(html);
 
-    if (cikkek.length === 0) {
-      throw new Error(
-        "A letöltött oldalon nem található cikk. Lehet, hogy megváltozott a forrás szerkezete."
-      );
+    // Az értelmező a forráshoz tartozik: az EUR-Lex cikkfejlécek szerint
+    // bontja a szöveget, a njt.hu pedig a horgonyai szerint (SZ47@BE1@POA).
+    // A horgonyokra támaszkodni azért biztonságosabb, mert a szövegben lévő
+    // kereszthivatkozás ("a 36. § szerint") nem téveszti meg.
+    let tetelek;
+    if (forras.auto_update_parser === "njt") {
+      tetelek = njtTetelek(html, forras.auto_update_url);
+      if (tetelek.length === 0) {
+        throw new Error(
+          "A njt.hu oldalon nem találhatók jogszabályhely-horgonyok. Lehet, hogy megváltozott a forrás szerkezete."
+        );
+      }
+    } else {
+      const cikkek = cikkekKinyerese(html);
+      if (cikkek.length === 0) {
+        throw new Error(
+          "A letöltött oldalon nem található cikk. Lehet, hogy megváltozott a forrás szerkezete."
+        );
+      }
+      tetelek = betoltendoTetelek(cikkek, forras.auto_update_url);
     }
-
-    const tetelek = betoltendoTetelek(cikkek, forras.auto_update_url);
 
     let feldolgozott = 0;
     let valtozott = 0;
@@ -137,7 +151,7 @@ export async function GET(request) {
     .from("aic_legal_sources")
     .select("id, title, celex_number, auto_update_url, auto_update_parser")
     .eq("auto_update_enabled", true)
-    .eq("auto_update_parser", "eurlex")
+    .in("auto_update_parser", ["eurlex", "njt"])
     .not("auto_update_url", "is", null)
     .not("celex_number", "is", null);
 
