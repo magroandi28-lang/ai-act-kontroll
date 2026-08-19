@@ -9,6 +9,7 @@ import { createClient } from "../../lib/supabase/client";
 
 const ALLAPOTOK = [
   ["jovahagyasra_var", "Jóváhagyásra vár"],
+  ["felulvizsgalando", "Változás miatt felülvizsgálandó"],
   ["jovahagyott", "Jóváhagyva"],
   ["mind", "Mind"],
 ];
@@ -281,6 +282,7 @@ export default function JogtarView({ kezdoLista, iparagak, dontheto }) {
                     "jogtar-nav-szabaly",
                     nyitottKod === sz.rule_code ? "is-active" : "",
                     sz.jovahagyva ? "is-kesz" : "",
+                    sz.felulvizsgalando ? "is-valtozott" : "",
                   ].join(" ").trim()}
                   onClick={() => szabalyMegnyitasa(sz.rule_code)}
                 >
@@ -314,14 +316,29 @@ export default function JogtarView({ kezdoLista, iparagak, dontheto }) {
 
           {!betolt && szabaly && (
             <>
+              {szabaly.valtozas && (
+                <section className="jogtar-valtozas">
+                  <p className="jogtar-valtozas-fej">
+                    A jogalap megváltozott — {szabaly.valtozas.forras}{" "}
+                    {helyJelolese(szabaly.valtozas.cikk, null)} ·{" "}
+                    {datum(szabaly.valtozas.mikor)}
+                  </p>
+                  <p className="jogtar-valtozas-szoveg is-regi">
+                    {szabaly.valtozas.regi_szoveg}
+                  </p>
+                  <p className="jogtar-valtozas-szoveg is-uj">
+                    {szabaly.valtozas.uj_szoveg}
+                  </p>
+                  <p className="jogtar-valtozas-labjegyzet">
+                    Felül: a korábbi szöveg. Alul: a hatályos. A jóváhagyás a
+                    hatályos szövegre fog szólni.
+                  </p>
+                </section>
+              )}
+
               {szabaly.jovahagyva && (
                 <p className="jogtar-allapotsav">
                   Jóváhagyva · {datum(szabaly.jovahagyva_mikor)}
-                </p>
-              )}
-              {szabaly.generacio === "elso" && !szabaly.jovahagyva && (
-                <p className="jogtar-allapotsav is-figyelmeztet">
-                  Első generációs szöveg — a projekt korai szakaszából. Érdemes figyelmesen átolvasni.
                 </p>
               )}
 
