@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "../../../lib/supabase/client";
-import TriggerCombobox from "./TriggerCombobox";
 
 // Egy kártya, egy kérdés. Válasz után a kártya felfelé kicsúszik, a következő
 // alulról érkezik. A kérdéssort a kapcsolókatalógus adja: a szerepkör dönti el,
@@ -41,10 +40,6 @@ export default function NewSystemForm({
 
   const [lepes, setLepes] = useState(0);
   const [irany, setIrany] = useState("elore");
-  const [kilepes, setKilepes] = useState(null);
-  const [megerositettCsoportok, setMegerositettCsoportok] = useState({});
-  const [megerositettKerdesek, setMegerositettKerdesek] = useState({});
-  const animacioIdozito = useRef(null);
 
   // A kérdéseket a szerver adja, a válaszok minden változásánál újra. Így a
   // követő kérdések ott jelennek meg, ahol kell, és a felület nem dönt semmit.
@@ -131,131 +126,49 @@ export default function NewSystemForm({
   const aktualis = kartyak[Math.min(lepes, kartyak.length - 1)];
   const utolso = lepes >= kartyak.length - 1;
 
-  function kerdesErtek(kerdes) {
-    if (Object.prototype.hasOwnProperty.call(valaszok, kerdes.kulcs)) {
-      return valaszok[kerdes.kulcs];
-    }
-    return kerdes.valasz ?? null;
-  }
-
-  const megjelenitettValaszok = useMemo(() => {
-    const eredmeny = { ...valaszok };
-    kerdesek.forEach((kerdes) => {
-      if (!Object.prototype.hasOwnProperty.call(eredmeny, kerdes.kulcs) && kerdes.valasz !== null) {
-        eredmeny[kerdes.kulcs] = kerdes.valasz;
-      }
-    });
-    return eredmeny;
-  }, [kerdesek, valaszok]);
-
   const tovabbLehet = useMemo(() => {
     if (!aktualis) return false;
     if (aktualis.fajta === "nev") return nev.trim().length > 0;
     if (aktualis.fajta === "tipus") return !!tipusKod;
-    if (aktualis.fajta === "iparag") return !!iparag;
     if (aktualis.fajta === "szerepkor") return szerepkorok.length > 0;
-    if (aktualis.fajta === "csoport") return !!megerositettCsoportok[aktualis.csoport];
-    if (aktualis.fajta === "kerdes") {
-      if (aktualis.kerdes.lehetosegek?.length) {
-        return !!megerositettKerdesek[aktualis.kerdes.kulcs];
-      }
-      return typeof kerdesErtek(aktualis.kerdes) === "boolean";
-    }
-    if (aktualis.fajta === "rendeltetes") return rendeltetes.trim().length >= 10;
     return true;
-  }, [aktualis, nev, tipusKod, iparag, szerepkorok, valaszok, megerositettCsoportok, megerositettKerdesek, rendeltetes]);
-
-  function lepestValt(cel, ujIrany) {
-    if (kilepes || cel < 0 || cel >= kartyak.length || cel === lepes) return;
-    setKilepes(ujIrany);
-    if (animacioIdozito.current) clearTimeout(animacioIdozito.current);
-    animacioIdozito.current = setTimeout(() => {
-      setIrany(ujIrany);
-      setLepes(cel);
-      setKilepes(null);
-    }, 220);
-  }
+  }, [aktualis, nev, tipusKod, szerepkorok]);
 
   function tovabb() {
     if (!tovabbLehet || utolso) return;
-    if (aktualis.fajta === "csoport") {
-      setValaszok((elozo) => {
-        const uj = { ...elozo };
-        aktualis.tetelek.forEach((tetel) => {
-          if (!Object.prototype.hasOwnProperty.call(uj, tetel.kulcs)) {
-            uj[tetel.kulcs] = tetel.valasz === true;
-          }
-        });
-        return uj;
-      });
-    }
-    lepestValt(lepes + 1, "elore");
+    setIrany("elore");
+    setLepes((l) => l + 1);
   }
 
   function vissza() {
     if (lepes === 0) return;
-    lepestValt(lepes - 1, "vissza");
+    setIrany("vissza");
+    setLepes((l) => l - 1);
   }
 
-  function valaszValt(kulcs, ertek, csoport = null) {
+  function valaszValt(kulcs, ertek) {
     setValaszok((elozo) => ({ ...elozo, [kulcs]: ertek }));
-    if (csoport) {
-      setMegerositettCsoportok((elozo) => ({ ...elozo, [csoport]: true }));
-    }
-  }
-
-  function tobbesValaszValt(kulcs, kod) {
-    setValaszok((elozo) => {
-      const jelenlegi = Array.isArray(elozo[kulcs]) ? elozo[kulcs] : [];
-      const uj = jelenlegi.includes(kod)
-        ? jelenlegi.filter((ertek) => ertek !== kod)
-        : [...jelenlegi, kod];
-      return { ...elozo, [kulcs]: uj };
-    });
-    setMegerositettKerdesek((elozo) => ({ ...elozo, [kulcs]: true }));
   }
 
   // "Egyiket sem": a csoport minden tétele nemre áll, és lépünk tovább.
-  function egyikSem(csoport, tetelek) {
+  function egyikSem(tetelek) {
     setValaszok((elozo) => {
       const uj = { ...elozo };
       tetelek.forEach((t) => { uj[t.kulcs] = false; });
       return uj;
     });
-    setMegerositettCsoportok((elozo) => ({ ...elozo, [csoport]: true }));
-    setTimeout(() => lepestValt(lepes + 1, "elore"), 120);
-  }
-
-  function egyikSemTobbesKerdes(kerdes) {
-    setValaszok((elozo) => ({ ...elozo, [kerdes.kulcs]: [] }));
-    setMegerositettKerdesek((elozo) => ({ ...elozo, [kerdes.kulcs]: true }));
-    setTimeout(() => lepestValt(lepes + 1, "elore"), 120);
+    setTimeout(tovabb, 120);
   }
 
   function szerepkorValt(kod) {
     setSzerepkorok((elozo) =>
       elozo.includes(kod) ? elozo.filter((x) => x !== kod) : [...elozo, kod]
     );
-    setValaszok({});
-    setMegerositettCsoportok({});
-    setMegerositettKerdesek({});
   }
-
-  useEffect(() => {
-    setLepes((aktualisLepes) => Math.min(aktualisLepes, Math.max(kartyak.length - 1, 0)));
-  }, [kartyak.length]);
-
-  useEffect(() => () => {
-    if (animacioIdozito.current) clearTimeout(animacioIdozito.current);
-  }, []);
 
   // Enter visz tovább, kivéve a hosszú szöveges mezőben.
   useEffect(() => {
     function billentyu(e) {
-      const cel = e.target;
-      const interaktivElem = cel instanceof HTMLElement &&
-        (cel.tagName === "BUTTON" || cel.getAttribute("role") === "combobox");
-      if (interaktivElem) return;
       if (e.key === "Enter" && !e.shiftKey && aktualis?.fajta !== "rendeltetes") {
         e.preventDefault();
         if (utolso) mentesKezelese();
@@ -276,9 +189,8 @@ export default function NewSystemForm({
       p_organisation_id: organisationId,
       p_nev: tisztaNev,
       p_system_type_code: tipusKod,
-      p_valaszok: megjelenitettValaszok,
+      p_valaszok: valaszok,
       p_szerepkorok: szerepkorok,
-      p_iparag: iparag,
       p_rendeltetes: rendeltetes.trim() || null,
       p_system_id: null,
     });
@@ -313,13 +225,7 @@ export default function NewSystemForm({
       <div className="felvitel-szinpad">
         <section
           key={`${lepes}-${aktualis?.fajta}-${aktualis?.csoport || ""}`}
-          className={
-            kilepes
-              ? `felvitel-kartya ki-${kilepes}`
-              : irany === "elore"
-                ? "felvitel-kartya be-elore"
-                : "felvitel-kartya be-vissza"
-          }
+          className={irany === "elore" ? "felvitel-kartya be-elore" : "felvitel-kartya be-vissza"}
         >
           {aktualis?.fajta === "nev" && (
             <>
@@ -345,13 +251,7 @@ export default function NewSystemForm({
                     key={t.type_code}
                     type="button"
                     className={tipusKod === t.type_code ? "felvitel-opcio is-aktiv" : "felvitel-opcio"}
-                    onClick={() => {
-                      if (tipusKod === t.type_code) return;
-                      setTipusKod(t.type_code);
-                      setValaszok({});
-                      setMegerositettCsoportok({});
-                      setMegerositettKerdesek({});
-                    }}
+                    onClick={() => { setTipusKod(t.type_code); setValaszok({}); }}
                   >
                     <strong>{t.name_hu}</strong>
                     {t.description_hu && <em>{t.description_hu}</em>}
@@ -374,13 +274,7 @@ export default function NewSystemForm({
                     key={i.code}
                     type="button"
                     className={iparag === i.code ? "felvitel-opcio is-aktiv" : "felvitel-opcio"}
-                    onClick={() => {
-                      if (iparag === i.code) return;
-                      setIparag(i.code);
-                      setValaszok({});
-                      setMegerositettCsoportok({});
-                      setMegerositettKerdesek({});
-                    }}
+                    onClick={() => setIparag(i.code)}
                   >
                     <strong>{i.name_hu}</strong>
                   </button>
@@ -416,49 +310,28 @@ export default function NewSystemForm({
             <>
               <h2>{aktualis.fej.cim}</h2>
               {aktualis.fej.leiras && <p className="felvitel-sugo">{aktualis.fej.leiras}</p>}
-              {aktualis.csoport === "mukodes" ? (
-                <TriggerCombobox
-                  questions={aktualis.tetelek}
-                  values={megjelenitettValaszok}
-                  onChange={(kulcs, ertek) => valaszValt(kulcs, ertek, aktualis.csoport)}
-                />
-              ) : (
-                <div className="felvitel-pipak">
-                  {aktualis.tetelek.map((t) => (
-                    <label
-                      key={t.kulcs}
-                      className={kerdesErtek(t) === true ? "felvitel-pipa is-aktiv" : "felvitel-pipa"}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={kerdesErtek(t) === true}
-                        onChange={(e) => valaszValt(t.kulcs, e.target.checked, aktualis.csoport)}
-                      />
-                      <span>
-                        <strong>{t.nev}</strong>
-                        {t.magyarazat && <em>{t.magyarazat}</em>}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              )}
-              {!megerositettCsoportok[aktualis.csoport] &&
-                aktualis.tetelek.some((tetel) => kerdesErtek(tetel) === true) && (
-                  <button
-                    type="button"
-                    className="felvitel-megerosites"
-                    onClick={() => setMegerositettCsoportok((elozo) => ({
-                      ...elozo,
-                      [aktualis.csoport]: true,
-                    }))}
+              <div className="felvitel-pipak">
+                {aktualis.tetelek.map((t) => (
+                  <label
+                    key={t.kulcs}
+                    className={valaszok[t.kulcs] === true ? "felvitel-pipa is-aktiv" : "felvitel-pipa"}
                   >
-                    A kijelölés megfelelő
-                  </button>
-                )}
+                    <input
+                      type="checkbox"
+                      checked={valaszok[t.kulcs] === true}
+                      onChange={(e) => valaszValt(t.kulcs, e.target.checked)}
+                    />
+                    <span>
+                      <strong>{t.nev}</strong>
+                      {t.magyarazat && <em>{t.magyarazat}</em>}
+                    </span>
+                  </label>
+                ))}
+              </div>
               <button
                 type="button"
                 className="felvitel-egyiksem"
-                onClick={() => egyikSem(aktualis.csoport, aktualis.tetelek)}
+                onClick={() => egyikSem(aktualis.tetelek)}
               >
                 {aktualis.fej.nincs_egyik_cimke || "Egyiket sem"}
               </button>
@@ -471,57 +344,22 @@ export default function NewSystemForm({
               {aktualis.kerdes.magyarazat && (
                 <p className="felvitel-sugo">{aktualis.kerdes.magyarazat}</p>
               )}
-              {aktualis.kerdes.lehetosegek?.length ? (
-                <>
-                  <div className="felvitel-tobbes">
-                    {aktualis.kerdes.lehetosegek.map((lehetoseg) => {
-                      const aktualisErtek = kerdesErtek(aktualis.kerdes);
-                      const kijelolt = Array.isArray(aktualisErtek) &&
-                        aktualisErtek.includes(lehetoseg.kod);
-                      return (
-                        <button
-                          type="button"
-                          key={lehetoseg.kod}
-                          className={kijelolt ? "felvitel-opcio is-aktiv" : "felvitel-opcio"}
-                          onClick={() => tobbesValaszValt(aktualis.kerdes.kulcs, lehetoseg.kod)}
-                        >
-                          <strong>{lehetoseg.cimke}</strong>
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <button
-                    type="button"
-                    className="felvitel-egyiksem"
-                    onClick={() => egyikSemTobbesKerdes(aktualis.kerdes)}
-                  >
-                    Egyiket sem
-                  </button>
-                </>
-              ) : (
-                <div className="felvitel-igennem">
-                  <button
-                    type="button"
-                    className={kerdesErtek(aktualis.kerdes) === true ? "felvitel-opcio is-aktiv" : "felvitel-opcio"}
-                    onClick={() => {
-                      valaszValt(aktualis.kerdes.kulcs, true);
-                      setTimeout(() => lepestValt(lepes + 1, "elore"), 120);
-                    }}
-                  >
-                    <strong>Igen</strong>
-                  </button>
-                  <button
-                    type="button"
-                    className={kerdesErtek(aktualis.kerdes) === false ? "felvitel-opcio is-aktiv" : "felvitel-opcio"}
-                    onClick={() => {
-                      valaszValt(aktualis.kerdes.kulcs, false);
-                      setTimeout(() => lepestValt(lepes + 1, "elore"), 120);
-                    }}
-                  >
-                    <strong>Nem</strong>
-                  </button>
-                </div>
-              )}
+              <div className="felvitel-igennem">
+                <button
+                  type="button"
+                  className={valaszok[aktualis.kerdes.kulcs] === true ? "felvitel-opcio is-aktiv" : "felvitel-opcio"}
+                  onClick={() => { valaszValt(aktualis.kerdes.kulcs, true); setTimeout(tovabb, 120); }}
+                >
+                  <strong>Igen</strong>
+                </button>
+                <button
+                  type="button"
+                  className={valaszok[aktualis.kerdes.kulcs] === false ? "felvitel-opcio is-aktiv" : "felvitel-opcio"}
+                  onClick={() => { valaszValt(aktualis.kerdes.kulcs, false); setTimeout(tovabb, 120); }}
+                >
+                  <strong>Nem</strong>
+                </button>
+              </div>
             </>
           )}
 
@@ -573,7 +411,7 @@ export default function NewSystemForm({
       {uzenet && <p className="felvitel-uzenet" role="alert">{uzenet}</p>}
 
       <div className="felvitel-lab">
-        <button type="button" className="felvitel-vissza" onClick={vissza} disabled={lepes === 0 || !!kilepes}>
+        <button type="button" className="felvitel-vissza" onClick={vissza} disabled={lepes === 0}>
           Vissza
         </button>
 
@@ -582,7 +420,7 @@ export default function NewSystemForm({
             type="button"
             className="felvitel-tovabb"
             onClick={mentesKezelese}
-            disabled={mentes || !!kilepes}
+            disabled={mentes}
           >
             {mentes ? "Mentés…" : "Rendszer mentése"}
           </button>
@@ -591,11 +429,9 @@ export default function NewSystemForm({
             type="button"
             className="felvitel-tovabb"
             onClick={tovabb}
-            disabled={!tovabbLehet || !!kilepes}
+            disabled={!tovabbLehet}
           >
-            {aktualis?.fajta === "csoport" || aktualis?.kerdes?.lehetosegek?.length
-              ? "Megerősítem és tovább"
-              : "Tovább"}
+            Tovább
           </button>
         )}
 
