@@ -1,4 +1,8 @@
 .felvitel-page {
+  --felvitel-bronz: #b36949;
+  --felvitel-bronz-vilagos: #c17a5a;
+  --felvitel-bronz-sotet: #4d3125;
+  --felvitel-bronz-rgb: 179, 105, 73;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -34,8 +38,8 @@
 
 .felvitel {
   width: 100%;
-  max-width: 780px;
-  min-height: calc(100vh - 64px);
+  max-width: 720px;
+  min-height: calc(100vh - 84px);
   margin: 0 auto;
   padding: 0 20px 24px;
   display: flex;
@@ -53,7 +57,7 @@
 .felvitel-halado-sav {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #df5e39, #f29a66);
+  background: linear-gradient(90deg, var(--felvitel-bronz), var(--felvitel-bronz-sotet));
   transition: width 360ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -69,8 +73,8 @@
 
 .felvitel-szinpad {
   position: relative;
-  min-height: 570px;
-  padding: 24px 0 18px;
+  min-height: 455px;
+  padding: 16px 0 12px;
   display: flex;
   flex: 1;
   align-items: center;
@@ -81,9 +85,9 @@
 .felvitel-kartya {
   position: relative;
   width: 100%;
-  min-height: 430px;
-  max-height: min(660px, calc(100vh - 175px));
-  padding: 32px 34px;
+  min-height: 340px;
+  max-height: min(560px, calc(100vh - 190px));
+  padding: 26px 28px;
   overflow-y: auto;
   border: 1px solid #22394a;
   border-radius: 22px;
@@ -157,7 +161,7 @@
 .felvitel-felirat {
   display: block;
   margin-bottom: 10px;
-  color: #e77950;
+  color: var(--felvitel-bronz);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -168,7 +172,7 @@
   max-width: 650px;
   margin: 0 0 9px;
   color: #f5f9fb;
-  font-size: clamp(22px, 3.2vw, 30px);
+  font-size: clamp(21px, 2.7vw, 27px);
   font-weight: 620;
   line-height: 1.24;
 }
@@ -203,8 +207,8 @@
 }
 
 .felvitel-mezo:focus {
-  border-color: #df6842;
-  box-shadow: 0 0 0 3px rgba(223, 104, 66, 0.12);
+  border-color: var(--felvitel-bronz);
+  box-shadow: 0 0 0 3px rgba(var(--felvitel-bronz-rgb), 0.12);
 }
 
 .felvitel-mezo::placeholder { color: #526a7a; }
@@ -230,7 +234,7 @@
 }
 
 .felvitel-opcio:hover { transform: translateY(-1px); border-color: #4f7187; }
-.felvitel-opcio.is-aktiv { border-color: #df6842; background: #192c38; box-shadow: inset 3px 0 #df6842; }
+.felvitel-opcio.is-aktiv { border-color: var(--felvitel-bronz); background: #192c38; box-shadow: inset 3px 0 var(--felvitel-bronz); }
 .felvitel-opcio strong { display: block; font-size: 14px; font-weight: 600; }
 .felvitel-opcio em { display: block; margin-top: 3px; color: #829bab; font-size: 12px; font-style: normal; line-height: 1.45; }
 
@@ -273,7 +277,7 @@
 
 .felvitel-kez {
   display: inline-block;
-  color: #f2b091;
+  color: var(--felvitel-bronz-vilagos);
   font-size: 28px;
   filter: grayscale(0.35);
   animation: kezHuz 1.6s ease-in-out infinite;
@@ -360,7 +364,7 @@
 
 .felvitel-mini-igennem button.is-aktiv,
 .felvitel-chip.is-aktiv {
-  border-color: #df6842;
+  border-color: var(--felvitel-bronz);
   background: #2b2929;
   color: #fff3ed;
 }
@@ -377,7 +381,7 @@
 
 .felvitel-merfoldko,
 .felvitel-betoltes {
-  min-height: 350px;
+  min-height: 270px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -407,7 +411,7 @@
   height: 34px;
   margin-bottom: 20px;
   border: 3px solid #294355;
-  border-top-color: #df6842;
+  border-top-color: var(--felvitel-bronz);
   border-radius: 50%;
   animation: forog 700ms linear infinite;
 }
@@ -449,7 +453,7 @@
 }
 
 .felvitel-szabalylista span { line-height: 1.45; }
-.felvitel-szabalylista em { color: #df805d; font-style: normal; }
+.felvitel-szabalylista em { color: var(--felvitel-bronz); font-style: normal; }
 
 .felvitel-lab {
   min-height: 48px;
@@ -477,14 +481,14 @@
 }
 
 .felvitel-tovabb {
-  border: 1px solid #df6842;
-  background: #df6842;
+  border: 1px solid var(--felvitel-bronz);
+  background: linear-gradient(90deg, var(--felvitel-bronz), var(--felvitel-bronz-sotet));
   color: #fff;
 }
 
 .felvitel-vissza:hover:not(:disabled),
 .felvitel-egyiksem:hover:not(:disabled) { border-color: #527389; color: #edf4f7; }
-.felvitel-tovabb:hover:not(:disabled) { border-color: #f07950; background: #c95431; }
+.felvitel-tovabb:hover:not(:disabled) { border-color: var(--felvitel-bronz-vilagos); background: linear-gradient(90deg, var(--felvitel-bronz-vilagos), var(--felvitel-bronz-sotet)); }
 .felvitel-vissza:disabled,
 .felvitel-egyiksem:disabled,
 .felvitel-tovabb:disabled { opacity: 0.38; cursor: default; }
@@ -515,8 +519,8 @@
   .felvitel-topbar { padding: 14px 18px; }
   .felvitel-szervezet { max-width: 45%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .felvitel { min-height: calc(100vh - 58px); padding: 0 13px 16px; }
-  .felvitel-szinpad { min-height: 520px; padding: 14px 0; }
-  .felvitel-kartya { min-height: 420px; max-height: calc(100vh - 155px); padding: 25px 21px; border-radius: 18px; }
+  .felvitel-szinpad { min-height: 420px; padding: 12px 0; }
+  .felvitel-kartya { min-height: 340px; max-height: calc(100vh - 165px); padding: 23px 20px; border-radius: 18px; }
   .felvitel-valasztek-ketto { grid-template-columns: 1fr; }
   .felvitel-osszegzes { grid-template-columns: 1fr; }
   .felvitel-kezmutato { right: 22px; bottom: 108px; }
