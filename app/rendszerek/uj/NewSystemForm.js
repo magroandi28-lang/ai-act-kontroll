@@ -21,6 +21,64 @@ const CSOPORT_CIMKEK = {
   high_risk_use: "Használati környezet",
 };
 
+const KAPUK = [
+  {
+    key: "GATE_HUMAN_SERVICE",
+    label: "Emberekkel kommunikál, ügyet kezel vagy ajánlatot ad?",
+    description: "Ide tartozik az ügyfélszolgálat, a beadványfogadás, az ajánlás és az emberrel történő közvetlen kapcsolat.",
+    group: "contact",
+    round: 1,
+    children: ["DIRECT_HUMAN_INTERACTION", "CASE_INTAKE_HANDLING", "OPERATES_CUSTOMER_SERVICE", "COMMERCIAL_PRACTICE"],
+  },
+  {
+    key: "GATE_DECISION",
+    label: "Személyeket vagy kritikus folyamatokat értékel, profiloz vagy döntést hoz?",
+    description: "A döntéstámogatás, profilalkotás, tiltott működések és kiemelt használati környezetek közös kapuja.",
+    group: "decision",
+    round: 1,
+    children: [
+      "PROFILES_NATURAL_PERSONS", "AUTOMATED_DECISION", "SUBLIMINAL_MANIPULATION",
+      "EXPLOITS_VULNERABILITY", "SOCIAL_SCORING", "CRIMINAL_RISK_PREDICTION",
+      "USE_CRITICAL_INFRASTRUCTURE", "USE_EDUCATION", "USE_EMPLOYMENT",
+      "USE_ESSENTIAL_SERVICES", "USE_LAW_ENFORCEMENT", "USE_MIGRATION_BORDER",
+      "USE_JUSTICE_DEMOCRACY",
+    ],
+  },
+  {
+    key: "GATE_DATA_BIOMETRIC",
+    label: "Személyes, biometrikus vagy használati adatot kezel?",
+    description: "Csak érintettség esetén kérdezünk rá az adattípusokra, a célzott elemzésre és a biometrikus működésre.",
+    group: "sensitive",
+    round: 1,
+    children: ["PROCESSES_PERSONAL_DATA", "ANALYTICS_OR_TARGETING", "FACE_SCRAPING", "EMOTION_RECOGNITION", "BIOMETRIC_CATEGORISATION", "REALTIME_REMOTE_BIOMETRIC_ID"],
+  },
+  {
+    key: "GATE_CONTENT",
+    label: "Tartalmat állít elő vagy módosít?",
+    description: "Szöveg, kép, hang vagy videó létrehozása és átalakítása tartozik ide.",
+    group: "content_data",
+    round: 2,
+    children: ["GENERATES_SYNTHETIC_CONTENT"],
+  },
+  {
+    key: "GATE_DEVELOPMENT",
+    label: "Modellt fejleszt, tanít, külső szolgáltatót használ vagy szabályozott termék részeként működik?",
+    description: "A fejlesztési, tanítási, folyamatos tanulási, beszállítói és termékbiztonsági működés közös kapuja.",
+    group: "development",
+    round: 2,
+    children: ["USES_EXTERNAL_PROVIDER", "TRAINS_OR_FINETUNES_MODEL", "CONTINUOUS_LEARNING", "ANNEX_I_PRODUCT"],
+  },
+];
+
+const ENERGETIKAI_AG = {
+  key: "GATE_ENERGY",
+  label: "Érint energetikai ügyfélfolyamatot vagy mérési adatot?",
+  description: "Ez az ág csak az energetikai iparág kiválasztása miatt jelenik meg.",
+  group: "high_risk_use",
+  round: 2,
+  children: ["ENERGY_CUSTOMER_MATTERS", "SMART_METERING_DATA", "DATA_DISCLOSURE_ON_REQUEST"],
+};
+
 const FAZIS_SORREND = ["azonositas", "iparag", "szerepkor", "funkciok", "pontositas", "osszegzes"];
 const MOZGAS_IDO = 260;
 const HUZASI_KUSZOB = 86;
@@ -124,6 +182,27 @@ function ReszletSzerkeszto({ tetelek, ertekek, onChange }) {
   );
 }
 
+function KapuReszletSzerkeszto({ tetelek, ertekek, onChange }) {
+  return (
+    <div className="felvitel-valasztek">
+      {tetelek.map((tetel) => {
+        const aktiv = ertekek[tetel.key] === true;
+        return (
+          <button
+            type="button"
+            key={tetel.key}
+            className={aktiv ? "felvitel-opcio is-aktiv" : "felvitel-opcio"}
+            aria-pressed={aktiv}
+            onClick={() => onChange(tetel.key, !aktiv)}
+          >
+            <strong>{tetel.label}</strong>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function NewSystemForm({
   organisationId,
   organisationIndustry,
@@ -134,7 +213,6 @@ export default function NewSystemForm({
 
   const [fazis, setFazis] = useState("azonositas");
   const [nev, setNev] = useState("");
-  const [rendeltetes, setRendeltetes] = useState("");
   const [iparag, setIparag] = useState(organisationIndustry || "general");
   const [szerepkorok, setSzerepkorok] = useState([]);
   const [valaszok, setValaszok] = useState({});
@@ -162,7 +240,16 @@ export default function NewSystemForm({
   const idozito = useRef(null);
   const huzasKezdete = useRef(null);
 
-  const kartyak = katalogus?.cards || [];
+  const katalogusKartyak = katalogus?.cards || [];
+  const kartyak = useMemo(() => {
+    const terkep = new Map(katalogusKartyak.map((kartya) => [kartya.key, kartya]));
+    const kapuk = [...KAPUK, ...(iparag === "energy" ? [ENERGETIKAI_AG] : [])];
+    return kapuk.map((kapu) => ({
+      ...kapu,
+      isGateway: true,
+      details: kapu.children.map((kulcs) => terkep.get(kulcs)).filter(Boolean),
+    })).filter((kapu) => kapu.details.length > 0);
+  }, [katalogusKartyak, iparag]);
   const aktualisKartya = kartyak[funkcioIndex] || null;
   const elsoKorDarab = useMemo(
     () => kartyak.filter((kartya) => Number(kartya.round) === 1).length,
@@ -176,27 +263,22 @@ export default function NewSystemForm({
     return aktualisKartya.details || [];
   }, [aktualisKartya]);
 
-  const reszletTeljes = reszletTetelek.every((tetel) => {
+  const reszletTeljes = aktualisKartya?.isGateway
+    ? reszletTetelek.some((tetel) => reszletErtekek[tetel.key] === true)
+    : reszletTetelek.every((tetel) => {
     const ertek = reszletErtekek[tetel.key];
     if (tetel.input === "multi") return Array.isArray(ertek) && ertek.length > 0;
     return typeof ertek === "boolean";
-  });
+    });
 
   const pontositasTeljes = aktualisPontositas?.input === "multi"
     ? Array.isArray(pontositasErtekek[aktualisPontositas?.key])
       && pontositasErtekek[aktualisPontositas?.key].length > 0
     : typeof pontositasErtekek[aktualisPontositas?.key] === "boolean";
 
-  const haladas = useMemo(() => {
-    if (fazis === "azonositas") return 4;
-    if (fazis === "iparag") return 8;
-    if (fazis === "szerepkor") return 12;
-    if (fazis === "funkciok") {
-      return 12 + Math.round((Math.min(funkcioIndex, kartyak.length) / Math.max(kartyak.length, 1)) * 70);
-    }
-    if (fazis === "pontositas") return 88;
-    return 100;
-  }, [fazis, funkcioIndex, kartyak.length]);
+  const hatralevoTema = fazis === "funkciok"
+    ? Math.max(1, kartyak.length - funkcioIndex)
+    : null;
 
   const katalogusBetoltese = useCallback(async (tenyek) => {
     const { data, error } = await supabase.rpc("aic_felviteli_katalogus_v2", {
@@ -355,6 +437,15 @@ export default function NewSystemForm({
     if (!aktualisKartya || kilepes || betoltes || (reszletMod && !reszletbol) || merfoldko) return;
     setKezmutato(false);
 
+    if (igen && aktualisKartya.isGateway && reszletTetelek.length === 1) {
+      const valtozasok = { [reszletTetelek[0].key]: true };
+      animaltValtas("ki-jobbra", () => {
+        const tenyek = valtozasRogzitese(valtozasok, { fazis: "funkciok", index: funkcioIndex });
+        kovetkezoFunkcio(tenyek);
+      });
+      return;
+    }
+
     if (igen && (aktualisKartya.input === "multi" || (aktualisKartya.details || []).length > 0)) {
       const kezdo = {};
       reszletTetelek.forEach((tetel) => {
@@ -366,7 +457,9 @@ export default function NewSystemForm({
       return;
     }
 
-    const valtozasok = { [aktualisKartya.key]: igen };
+    const valtozasok = aktualisKartya.isGateway
+      ? Object.fromEntries(reszletTetelek.map((tetel) => [tetel.key, false]))
+      : { [aktualisKartya.key]: igen };
     if (aktualisKartya.input === "multi") valtozasok[aktualisKartya.key] = [];
     const mozgas = igen ? "ki-jobbra" : "ki-balra";
     animaltValtas(mozgas, () => {
@@ -380,7 +473,9 @@ export default function NewSystemForm({
 
   function reszletekMentese() {
     if (!reszletTeljes || !aktualisKartya) return;
-    const valtozasok = aktualisKartya.input === "multi"
+    const valtozasok = aktualisKartya.isGateway
+      ? Object.fromEntries(reszletTetelek.map((tetel) => [tetel.key, reszletErtekek[tetel.key] === true]))
+      : aktualisKartya.input === "multi"
       ? { [aktualisKartya.key]: reszletErtekek[aktualisKartya.key] }
       : { [aktualisKartya.key]: true, ...reszletErtekek };
     animaltValtas("ki-jobbra", () => {
@@ -508,7 +603,14 @@ export default function NewSystemForm({
 
   async function mentesKezelese() {
     const tisztaNev = nev.trim().replace(/\s+/g, " ");
-    if (!tisztaNev || rendeltetes.trim().length < 10 || szerepkorok.length === 0 || mentes) return;
+    if (!tisztaNev || szerepkorok.length === 0 || mentes) return;
+    const kivalasztottFunkciok = katalogusKartyak
+      .filter((kartya) => valaszok[kartya.key] === true)
+      .map((kartya) => kartya.label)
+      .slice(0, 6);
+    const generaltRendeltetes = kivalasztottFunkciok.length
+      ? kivalasztottFunkciok.join("; ")
+      : "Szervezeti MI-rendszer használata";
     setMentes(true);
     setUzenet("");
     const { data, error } = await supabase.rpc("aic_eszkoz_mentese_v2", {
@@ -517,7 +619,7 @@ export default function NewSystemForm({
       p_valaszok: valaszok,
       p_szerepkorok: szerepkorok,
       p_iparag: iparag,
-      p_rendeltetes: rendeltetes.trim(),
+      p_rendeltetes: generaltRendeltetes,
       p_system_id: null,
       p_vegleges: true,
     });
@@ -546,12 +648,9 @@ export default function NewSystemForm({
 
   return (
     <div className="felvitel">
-      <div className="felvitel-halado" aria-label={`Felvitel készültsége: ${haladas}%`}>
-        <div className="felvitel-halado-sav" style={{ width: `${haladas}%` }} />
-      </div>
       <div className="felvitel-allapot">
         <span>{fazisIndex + 1}. szakasz</span>
-        <span>{haladas}%</span>
+        <span>{fazis === "funkciok" ? `Még ${hatralevoTema} rövid témakör van hátra` : fazis === "pontositas" ? "Csak a szükséges pontosítások" : "Rövid felvitel"}</span>
       </div>
 
       <div className="felvitel-szinpad">
@@ -567,9 +666,9 @@ export default function NewSystemForm({
           {fazis === "azonositas" && (
             <>
               <span className="felvitel-felirat">Azonosítás</span>
-              <h2>Mi az MI-rendszer neve és rendeltetése?</h2>
-              <p className="felvitel-sugo">A belső elnevezést és egy rövid, tényszerű célt adj meg.</p>
-              <label className="felvitel-mezo-cimke" htmlFor="rendszer-nev">Rendszer neve</label>
+              <h2>Mi az MI-rendszer neve?</h2>
+              <p className="felvitel-sugo">A szervezet által használt belső elnevezést add meg.</p>
+              <label className="felvitel-mezo-cimke" htmlFor="rendszer-nev">MI-rendszer neve</label>
               <input
                 id="rendszer-nev"
                 autoFocus
@@ -577,15 +676,6 @@ export default function NewSystemForm({
                 value={nev}
                 placeholder="Például: EnergiaChat"
                 onChange={(event) => setNev(event.target.value)}
-              />
-              <label className="felvitel-mezo-cimke" htmlFor="rendszer-cel">Mire használják?</label>
-              <textarea
-                id="rendszer-cel"
-                className="felvitel-mezo felvitel-hosszu"
-                rows={3}
-                value={rendeltetes}
-                placeholder="Például: beérkező dokumentumok osztályozása és az ügyintéző támogatása."
-                onChange={(event) => setRendeltetes(event.target.value)}
               />
             </>
           )}
@@ -642,7 +732,7 @@ export default function NewSystemForm({
               <span className="felvitel-merfoldko-jel">✓</span>
               <span className="felvitel-felirat">Első kör kész</span>
               <h2>Kitartás, már a nehezén túl vagy!</h2>
-              <p>A következő kör rövidebb: az érzékeny működést és a használati környezetet nézzük át.</p>
+              <p>A következő kör rövidebb: a tartalom- és fejlesztési működést nézzük át.</p>
               <button type="button" className="felvitel-tovabb" onClick={merfoldkoFolytatasa}>
                 Jöhet a rövidebb kör
               </button>
@@ -684,20 +774,28 @@ export default function NewSystemForm({
 
           {fazis === "funkciok" && aktualisKartya && reszletMod && (
             <>
-              <span className="felvitel-felirat">Szükséges pontosítás</span>
-              <h2>{aktualisKartya.label}</h2>
-              <p className="felvitel-sugo">Csak azért jelent meg, mert az előző funkciót kiválasztottad.</p>
-              <ReszletSzerkeszto
-                tetelek={reszletTetelek}
-                ertekek={reszletErtekek}
-                onChange={(kulcs, ertek) => setReszletErtekek((elozo) => ({ ...elozo, [kulcs]: ertek }))}
-              />
+              <span className="felvitel-felirat">Érintett funkciók</span>
+              <h2>Melyik működés jellemző a rendszerre?</h2>
+              <p className="felvitel-sugo">Jelöld meg az összes érintett funkciót. A többit a rendszer nem érintettként rögzíti.</p>
+              {aktualisKartya.isGateway ? (
+                <KapuReszletSzerkeszto
+                  tetelek={reszletTetelek}
+                  ertekek={reszletErtekek}
+                  onChange={(kulcs, ertek) => setReszletErtekek((elozo) => ({ ...elozo, [kulcs]: ertek }))}
+                />
+              ) : (
+                <ReszletSzerkeszto
+                  tetelek={reszletTetelek}
+                  ertekek={reszletErtekek}
+                  onChange={(kulcs, ertek) => setReszletErtekek((elozo) => ({ ...elozo, [kulcs]: ertek }))}
+                />
+              )}
               <div className="felvitel-reszlet-lab">
                 <button type="button" className="felvitel-egyiksem" onClick={() => funkcioValasz(false, true)}>
-                  Mégsem érinti
+                  Egyik sem
                 </button>
                 <button type="button" className="felvitel-tovabb" disabled={!reszletTeljes} onClick={reszletekMentese}>
-                  Pontosítások mentése
+                  Kiválasztás mentése
                 </button>
               </div>
             </>
@@ -789,7 +887,7 @@ export default function NewSystemForm({
           <button
             type="button"
             className="felvitel-tovabb"
-            disabled={!nev.trim() || rendeltetes.trim().length < 10 || !!kilepes}
+            disabled={!nev.trim() || !!kilepes}
             onClick={() => fazisValtas("iparag")}
           >
             Tovább
@@ -815,7 +913,7 @@ export default function NewSystemForm({
         )}
 
         {fazis === "funkciok" && aktualisKartya && !merfoldko && (
-          <span className="felvitel-futo">{funkcioIndex + 1}/{kartyak.length} áttekintve</span>
+          <span className="felvitel-futo">Még {hatralevoTema} rövid témakör</span>
         )}
       </div>
     </div>
