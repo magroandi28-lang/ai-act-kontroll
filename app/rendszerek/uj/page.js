@@ -5,9 +5,8 @@ import NewSystemForm from "./NewSystemForm";
 // Saját stíluslap, hogy a globals.css-t ne kelljen bővíteni.
 import "./felvitel.css";
 
-// A felvitel kártyánként halad: egy kérdés, válasz, a kártya felsuhan, jön a
-// következő. A kérdéssort a kapcsolókatalógus adja, szerepkör szerint szűrve,
-// ezért a felület nem tud eltérni attól, amit a jog megkövetel.
+// A felvitel típussablon nélkül, közvetlenül a Jogtárból visszafejtett
+// funkció- és környezetkatalógusból dolgozik.
 export const dynamic = "force-dynamic";
 
 export default async function NewSystemPage() {
@@ -35,18 +34,11 @@ export default async function NewSystemPage() {
     );
   }
 
-  const [{ data: industries }, { data: systemTypes }] = await Promise.all([
-    supabase
-      .from("aic_industries")
-      .select("code, name_hu")
-      .eq("active", true)
-      .order("sort_order"),
-    supabase
-      .from("aic_system_type_templates")
-      .select("type_code, name_hu, description_hu, sort_order")
-      .eq("active", true)
-      .order("sort_order"),
-  ]);
+  const { data: industries } = await supabase
+    .from("aic_industries")
+    .select("code, name_hu")
+    .eq("active", true)
+    .order("sort_order");
 
   return (
     <main className="felvitel-page">
@@ -59,9 +51,7 @@ export default async function NewSystemPage() {
         organisationId={membership.organisation_id}
         organisationIndustry={membership.aic_organisations?.industry || null}
         industries={industries || []}
-        systemTypes={systemTypes || []}
       />
     </main>
   );
 }
-

@@ -4,200 +4,527 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "../../../lib/supabase/client";
 
-// Egy kártya, egy kérdés. Válasz után a kártya felfelé kicsúszik, a következő
-// alulról érkezik. A kérdéssort a kapcsolókatalógus adja: a szerepkör dönti el,
-// mit kérdezünk, a korábbi válaszok pedig kiváltják a követő kérdéseket.
-
 const SZEREPKOROK = [
-  ["deployer", "Használjuk", "A szervezet saját felelősségére üzemelteti."],
-  ["provider", "Mi fejlesztjük", "Fejlesztjük, fejlesztetjük, vagy saját néven hozzuk forgalomba."],
+  ["deployer", "Használjuk", "A szervezet saját felelősségére használja vagy üzemelteti."],
+  ["provider", "Fejlesztjük vagy szolgáltatjuk", "Fejlesztjük, fejlesztetjük, vagy saját néven hozzuk forgalomba."],
   ["importer", "Importáljuk", "Unión kívüli szolgáltató rendszerét hozzuk az uniós piacra."],
-  ["distributor", "Továbbadjuk", "Továbbforgalmazzuk, de nem mi fejlesztettük és nem mi importáljuk."],
+  ["distributor", "Továbbadjuk", "Az uniós piacon továbbforgalmazzuk a rendszert."],
   ["authorised_representative", "Képviseljük", "Unión kívüli szolgáltatót képviselünk írásbeli megbízás alapján."],
 ];
+
+const CSOPORT_CIMKEK = {
+  contact: "Kapcsolat és kommunikáció",
+  content_data: "Tartalom és adatok",
+  decision: "Döntés és értékelés",
+  development: "Fejlesztés és működtetés",
+  sensitive: "Érzékeny működés",
+  high_risk_use: "Használati környezet",
+};
+
+const FAZIS_SORREND = ["azonositas", "iparag", "szerepkor", "funkciok", "pontositas", "osszegzes"];
+const MOZGAS_IDO = 260;
+const HUZASI_KUSZOB = 86;
+
+function sajatKulcs(objektum, kulcs) {
+  return Object.prototype.hasOwnProperty.call(objektum, kulcs);
+}
+
+function megvalaszolt(tetel, valaszok) {
+  if (!tetel || !sajatKulcs(valaszok, tetel.key)) return false;
+  if (tetel.input === "multi") return Array.isArray(valaszok[tetel.key]);
+  return typeof valaszok[tetel.key] === "boolean";
+}
+
+function opcioKod(opcio) {
+  return opcio?.kod ?? opcio?.code ?? opcio?.value;
+}
+
+function opcioCimke(opcio) {
+  return opcio?.cimke ?? opcio?.label ?? opcio?.nev ?? opcioKod(opcio);
+}
+
+function visszaallitas(aktualis, elozoErtekek) {
+  const kovetkezo = { ...aktualis };
+  Object.entries(elozoErtekek).forEach(([kulcs, elozo]) => {
+    if (elozo.letezett) kovetkezo[kulcs] = elozo.ertek;
+    else delete kovetkezo[kulcs];
+  });
+  return kovetkezo;
+}
+
+function elozoErtekek(valaszok, valtozasok) {
+  return Object.fromEntries(Object.keys(valtozasok).map((kulcs) => [
+    kulcs,
+    { letezett: sajatKulcs(valaszok, kulcs), ertek: valaszok[kulcs] },
+  ]));
+}
+
+function ReszletSzerkeszto({ tetelek, ertekek, onChange }) {
+  return (
+    <div className="felvitel-reszletek">
+      {tetelek.map((tetel) => {
+        const ertek = ertekek[tetel.key];
+        if (tetel.input === "multi") {
+          return (
+            <fieldset className="felvitel-reszlet" key={tetel.key}>
+              <legend>{tetel.question || tetel.label}</legend>
+              {tetel.description && <p>{tetel.description}</p>}
+              <div className="felvitel-chip-sor">
+                {(tetel.options || []).map((opcio) => {
+                  const kod = opcioKod(opcio);
+                  const aktiv = Array.isArray(ertek) && ertek.includes(kod);
+                  return (
+                    <button
+                      type="button"
+                      key={kod}
+                      className={aktiv ? "felvitel-chip is-aktiv" : "felvitel-chip"}
+                      aria-pressed={aktiv}
+                      onClick={() => {
+                        const jelenlegi = Array.isArray(ertek) ? ertek : [];
+                        onChange(tetel.key, aktiv
+                          ? jelenlegi.filter((elem) => elem !== kod)
+                          : [...jelenlegi, kod]);
+                      }}
+                    >
+                      {opcioCimke(opcio)}
+                    </button>
+                  );
+                })}
+              </div>
+            </fieldset>
+          );
+        }
+
+        return (
+          <fieldset className="felvitel-reszlet" key={tetel.key}>
+            <legend>{tetel.question || tetel.label}</legend>
+            {tetel.description && <p>{tetel.description}</p>}
+            <div className="felvitel-mini-igennem">
+              <button
+                type="button"
+                className={ertek === true ? "is-aktiv" : ""}
+                aria-pressed={ertek === true}
+                onClick={() => onChange(tetel.key, true)}
+              >
+                Igen
+              </button>
+              <button
+                type="button"
+                className={ertek === false ? "is-aktiv" : ""}
+                aria-pressed={ertek === false}
+                onClick={() => onChange(tetel.key, false)}
+              >
+                Nem
+              </button>
+            </div>
+          </fieldset>
+        );
+      })}
+    </div>
+  );
+}
 
 export default function NewSystemForm({
   organisationId,
   organisationIndustry,
   industries,
-  systemTypes,
 }) {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
 
+  const [fazis, setFazis] = useState("azonositas");
   const [nev, setNev] = useState("");
-  const [tipusKod, setTipusKod] = useState("");
-  const [iparag, setIparag] = useState(organisationIndustry || "general");
   const [rendeltetes, setRendeltetes] = useState("");
+  const [iparag, setIparag] = useState(organisationIndustry || "general");
   const [szerepkorok, setSzerepkorok] = useState([]);
   const [valaszok, setValaszok] = useState({});
 
-  const [kerdesek, setKerdesek] = useState([]);
-  const [csoportok, setCsoportok] = useState([]);
+  const [katalogus, setKatalogus] = useState(null);
+  const [funkcioIndex, setFunkcioIndex] = useState(0);
+  const [merfoldko, setMerfoldko] = useState(false);
+  const [merfoldkoMegvolt, setMerfoldkoMegvolt] = useState(false);
+  const [reszletMod, setReszletMod] = useState(false);
+  const [reszletErtekek, setReszletErtekek] = useState({});
+  const [pontositasok, setPontositasok] = useState([]);
+  const [pontositasIndex, setPontositasIndex] = useState(0);
+  const [pontositasErtekek, setPontositasErtekek] = useState({});
+  const [elozmeny, setElozmeny] = useState([]);
   const [elonezet, setElonezet] = useState(null);
-  const [uzenet, setUzenet] = useState("");
+
+  const [betoltes, setBetoltes] = useState(false);
   const [mentes, setMentes] = useState(false);
+  const [uzenet, setUzenet] = useState("");
+  const [kilepes, setKilepes] = useState(null);
+  const [belepes, setBelepes] = useState("elore");
+  const [huzas, setHuzas] = useState(0);
+  const [kezmutato, setKezmutato] = useState(true);
 
-  const [lepes, setLepes] = useState(0);
-  const [irany, setIrany] = useState("elore");
-
-  // A kérdéseket a szerver adja, a válaszok minden változásánál újra. Így a
-  // követő kérdések ott jelennek meg, ahol kell, és a felület nem dönt semmit.
   const idozito = useRef(null);
-  const frissit = useCallback(async () => {
-    if (!tipusKod || szerepkorok.length === 0) {
-      setKerdesek([]);
-      setElonezet(null);
-      return;
+  const huzasKezdete = useRef(null);
+
+  const kartyak = katalogus?.cards || [];
+  const aktualisKartya = kartyak[funkcioIndex] || null;
+  const elsoKorDarab = useMemo(
+    () => kartyak.filter((kartya) => Number(kartya.round) === 1).length,
+    [kartyak],
+  );
+  const aktualisPontositas = pontositasok[pontositasIndex] || null;
+
+  const reszletTetelek = useMemo(() => {
+    if (!aktualisKartya) return [];
+    if (aktualisKartya.input === "multi") return [aktualisKartya];
+    return aktualisKartya.details || [];
+  }, [aktualisKartya]);
+
+  const reszletTeljes = reszletTetelek.every((tetel) => {
+    const ertek = reszletErtekek[tetel.key];
+    if (tetel.input === "multi") return Array.isArray(ertek) && ertek.length > 0;
+    return typeof ertek === "boolean";
+  });
+
+  const pontositasTeljes = aktualisPontositas?.input === "multi"
+    ? Array.isArray(pontositasErtekek[aktualisPontositas?.key])
+      && pontositasErtekek[aktualisPontositas?.key].length > 0
+    : typeof pontositasErtekek[aktualisPontositas?.key] === "boolean";
+
+  const haladas = useMemo(() => {
+    if (fazis === "azonositas") return 4;
+    if (fazis === "iparag") return 8;
+    if (fazis === "szerepkor") return 12;
+    if (fazis === "funkciok") {
+      return 12 + Math.round((Math.min(funkcioIndex, kartyak.length) / Math.max(kartyak.length, 1)) * 70);
     }
-    const [{ data: k, error: kh }, { data: e }] = await Promise.all([
-      supabase.rpc("aic_felviteli_kerdesek", {
-        p_system_type_code: tipusKod,
-        p_valaszok: valaszok,
-        p_iparag: iparag,
-        p_szerepkorok: szerepkorok,
-      }),
-      supabase.rpc("aic_felvitel_elonezet", {
-        p_organisation_id: organisationId,
-        p_system_type_code: tipusKod,
-        p_valaszok: valaszok,
-        p_szerepkorok: szerepkorok,
-        p_iparag: iparag,
-      }),
-    ]);
-    if (kh) {
-      setUzenet(kh.message);
-      return;
-    }
-    setUzenet("");
-    setKerdesek(k?.kerdesek || []);
-    setCsoportok(k?.csoportok || []);
-    setElonezet(e || null);
-  }, [supabase, tipusKod, valaszok, iparag, szerepkorok, organisationId]);
+    if (fazis === "pontositas") return 88;
+    return 100;
+  }, [fazis, funkcioIndex, kartyak.length]);
 
-  useEffect(() => {
-    if (idozito.current) clearTimeout(idozito.current);
-    idozito.current = setTimeout(frissit, 200);
-    return () => clearTimeout(idozito.current);
-  }, [frissit]);
-
-  // A kártyák sora: négy alapadat, a szerepkör, majd a kérdéscsoportok.
-  const kartyak = useMemo(() => {
-    const lista = [
-      { fajta: "nev" },
-      { fajta: "tipus" },
-      { fajta: "iparag" },
-      { fajta: "szerepkor" },
-    ];
-    if (!tipusKod || szerepkorok.length === 0) return lista;
-
-    const csoportSorrend = new Map(csoportok.map((c) => [c.csoport, c]));
-    const beosztva = new Map();
-    const onalloak = [];
-
-    for (const k of kerdesek) {
-      if (k.csoport) {
-        if (!beosztva.has(k.csoport)) beosztva.set(k.csoport, []);
-        beosztva.get(k.csoport).push(k);
-      } else {
-        onalloak.push(k);
-      }
-    }
-
-    const csoportKartyak = [...beosztva.entries()]
-      .map(([csoport, tetelek]) => ({
-        fajta: "csoport",
-        csoport,
-        fej: csoportSorrend.get(csoport) || { cim: "Kérdések" },
-        tetelek,
-        sorrend: csoportSorrend.get(csoport)?.sorrend ?? 100,
-      }))
-      .sort((a, b) => a.sorrend - b.sorrend);
-
-    return [
-      ...lista,
-      ...csoportKartyak,
-      ...onalloak.map((k) => ({ fajta: "kerdes", kerdes: k })),
-      { fajta: "rendeltetes" },
-      { fajta: "osszegzes" },
-    ];
-  }, [kerdesek, csoportok, tipusKod, szerepkorok]);
-
-  const aktualis = kartyak[Math.min(lepes, kartyak.length - 1)];
-  const utolso = lepes >= kartyak.length - 1;
-
-  const tovabbLehet = useMemo(() => {
-    if (!aktualis) return false;
-    if (aktualis.fajta === "nev") return nev.trim().length > 0;
-    if (aktualis.fajta === "tipus") return !!tipusKod;
-    if (aktualis.fajta === "szerepkor") return szerepkorok.length > 0;
-    return true;
-  }, [aktualis, nev, tipusKod, szerepkorok]);
-
-  function tovabb() {
-    if (!tovabbLehet || utolso) return;
-    setIrany("elore");
-    setLepes((l) => l + 1);
-  }
-
-  function vissza() {
-    if (lepes === 0) return;
-    setIrany("vissza");
-    setLepes((l) => l - 1);
-  }
-
-  function valaszValt(kulcs, ertek) {
-    setValaszok((elozo) => ({ ...elozo, [kulcs]: ertek }));
-  }
-
-  // "Egyiket sem": a csoport minden tétele nemre áll, és lépünk tovább.
-  function egyikSem(tetelek) {
-    setValaszok((elozo) => {
-      const uj = { ...elozo };
-      tetelek.forEach((t) => { uj[t.kulcs] = false; });
-      return uj;
+  const katalogusBetoltese = useCallback(async (tenyek) => {
+    const { data, error } = await supabase.rpc("aic_felviteli_katalogus_v2", {
+      p_organisation_id: organisationId,
+      p_iparag: iparag,
+      p_szerepkorok: szerepkorok,
+      p_valaszok: tenyek,
     });
-    setTimeout(tovabb, 120);
+    if (error) throw error;
+    return data;
+  }, [supabase, organisationId, iparag, szerepkorok]);
+
+  const elonezetBetoltese = useCallback(async (tenyek) => {
+    const { data, error } = await supabase.rpc("aic_felvitel_elonezet_v2", {
+      p_organisation_id: organisationId,
+      p_valaszok: tenyek,
+      p_szerepkorok: szerepkorok,
+      p_iparag: iparag,
+    });
+    if (error) throw error;
+    return data;
+  }, [supabase, organisationId, iparag, szerepkorok]);
+
+  function animaltValtas(mozgas, muvelet) {
+    if (kilepes) return;
+    setKilepes(mozgas);
+    if (idozito.current) clearTimeout(idozito.current);
+    idozito.current = setTimeout(() => {
+      setBelepes(mozgas.includes("vissza") ? "vissza" : mozgas.includes("balra") ? "jobbra" : mozgas.includes("jobbra") ? "balra" : "elore");
+      muvelet();
+      setHuzas(0);
+      setKilepes(null);
+    }, MOZGAS_IDO);
+  }
+
+  function fazisValtas(ujFazis, vissza = false) {
+    animaltValtas(vissza ? "ki-vissza" : "ki-elore", () => setFazis(ujFazis));
   }
 
   function szerepkorValt(kod) {
-    setSzerepkorok((elozo) =>
-      elozo.includes(kod) ? elozo.filter((x) => x !== kod) : [...elozo, kod]
-    );
+    setSzerepkorok((elozo) => (
+      elozo.includes(kod) ? elozo.filter((elem) => elem !== kod) : [...elozo, kod]
+    ));
+    setKatalogus(null);
+    setElonezet(null);
   }
 
-  // Enter visz tovább, kivéve a hosszú szöveges mezőben.
-  useEffect(() => {
-    function billentyu(e) {
-      if (e.key === "Enter" && !e.shiftKey && aktualis?.fajta !== "rendeltetes") {
-        e.preventDefault();
-        if (utolso) mentesKezelese();
-        else tovabb();
+  async function funkciokInditasa() {
+    if (szerepkorok.length === 0 || betoltes) return;
+    setBetoltes(true);
+    setUzenet("");
+    try {
+      const adat = await katalogusBetoltese(valaszok);
+      setKatalogus(adat);
+      setFunkcioIndex(0);
+      setMerfoldko(false);
+      setMerfoldkoMegvolt(false);
+      setReszletMod(false);
+      fazisValtas("funkciok");
+    } catch (error) {
+      setUzenet(error.message || "A funkciók betöltése nem sikerült.");
+    } finally {
+      setBetoltes(false);
+    }
+  }
+
+  function valtozasRogzitese(valtozasok, hely) {
+    setElozmeny((elozo) => [...elozo, {
+      ...hely,
+      elozoErtekek: elozoErtekek(valaszok, valtozasok),
+    }]);
+    const kovetkezo = { ...valaszok, ...valtozasok };
+    setValaszok(kovetkezo);
+    return kovetkezo;
+  }
+
+  async function felvitelLezarasa(tenyek) {
+    setFazis("pontositas");
+    setBetoltes(true);
+    setUzenet("");
+    try {
+      const adat = await katalogusBetoltese(tenyek);
+      setKatalogus(adat);
+
+      const kartyaTerkep = new Map();
+      (adat.cards || []).forEach((kartya) => {
+        kartyaTerkep.set(kartya.key, kartya);
+        (kartya.details || []).forEach((reszlet) => kartyaTerkep.set(reszlet.key, reszlet));
+      });
+      (adat.role_details || []).forEach((reszlet) => kartyaTerkep.set(reszlet.key, reszlet));
+      (adat.legal_review || []).forEach((reszlet) => kartyaTerkep.set(reszlet.key, reszlet));
+
+      const hianyzoKulcsok = (adat.missing?.cards || []).map((elem) => elem.key);
+      const hianyzoKartyak = hianyzoKulcsok
+        .map((kulcs) => kartyaTerkep.get(kulcs))
+        .filter(Boolean)
+        .filter((tetel) => !megvalaszolt(tetel, tenyek));
+      const szerepReszletek = (adat.role_details || [])
+        .filter((tetel) => !megvalaszolt(tetel, tenyek));
+      const jogiReszletek = (adat.legal_review || [])
+        .filter((tetel) => !megvalaszolt(tetel, tenyek));
+
+      const egyedi = [];
+      const latott = new Set();
+      [...hianyzoKartyak, ...szerepReszletek, ...jogiReszletek].forEach((tetel) => {
+        if (!latott.has(tetel.key)) {
+          latott.add(tetel.key);
+          egyedi.push(tetel);
+        }
+      });
+
+      if (egyedi.length > 0) {
+        setPontositasok(egyedi);
+        setPontositasIndex(0);
+        setPontositasErtekek({});
+        setFazis("pontositas");
+        return;
       }
-      if (e.key === "Escape") vissza();
+
+      if ((adat.missing?.internal || []).length > 0) {
+        setUzenet("A szabálykapcsoláshoz szükséges belső levezetés hiányzik. A rendszer nem menthető véglegesen.");
+        setFazis("pontositas");
+        return;
+      }
+
+      const elonezetiAdat = await elonezetBetoltese(tenyek);
+      if (elonezetiAdat.needs_data_count > 0) {
+        setUzenet("Van még tisztázatlan alkalmazhatósági feltétel; a mentés előtt ezt rendezni kell.");
+        setFazis("pontositas");
+        return;
+      }
+      setElonezet(elonezetiAdat);
+      setFazis("osszegzes");
+    } catch (error) {
+      setUzenet(error.message || "A Jogtár-kapcsolatok ellenőrzése nem sikerült.");
+    } finally {
+      setBetoltes(false);
+    }
+  }
+
+  function kovetkezoFunkcio(tenyek) {
+    setReszletMod(false);
+    setReszletErtekek({});
+    if (funkcioIndex >= kartyak.length - 1) {
+      felvitelLezarasa(tenyek);
+      return;
+    }
+    if (!merfoldkoMegvolt && funkcioIndex + 1 === elsoKorDarab) {
+      setMerfoldko(true);
+      return;
+    }
+    setFunkcioIndex((index) => index + 1);
+  }
+
+  function funkcioValasz(igen, reszletbol = false) {
+    if (!aktualisKartya || kilepes || betoltes || (reszletMod && !reszletbol) || merfoldko) return;
+    setKezmutato(false);
+
+    if (igen && (aktualisKartya.input === "multi" || (aktualisKartya.details || []).length > 0)) {
+      const kezdo = {};
+      reszletTetelek.forEach((tetel) => {
+        if (sajatKulcs(valaszok, tetel.key)) kezdo[tetel.key] = valaszok[tetel.key];
+      });
+      setReszletErtekek(kezdo);
+      setReszletMod(true);
+      setBelepes("reszlet");
+      return;
+    }
+
+    const valtozasok = { [aktualisKartya.key]: igen };
+    if (aktualisKartya.input === "multi") valtozasok[aktualisKartya.key] = [];
+    const mozgas = igen ? "ki-jobbra" : "ki-balra";
+    animaltValtas(mozgas, () => {
+      const tenyek = valtozasRogzitese(valtozasok, {
+        fazis: "funkciok",
+        index: funkcioIndex,
+      });
+      kovetkezoFunkcio(tenyek);
+    });
+  }
+
+  function reszletekMentese() {
+    if (!reszletTeljes || !aktualisKartya) return;
+    const valtozasok = aktualisKartya.input === "multi"
+      ? { [aktualisKartya.key]: reszletErtekek[aktualisKartya.key] }
+      : { [aktualisKartya.key]: true, ...reszletErtekek };
+    animaltValtas("ki-jobbra", () => {
+      const tenyek = valtozasRogzitese(valtozasok, {
+        fazis: "funkciok",
+        index: funkcioIndex,
+      });
+      kovetkezoFunkcio(tenyek);
+    });
+  }
+
+  function merfoldkoFolytatasa() {
+    animaltValtas("ki-elore", () => {
+      setMerfoldko(false);
+      setMerfoldkoMegvolt(true);
+      setFunkcioIndex((index) => index + 1);
+    });
+  }
+
+  function pontositasValasz(ertek) {
+    if (!aktualisPontositas || kilepes || betoltes) return;
+    const valtozasok = { [aktualisPontositas.key]: ertek };
+    animaltValtas(ertek === true ? "ki-jobbra" : "ki-balra", () => {
+      const tenyek = valtozasRogzitese(valtozasok, {
+        fazis: "pontositas",
+        index: pontositasIndex,
+      });
+      felvitelLezarasa(tenyek);
+    });
+  }
+
+  function pontositasMentese() {
+    if (!aktualisPontositas || !pontositasTeljes) return;
+    pontositasValasz(pontositasErtekek[aktualisPontositas.key]);
+  }
+
+  function visszavonas() {
+    if (reszletMod) {
+      setReszletMod(false);
+      setReszletErtekek({});
+      return;
+    }
+    const utolso = elozmeny[elozmeny.length - 1];
+    if (!utolso) {
+      if (fazis === "funkciok") fazisValtas("szerepkor", true);
+      else if (fazis === "iparag") fazisValtas("azonositas", true);
+      else if (fazis === "szerepkor") fazisValtas("iparag", true);
+      return;
+    }
+
+    const kovetkezo = visszaallitas(valaszok, utolso.elozoErtekek);
+    setElozmeny((elozo) => elozo.slice(0, -1));
+    setValaszok(kovetkezo);
+    setMerfoldko(false);
+    setReszletMod(false);
+    setUzenet("");
+
+    if (utolso.fazis === "funkciok") {
+      setFunkcioIndex(utolso.index);
+      setFazis("funkciok");
+      return;
+    }
+
+    setFazis("pontositas");
+    felvitelLezarasa(kovetkezo);
+  }
+
+  function alapVissza() {
+    if (fazis === "azonositas") return;
+    if (fazis === "iparag") fazisValtas("azonositas", true);
+    else if (fazis === "szerepkor") fazisValtas("iparag", true);
+    else visszavonas();
+  }
+
+  function huzasIndul(event) {
+    if (fazis !== "funkciok" || reszletMod || merfoldko || betoltes || kilepes) return;
+    if (event.target.closest("button, input, textarea, fieldset")) return;
+    huzasKezdete.current = { id: event.pointerId, x: event.clientX };
+    event.currentTarget.setPointerCapture(event.pointerId);
+    setKezmutato(false);
+  }
+
+  function huzasMozog(event) {
+    if (!huzasKezdete.current || huzasKezdete.current.id !== event.pointerId) return;
+    setHuzas(event.clientX - huzasKezdete.current.x);
+  }
+
+  function huzasVege(event) {
+    if (!huzasKezdete.current || huzasKezdete.current.id !== event.pointerId) return;
+    const tavolsag = event.clientX - huzasKezdete.current.x;
+    huzasKezdete.current = null;
+    if (Math.abs(tavolsag) >= HUZASI_KUSZOB) funkcioValasz(tavolsag > 0);
+    else setHuzas(0);
+  }
+
+  useEffect(() => {
+    function billentyu(event) {
+      const cel = event.target;
+      const szerkeszto = cel instanceof HTMLElement
+        && (cel.matches("input, textarea, button") || cel.closest("fieldset"));
+      if (szerkeszto) return;
+
+      if (fazis === "funkciok" && !reszletMod && !merfoldko) {
+        if (event.key === "ArrowLeft") {
+          event.preventDefault();
+          funkcioValasz(false);
+        }
+        if (event.key === "ArrowRight") {
+          event.preventDefault();
+          funkcioValasz(true);
+        }
+      }
+      if ((event.key === "Escape" || event.key === "Backspace") && fazis !== "azonositas") {
+        event.preventDefault();
+        alapVissza();
+      }
     }
     window.addEventListener("keydown", billentyu);
     return () => window.removeEventListener("keydown", billentyu);
   });
 
+  useEffect(() => () => {
+    if (idozito.current) clearTimeout(idozito.current);
+  }, []);
+
   async function mentesKezelese() {
     const tisztaNev = nev.trim().replace(/\s+/g, " ");
-    if (!tisztaNev || !tipusKod || szerepkorok.length === 0) return;
-
+    if (!tisztaNev || rendeltetes.trim().length < 10 || szerepkorok.length === 0 || mentes) return;
     setMentes(true);
-    const { data, error } = await supabase.rpc("aic_eszkoz_mentese", {
+    setUzenet("");
+    const { data, error } = await supabase.rpc("aic_eszkoz_mentese_v2", {
       p_organisation_id: organisationId,
       p_nev: tisztaNev,
-      p_system_type_code: tipusKod,
       p_valaszok: valaszok,
       p_szerepkorok: szerepkorok,
-      p_rendeltetes: rendeltetes.trim() || null,
+      p_iparag: iparag,
+      p_rendeltetes: rendeltetes.trim(),
       p_system_id: null,
+      p_vegleges: true,
     });
     setMentes(false);
 
     if (error?.code === "23505") {
-      setUzenet(`A szervezetnél már létezik „${tisztaNev}" nevű MI-rendszer.`);
+      setUzenet(`A szervezetnél már létezik „${tisztaNev}” nevű MI-rendszer.`);
       return;
     }
     if (error) {
@@ -208,95 +535,99 @@ export default function NewSystemForm({
     router.refresh();
   }
 
-  const kivalasztottTipus = systemTypes.find((t) => t.type_code === tipusKod);
+  const fazisIndex = FAZIS_SORREND.indexOf(fazis);
+  const aktualisKor = Number(aktualisKartya?.round || 1);
+  const korKartyak = kartyak.filter((kartya) => Number(kartya.round) === aktualisKor);
+  const koronBeluliIndex = Math.max(0, korKartyak.findIndex((kartya) => kartya.key === aktualisKartya?.key));
+  const kartyaStilus = huzas && !kilepes ? {
+    transform: `translateX(${huzas}px) rotate(${huzas / 28}deg)`,
+    opacity: Math.max(0.62, 1 - Math.abs(huzas) / 500),
+  } : undefined;
 
   return (
     <div className="felvitel">
-      <div className="felvitel-halado">
-        <div
-          className="felvitel-halado-sav"
-          style={{ width: `${((lepes + 1) / kartyak.length) * 100}%` }}
-        />
+      <div className="felvitel-halado" aria-label={`Felvitel készültsége: ${haladas}%`}>
+        <div className="felvitel-halado-sav" style={{ width: `${haladas}%` }} />
       </div>
-      <p className="felvitel-lepesszam">
-        {lepes + 1} / {kartyak.length}
-      </p>
+      <div className="felvitel-allapot">
+        <span>{fazisIndex + 1}. szakasz</span>
+        <span>{haladas}%</span>
+      </div>
 
       <div className="felvitel-szinpad">
         <section
-          key={`${lepes}-${aktualis?.fajta}-${aktualis?.csoport || ""}`}
-          className={irany === "elore" ? "felvitel-kartya be-elore" : "felvitel-kartya be-vissza"}
+          key={`${fazis}-${funkcioIndex}-${pontositasIndex}-${reszletMod}-${merfoldko}`}
+          className={`felvitel-kartya ${fazis === "funkciok" && !reszletMod && !merfoldko ? "felvitel-swipe-kartya" : ""} ${kilepes || `be-${belepes}`}`}
+          style={kartyaStilus}
+          onPointerDown={huzasIndul}
+          onPointerMove={huzasMozog}
+          onPointerUp={huzasVege}
+          onPointerCancel={huzasVege}
         >
-          {aktualis?.fajta === "nev" && (
+          {fazis === "azonositas" && (
             <>
-              <h2>Mi a rendszer neve?</h2>
-              <p className="felvitel-sugo">Ahogy a szervezeten belül hívjátok.</p>
+              <span className="felvitel-felirat">Azonosítás</span>
+              <h2>Mi az MI-rendszer neve és rendeltetése?</h2>
+              <p className="felvitel-sugo">A belső elnevezést és egy rövid, tényszerű célt adj meg.</p>
+              <label className="felvitel-mezo-cimke" htmlFor="rendszer-nev">Rendszer neve</label>
               <input
+                id="rendszer-nev"
                 autoFocus
                 className="felvitel-mezo"
                 value={nev}
                 placeholder="Például: EnergiaChat"
-                onChange={(e) => setNev(e.target.value)}
+                onChange={(event) => setNev(event.target.value)}
+              />
+              <label className="felvitel-mezo-cimke" htmlFor="rendszer-cel">Mire használják?</label>
+              <textarea
+                id="rendszer-cel"
+                className="felvitel-mezo felvitel-hosszu"
+                rows={3}
+                value={rendeltetes}
+                placeholder="Például: beérkező dokumentumok osztályozása és az ügyintéző támogatása."
+                onChange={(event) => setRendeltetes(event.target.value)}
               />
             </>
           )}
 
-          {aktualis?.fajta === "tipus" && (
+          {fazis === "iparag" && (
             <>
-              <h2>Milyen típusú rendszer?</h2>
-              <p className="felvitel-sugo">A típus csak a kérdések szűkítésére szolgál.</p>
-              <div className="felvitel-valasztek">
-                {systemTypes.map((t) => (
-                  <button
-                    key={t.type_code}
-                    type="button"
-                    className={tipusKod === t.type_code ? "felvitel-opcio is-aktiv" : "felvitel-opcio"}
-                    onClick={() => { setTipusKod(t.type_code); setValaszok({}); }}
-                  >
-                    <strong>{t.name_hu}</strong>
-                    {t.description_hu && <em>{t.description_hu}</em>}
-                  </button>
-                ))}
-              </div>
-              {kivalasztottTipus && (
-                <p className="felvitel-sugo">Kiválasztva: {kivalasztottTipus.name_hu}</p>
-              )}
-            </>
-          )}
-
-          {aktualis?.fajta === "iparag" && (
-            <>
+              <span className="felvitel-felirat">Iparág</span>
               <h2>Melyik területen használják?</h2>
-              <p className="felvitel-sugo">Az ágazati előírások ettől függenek.</p>
-              <div className="felvitel-valasztek">
-                {industries.map((i) => (
+              <p className="felvitel-sugo">Ezzel csak az ágazatspecifikus kész Jogtár-szövegeket szűrjük.</p>
+              <div className="felvitel-valasztek felvitel-valasztek-ketto">
+                {industries.map((elem) => (
                   <button
-                    key={i.code}
                     type="button"
-                    className={iparag === i.code ? "felvitel-opcio is-aktiv" : "felvitel-opcio"}
-                    onClick={() => setIparag(i.code)}
+                    key={elem.code}
+                    className={iparag === elem.code ? "felvitel-opcio is-aktiv" : "felvitel-opcio"}
+                    aria-pressed={iparag === elem.code}
+                    onClick={() => {
+                      setIparag(elem.code);
+                      setKatalogus(null);
+                      setElonezet(null);
+                    }}
                   >
-                    <strong>{i.name_hu}</strong>
+                    <strong>{elem.name_hu}</strong>
                   </button>
                 ))}
               </div>
             </>
           )}
 
-          {aktualis?.fajta === "szerepkor" && (
+          {fazis === "szerepkor" && (
             <>
-              <h2>Milyen minőségben jártok el?</h2>
-              <p className="felvitel-sugo">
-                Több is lehet. Ez dönti el, milyen kötelezettségek terhelnek, és mit kérdezünk.
-              </p>
+              <span className="felvitel-felirat">Szerepkör</span>
+              <h2>Milyen minőségben jár el a szervezet?</h2>
+              <p className="felvitel-sugo">Több szerepkör is kiválasztható. Ez a kötelezettségeket szűri, nem a rendszer funkcióit.</p>
               <div className="felvitel-valasztek">
                 {SZEREPKOROK.map(([kod, cimke, leiras]) => (
                   <button
-                    key={kod}
                     type="button"
+                    key={kod}
                     className={szerepkorok.includes(kod) ? "felvitel-opcio is-aktiv" : "felvitel-opcio"}
-                    onClick={() => szerepkorValt(kod)}
                     aria-pressed={szerepkorok.includes(kod)}
+                    onClick={() => szerepkorValt(kod)}
                   >
                     <strong>{cimke}</strong>
                     <em>{leiras}</em>
@@ -306,103 +637,140 @@ export default function NewSystemForm({
             </>
           )}
 
-          {aktualis?.fajta === "csoport" && (
-            <>
-              <h2>{aktualis.fej.cim}</h2>
-              {aktualis.fej.leiras && <p className="felvitel-sugo">{aktualis.fej.leiras}</p>}
-              <div className="felvitel-pipak">
-                {aktualis.tetelek.map((t) => (
-                  <label
-                    key={t.kulcs}
-                    className={valaszok[t.kulcs] === true ? "felvitel-pipa is-aktiv" : "felvitel-pipa"}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={valaszok[t.kulcs] === true}
-                      onChange={(e) => valaszValt(t.kulcs, e.target.checked)}
-                    />
-                    <span>
-                      <strong>{t.nev}</strong>
-                      {t.magyarazat && <em>{t.magyarazat}</em>}
-                    </span>
-                  </label>
-                ))}
-              </div>
-              <button
-                type="button"
-                className="felvitel-egyiksem"
-                onClick={() => egyikSem(aktualis.tetelek)}
-              >
-                {aktualis.fej.nincs_egyik_cimke || "Egyiket sem"}
+          {fazis === "funkciok" && merfoldko && (
+            <div className="felvitel-merfoldko" aria-live="polite">
+              <span className="felvitel-merfoldko-jel">✓</span>
+              <span className="felvitel-felirat">Első kör kész</span>
+              <h2>Kitartás, már a nehezén túl vagy!</h2>
+              <p>A következő kör rövidebb: az érzékeny működést és a használati környezetet nézzük át.</p>
+              <button type="button" className="felvitel-tovabb" onClick={merfoldkoFolytatasa}>
+                Jöhet a rövidebb kör
               </button>
+            </div>
+          )}
+
+          {fazis === "funkciok" && aktualisKartya && !merfoldko && !reszletMod && (
+            <>
+              <div className="felvitel-kartya-fej">
+                <span className="felvitel-felirat">{CSOPORT_CIMKEK[aktualisKartya.group] || "Funkció"}</span>
+                <span>{aktualisKor}. kör · {koronBeluliIndex + 1}/{korKartyak.length}</span>
+              </div>
+              <h2>{aktualisKartya.question || aktualisKartya.label}</h2>
+              {aktualisKartya.description && <p className="felvitel-sugo">{aktualisKartya.description}</p>}
+
+              <div className={`felvitel-huzas-visszajelzes ${huzas < -25 ? "is-bal" : ""} ${huzas > 25 ? "is-jobb" : ""}`} aria-hidden="true">
+                <span>← Nem érinti</span>
+                <span>Érinti →</span>
+              </div>
+
+              {kezmutato && funkcioIndex === 0 && (
+                <div className="felvitel-kezmutato" aria-hidden="true">
+                  <span className="felvitel-kez">☝</span>
+                  <span>Húzd balra vagy jobbra</span>
+                </div>
+              )}
+
+              <div className="felvitel-dontesek">
+                <button type="button" className="felvitel-nem" onClick={() => funkcioValasz(false)}>
+                  <span>←</span> Nem érinti
+                </button>
+                <button type="button" className="felvitel-igen" onClick={() => funkcioValasz(true)}>
+                  Érinti <span>→</span>
+                </button>
+              </div>
+              <p className="felvitel-billentyu">Egérrel, érintéssel vagy a ← → billentyűkkel is választhatsz.</p>
             </>
           )}
 
-          {aktualis?.fajta === "kerdes" && (
+          {fazis === "funkciok" && aktualisKartya && reszletMod && (
             <>
-              <h2>{aktualis.kerdes.kerdes || aktualis.kerdes.nev}</h2>
-              {aktualis.kerdes.magyarazat && (
-                <p className="felvitel-sugo">{aktualis.kerdes.magyarazat}</p>
-              )}
-              <div className="felvitel-igennem">
-                <button
-                  type="button"
-                  className={valaszok[aktualis.kerdes.kulcs] === true ? "felvitel-opcio is-aktiv" : "felvitel-opcio"}
-                  onClick={() => { valaszValt(aktualis.kerdes.kulcs, true); setTimeout(tovabb, 120); }}
-                >
-                  <strong>Igen</strong>
+              <span className="felvitel-felirat">Szükséges pontosítás</span>
+              <h2>{aktualisKartya.label}</h2>
+              <p className="felvitel-sugo">Csak azért jelent meg, mert az előző funkciót kiválasztottad.</p>
+              <ReszletSzerkeszto
+                tetelek={reszletTetelek}
+                ertekek={reszletErtekek}
+                onChange={(kulcs, ertek) => setReszletErtekek((elozo) => ({ ...elozo, [kulcs]: ertek }))}
+              />
+              <div className="felvitel-reszlet-lab">
+                <button type="button" className="felvitel-egyiksem" onClick={() => funkcioValasz(false, true)}>
+                  Mégsem érinti
                 </button>
-                <button
-                  type="button"
-                  className={valaszok[aktualis.kerdes.kulcs] === false ? "felvitel-opcio is-aktiv" : "felvitel-opcio"}
-                  onClick={() => { valaszValt(aktualis.kerdes.kulcs, false); setTimeout(tovabb, 120); }}
-                >
-                  <strong>Nem</strong>
+                <button type="button" className="felvitel-tovabb" disabled={!reszletTeljes} onClick={reszletekMentese}>
+                  Pontosítások mentése
                 </button>
               </div>
             </>
           )}
 
-          {aktualis?.fajta === "rendeltetes" && (
+          {fazis === "pontositas" && betoltes && (
+            <div className="felvitel-betoltes" aria-live="polite">
+              <span />
+              <h2>A szükséges pontosításokat ellenőrzöm…</h2>
+              <p>Csak a kiválasztott funkciókhoz kapcsolódó kérdés jelenik meg.</p>
+            </div>
+          )}
+
+          {fazis === "pontositas" && !betoltes && aktualisPontositas && (
             <>
-              <h2>Mi a rendszer rendeltetése?</h2>
-              <p className="felvitel-sugo">
-                Ez a mondat szó szerint bekerül a szabályzatba. Enter helyett a Tovább gomb visz előre.
-              </p>
-              <textarea
-                autoFocus
-                className="felvitel-mezo felvitel-hosszu"
-                rows={4}
-                value={rendeltetes}
-                placeholder="Például: beérkező dokumentumok osztályozása és az ügyintéző támogatása."
-                onChange={(e) => setRendeltetes(e.target.value)}
-              />
+              <span className="felvitel-felirat">Szükséges pontosítás</span>
+              <h2>{aktualisPontositas.question || aktualisPontositas.label}</h2>
+              {aktualisPontositas.description && <p className="felvitel-sugo">{aktualisPontositas.description}</p>}
+              {aktualisPontositas.input === "multi" ? (
+                <>
+                  <ReszletSzerkeszto
+                    tetelek={[aktualisPontositas]}
+                    ertekek={pontositasErtekek}
+                    onChange={(kulcs, ertek) => setPontositasErtekek({ [kulcs]: ertek })}
+                  />
+                  <button type="button" className="felvitel-tovabb" disabled={!pontositasTeljes} onClick={pontositasMentese}>
+                    Mentem és ellenőrzöm
+                  </button>
+                </>
+              ) : (
+                <div className="felvitel-dontesek">
+                  <button type="button" className="felvitel-nem" onClick={() => pontositasValasz(false)}>Nem</button>
+                  <button type="button" className="felvitel-igen" onClick={() => pontositasValasz(true)}>Igen</button>
+                </div>
+              )}
             </>
           )}
 
-          {aktualis?.fajta === "osszegzes" && (
+          {fazis === "pontositas" && !betoltes && !aktualisPontositas && uzenet && (
+            <div className="felvitel-betoltes">
+              <span className="felvitel-hiba-jel">!</span>
+              <h2>Az ellenőrzés megállt</h2>
+              <p>A részletes hibaüzenet lent látható. A visszavonással javítható az utolsó válasz.</p>
+            </div>
+          )}
+
+          {fazis === "osszegzes" && (
             <>
-              <h2>{nev || "A rendszer"}</h2>
-              <p className="felvitel-sugo">Ez következik a válaszokból.</p>
+              <span className="felvitel-felirat">Mentésre kész</span>
+              <h2>{nev.trim()}</h2>
+              <p className="felvitel-sugo">Mentéskor a rendszerhez ezek a már kész Jogtár-szövegek kapcsolódnak.</p>
               <div className="felvitel-osszegzes">
                 <div>
-                  <span>Besorolás</span>
-                  <strong>
-                    {elonezet?.nagy_kockazatu ? "Nagy kockázatú" : "Nem nagy kockázatú"}
-                  </strong>
+                  <span>Kész Jogtár-szöveg</span>
+                  <strong>{elonezet?.applicable_count ?? 0}</strong>
                 </div>
                 <div>
-                  <span>Alkalmazandó előírás</span>
-                  <strong>{elonezet?.szabaly_szam ?? 0}</strong>
+                  <span>Kockázati besorolás</span>
+                  <strong>{elonezet?.high_risk ? "Magas" : "Nem magas"}</strong>
                 </div>
                 <div>
-                  <span>Ebből jóváhagyott</span>
-                  <strong>{elonezet?.jovahagyott_szabaly ?? 0}</strong>
+                  <span>Tisztázatlan feltétel</span>
+                  <strong>{elonezet?.needs_data_count ?? 0}</strong>
                 </div>
               </div>
-              {elonezet?.besorolas_indok && (
-                <p className="felvitel-indok">{elonezet.besorolas_indok}</p>
-              )}
+              <div className="felvitel-szabalylista">
+                {(elonezet?.applicable_modules || []).slice(0, 5).map((modul) => (
+                  <span key={modul.module_id}>✓ {modul.title}</span>
+                ))}
+                {(elonezet?.applicable_modules || []).length > 5 && (
+                  <em>és további {(elonezet?.applicable_modules || []).length - 5} kész szöveg</em>
+                )}
+              </div>
             </>
           )}
         </section>
@@ -411,35 +779,43 @@ export default function NewSystemForm({
       {uzenet && <p className="felvitel-uzenet" role="alert">{uzenet}</p>}
 
       <div className="felvitel-lab">
-        <button type="button" className="felvitel-vissza" onClick={vissza} disabled={lepes === 0}>
-          Vissza
-        </button>
-
-        {utolso ? (
-          <button
-            type="button"
-            className="felvitel-tovabb"
-            onClick={mentesKezelese}
-            disabled={mentes}
-          >
-            {mentes ? "Mentés…" : "Rendszer mentése"}
+        {fazis !== "azonositas" && fazis !== "osszegzes" && (
+          <button type="button" className="felvitel-vissza" onClick={alapVissza} disabled={!!kilepes || betoltes}>
+            {fazis === "funkciok" || fazis === "pontositas" ? "↶ Visszavonom" : "Vissza"}
           </button>
-        ) : (
+        )}
+
+        {fazis === "azonositas" && (
           <button
             type="button"
             className="felvitel-tovabb"
-            onClick={tovabb}
-            disabled={!tovabbLehet}
+            disabled={!nev.trim() || rendeltetes.trim().length < 10 || !!kilepes}
+            onClick={() => fazisValtas("iparag")}
           >
             Tovább
           </button>
         )}
+        {fazis === "iparag" && (
+          <button type="button" className="felvitel-tovabb" disabled={!iparag || !!kilepes} onClick={() => fazisValtas("szerepkor")}>
+            Tovább
+          </button>
+        )}
+        {fazis === "szerepkor" && (
+          <button type="button" className="felvitel-tovabb" disabled={szerepkorok.length === 0 || betoltes || !!kilepes} onClick={funkciokInditasa}>
+            {betoltes ? "Betöltés…" : "Funkciók áttekintése"}
+          </button>
+        )}
+        {fazis === "osszegzes" && (
+          <>
+            <button type="button" className="felvitel-vissza" onClick={visszavonas} disabled={mentes}>↶ Utolsó válasz javítása</button>
+            <button type="button" className="felvitel-tovabb" onClick={mentesKezelese} disabled={mentes || (elonezet?.needs_data_count ?? 1) > 0}>
+              {mentes ? "Mentés…" : "Rendszer mentése"}
+            </button>
+          </>
+        )}
 
-        {elonezet && lepes > 3 && (
-          <span className="felvitel-futo">
-            {elonezet.szabaly_szam} előírás
-            {elonezet.nagy_kockazatu ? " · nagy kockázatú" : ""}
-          </span>
+        {fazis === "funkciok" && aktualisKartya && !merfoldko && (
+          <span className="felvitel-futo">{funkcioIndex + 1}/{kartyak.length} áttekintve</span>
         )}
       </div>
     </div>

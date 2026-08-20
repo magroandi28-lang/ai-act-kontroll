@@ -1,319 +1,537 @@
-/* EnergiaAI Kontroll – az MI-rendszer felvitelének stíluslapja.
-   Önálló fájl: csak az app/rendszerek/uj oldal importálja.
-   Helye: app/rendszerek/uj/felvitel.css
-
-   Egy kártya, egy kérdés. A kártya felfelé kicsúszik, a következő alulról
-   érkezik. A sötét alaphangot az alkalmazás többi részétől örökli. */
-
 .felvitel-page {
   min-height: 100vh;
-  background: #0B1620;
-  color: #E8EEF3;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at 50% 12%, rgba(54, 103, 133, 0.16), transparent 34rem),
+    #0b1620;
+  color: #e8eef3;
 }
 
 .felvitel-topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
   padding: 16px 26px;
 }
 
-.felvitel-back { font-size: 13px; color: #7FA9C8; text-decoration: none; }
-.felvitel-back:hover { color: #B9D4E6; }
+.felvitel-back {
+  color: #7fa9c8;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.felvitel-back:hover { color: #c5ddeb; }
 
 .felvitel-szervezet {
+  color: #607d91;
   font-size: 11px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #5C7488;
 }
 
 .felvitel {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  max-width: 720px;
   width: 100%;
+  max-width: 780px;
+  min-height: calc(100vh - 64px);
   margin: 0 auto;
   padding: 0 20px 24px;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
 }
 
-/* Haladásjelző */
 .felvitel-halado {
-  height: 2px;
-  background: #16232E;
-  border-radius: 2px;
+  height: 3px;
   overflow: hidden;
+  border-radius: 999px;
+  background: #172632;
 }
 
 .felvitel-halado-sav {
   height: 100%;
-  background: #E0603A;
-  transition: width 320ms cubic-bezier(0.22, 1, 0.36, 1);
+  border-radius: inherit;
+  background: linear-gradient(90deg, #df5e39, #f29a66);
+  transition: width 360ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.felvitel-lepesszam {
-  margin: 8px 0 0;
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  color: #5C7488;
-}
-
-/* A kártya színpada: itt cserélődnek a kérdések */
-.felvitel-szinpad {
-  flex: 1;
+.felvitel-allapot {
   display: flex;
+  justify-content: space-between;
+  margin-top: 9px;
+  color: #607d91;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.felvitel-szinpad {
+  position: relative;
+  min-height: 570px;
+  padding: 24px 0 18px;
+  display: flex;
+  flex: 1;
   align-items: center;
-  min-height: 380px;
-  padding: 24px 0;
+  overflow: hidden;
+  perspective: 1100px;
 }
 
 .felvitel-kartya {
+  position: relative;
   width: 100%;
-  padding: 30px 32px;
-  background: #101E2A;
-  border: 1px solid #1E2E3C;
-  border-radius: 16px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  min-height: 430px;
+  max-height: min(660px, calc(100vh - 175px));
+  padding: 32px 34px;
+  overflow-y: auto;
+  border: 1px solid #22394a;
+  border-radius: 22px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.025), transparent 45%),
+    #101f2b;
+  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.38);
+  will-change: transform, opacity;
 }
 
-/* Beúszás: előre haladva alulról, visszalépve felülről. */
-.felvitel-kartya.be-elore { animation: felvitelBeAlulrol 300ms cubic-bezier(0.22, 1, 0.36, 1); }
-.felvitel-kartya.be-vissza { animation: felvitelBeFelulrol 300ms cubic-bezier(0.22, 1, 0.36, 1); }
-
-@keyframes felvitelBeAlulrol {
-  from { opacity: 0; transform: translateY(26px); }
-  to   { opacity: 1; transform: translateY(0); }
+.felvitel-swipe-kartya {
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+  transition: transform 120ms ease-out, opacity 120ms ease-out;
 }
 
-@keyframes felvitelBeFelulrol {
-  from { opacity: 0; transform: translateY(-26px); }
-  to   { opacity: 1; transform: translateY(0); }
+.felvitel-swipe-kartya:active { cursor: grabbing; }
+
+.felvitel-kartya.be-elore { animation: kartyaBeAlul 380ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.felvitel-kartya.be-vissza { animation: kartyaBeFelul 380ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.felvitel-kartya.be-balra { animation: kartyaBeBalrol 360ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.felvitel-kartya.be-jobbra { animation: kartyaBeJobbrol 360ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.felvitel-kartya.be-reszlet { animation: reszletBe 280ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.felvitel-kartya.ki-elore { animation: kartyaKiFel 260ms ease-in both; pointer-events: none; }
+.felvitel-kartya.ki-vissza { animation: kartyaKiLe 260ms ease-in both; pointer-events: none; }
+.felvitel-kartya.ki-balra { animation: kartyaKiBalra 260ms ease-in both; pointer-events: none; }
+.felvitel-kartya.ki-jobbra { animation: kartyaKiJobbra 260ms ease-in both; pointer-events: none; }
+
+@keyframes kartyaBeAlul {
+  from { opacity: 0; transform: translateY(90px) scale(0.97) rotateX(-3deg); }
+  to { opacity: 1; transform: none; }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .felvitel-kartya.be-elore,
-  .felvitel-kartya.be-vissza { animation: none; }
-  .felvitel-halado-sav { transition: none; }
+@keyframes kartyaBeFelul {
+  from { opacity: 0; transform: translateY(-90px) scale(0.97) rotateX(3deg); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes kartyaBeBalrol {
+  from { opacity: 0; transform: translateX(-90px) rotate(-2deg) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes kartyaBeJobbrol {
+  from { opacity: 0; transform: translateX(90px) rotate(2deg) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes reszletBe {
+  from { opacity: 0; transform: scale(0.975); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes kartyaKiFel {
+  to { opacity: 0; transform: translateY(-75vh) scale(0.92) rotateX(7deg); }
+}
+
+@keyframes kartyaKiLe {
+  to { opacity: 0; transform: translateY(75vh) scale(0.92) rotateX(-7deg); }
+}
+
+@keyframes kartyaKiBalra {
+  to { opacity: 0; transform: translateX(-115%) rotate(-12deg) scale(0.94); }
+}
+
+@keyframes kartyaKiJobbra {
+  to { opacity: 0; transform: translateX(115%) rotate(12deg) scale(0.94); }
+}
+
+.felvitel-felirat {
+  display: block;
+  margin-bottom: 10px;
+  color: #e77950;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 .felvitel-kartya h2 {
-  margin: 0 0 8px;
-  font-size: 23px;
-  line-height: 1.3;
-  font-weight: 600;
-  color: #F2F7FA;
+  max-width: 650px;
+  margin: 0 0 9px;
+  color: #f5f9fb;
+  font-size: clamp(22px, 3.2vw, 30px);
+  font-weight: 620;
+  line-height: 1.24;
 }
 
 .felvitel-sugo {
-  margin: 0 0 20px;
+  max-width: 640px;
+  margin: 0 0 22px;
+  color: #88a1b3;
   font-size: 13px;
-  line-height: 1.6;
-  color: #7A94A8;
+  line-height: 1.62;
 }
 
-/* Szöveges mező */
-.felvitel-mezo {
-  width: 100%;
-  padding: 14px 16px;
-  border: 1px solid #24374A;
-  border-radius: 10px;
-  background: #0B1620;
-  color: #E8EEF3;
-  font-family: inherit;
-  font-size: 16px;
-}
-
-.felvitel-mezo:focus { outline: none; border-color: #E0603A; }
-.felvitel-mezo::placeholder { color: #4E6376; }
-.felvitel-hosszu { line-height: 1.6; resize: vertical; }
-
-/* Választható kártyák */
-.felvitel-valasztek {
-  display: grid;
-  gap: 10px;
-}
-
-.felvitel-opcio {
+.felvitel-mezo-cimke {
   display: block;
-  width: 100%;
-  padding: 14px 16px;
-  border: 1px solid #24374A;
-  border-radius: 10px;
-  background: #0D1B26;
-  color: #E8EEF3;
-  text-align: left;
-  cursor: pointer;
-  transition: border-color 140ms ease, background 140ms ease, transform 140ms ease;
-}
-
-.felvitel-opcio:hover { border-color: #3A5670; transform: translateY(-1px); }
-
-.felvitel-opcio.is-aktiv {
-  border-color: #E0603A;
-  background: #17242F;
-}
-
-.felvitel-opcio strong { display: block; font-size: 15px; font-weight: 500; }
-.felvitel-opcio em {
-  display: block;
-  margin-top: 3px;
-  font-style: normal;
+  margin: 15px 0 7px;
+  color: #b9cedb;
   font-size: 12px;
-  line-height: 1.5;
-  color: #7A94A8;
-}
-
-.felvitel-igennem {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.felvitel-igennem .felvitel-opcio { text-align: center; }
-.felvitel-igennem strong { font-size: 16px; }
-
-/* Csoportos pipák */
-.felvitel-pipak { display: grid; gap: 8px; }
-
-.felvitel-pipa {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 12px 14px;
-  border: 1px solid #1E2E3C;
-  border-radius: 10px;
-  background: #0D1B26;
-  cursor: pointer;
-  transition: border-color 140ms ease, background 140ms ease;
-}
-
-.felvitel-pipa:hover { border-color: #3A5670; }
-.felvitel-pipa.is-aktiv { border-color: #E0603A; background: #17242F; }
-
-.felvitel-pipa input { margin-top: 3px; accent-color: #E0603A; }
-.felvitel-pipa strong { display: block; font-size: 14px; font-weight: 500; }
-.felvitel-pipa em {
-  display: block;
-  margin-top: 2px;
-  font-style: normal;
-  font-size: 12px;
-  line-height: 1.5;
-  color: #7A94A8;
-}
-
-.felvitel-egyiksem {
-  margin-top: 14px;
-  padding: 11px 18px;
-  border: 1px solid #24374A;
-  border-radius: 10px;
-  background: transparent;
-  color: #B9D4E6;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.felvitel-egyiksem:hover { border-color: #3A5670; color: #F2F7FA; }
-
-/* Összegzés */
-.felvitel-osszegzes {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 12px;
-}
-
-.felvitel-osszegzes div {
-  padding: 14px 16px;
-  border: 1px solid #1E2E3C;
-  border-radius: 10px;
-  background: #0D1B26;
-}
-
-.felvitel-osszegzes span {
-  display: block;
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #5C7488;
-}
-
-.felvitel-osszegzes strong {
-  display: block;
-  margin-top: 5px;
-  font-size: 19px;
   font-weight: 600;
 }
 
-.felvitel-indok {
-  margin: 14px 0 0;
-  font-size: 13px;
-  line-height: 1.65;
-  color: #7A94A8;
+.felvitel-mezo {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid #294355;
+  border-radius: 11px;
+  outline: 0;
+  background: #0a1721;
+  color: #eef4f7;
+  font: inherit;
+  font-size: 15px;
+  transition: border-color 140ms ease, box-shadow 140ms ease;
 }
 
-/* Lábléc */
+.felvitel-mezo:focus {
+  border-color: #df6842;
+  box-shadow: 0 0 0 3px rgba(223, 104, 66, 0.12);
+}
+
+.felvitel-mezo::placeholder { color: #526a7a; }
+.felvitel-hosszu { resize: vertical; line-height: 1.55; }
+
+.felvitel-valasztek {
+  display: grid;
+  gap: 9px;
+}
+
+.felvitel-valasztek-ketto { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+.felvitel-opcio {
+  width: 100%;
+  padding: 13px 15px;
+  border: 1px solid #294355;
+  border-radius: 11px;
+  background: #0c1923;
+  color: #e8eef3;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+}
+
+.felvitel-opcio:hover { transform: translateY(-1px); border-color: #4f7187; }
+.felvitel-opcio.is-aktiv { border-color: #df6842; background: #192c38; box-shadow: inset 3px 0 #df6842; }
+.felvitel-opcio strong { display: block; font-size: 14px; font-weight: 600; }
+.felvitel-opcio em { display: block; margin-top: 3px; color: #829bab; font-size: 12px; font-style: normal; line-height: 1.45; }
+
+.felvitel-kartya-fej {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.felvitel-kartya-fej .felvitel-felirat { margin: 0; }
+.felvitel-kartya-fej > span:last-child { color: #6f8a9c; font-size: 11px; }
+
+.felvitel-huzas-visszajelzes {
+  display: flex;
+  justify-content: space-between;
+  margin: 28px 2px 8px;
+  color: #607d91;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.felvitel-huzas-visszajelzes span { transition: color 120ms ease, transform 120ms ease; }
+.felvitel-huzas-visszajelzes.is-bal span:first-child { color: #ef9b87; transform: scale(1.08); }
+.felvitel-huzas-visszajelzes.is-jobb span:last-child { color: #76d2a0; transform: scale(1.08); }
+
+.felvitel-kezmutato {
+  position: absolute;
+  right: 36px;
+  bottom: 111px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #8ca7b8;
+  font-size: 11px;
+  pointer-events: none;
+  animation: kezmutatoEltunik 4.5s ease both;
+}
+
+.felvitel-kez {
+  display: inline-block;
+  color: #f2b091;
+  font-size: 28px;
+  filter: grayscale(0.35);
+  animation: kezHuz 1.6s ease-in-out infinite;
+}
+
+@keyframes kezHuz {
+  0%, 100% { transform: translateX(-12px) rotate(-7deg); }
+  50% { transform: translateX(20px) rotate(7deg); }
+}
+
+@keyframes kezmutatoEltunik {
+  0%, 76% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.felvitel-dontesek {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.felvitel-dontesek button {
+  min-height: 48px;
+  padding: 12px 17px;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: transform 140ms ease, filter 140ms ease;
+}
+
+.felvitel-dontesek button:hover { transform: translateY(-1px); filter: brightness(1.08); }
+.felvitel-nem { border: 1px solid #40596a; background: #111f29; color: #c2d1da; }
+.felvitel-igen { border: 1px solid #3b8962; background: #173c2c; color: #a8e2c1; }
+.felvitel-dontesek span { padding: 0 4px; }
+
+.felvitel-billentyu {
+  margin: 13px 0 0;
+  color: #5e788a;
+  font-size: 11px;
+  text-align: center;
+}
+
+.felvitel-reszletek { display: grid; gap: 12px; }
+
+.felvitel-reszlet {
+  margin: 0;
+  padding: 14px 15px;
+  border: 1px solid #294355;
+  border-radius: 12px;
+  background: #0c1923;
+}
+
+.felvitel-reszlet legend {
+  max-width: calc(100% - 8px);
+  padding: 0 5px;
+  color: #e9f0f4;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.felvitel-reszlet p { margin: 0 0 10px; color: #7892a4; font-size: 11px; line-height: 1.5; }
+
+.felvitel-mini-igennem {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.felvitel-mini-igennem button,
+.felvitel-chip {
+  padding: 9px 12px;
+  border: 1px solid #304b5d;
+  border-radius: 9px;
+  background: #101f2a;
+  color: #b8cbd7;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.felvitel-mini-igennem button.is-aktiv,
+.felvitel-chip.is-aktiv {
+  border-color: #df6842;
+  background: #2b2929;
+  color: #fff3ed;
+}
+
+.felvitel-chip-sor { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.felvitel-reszlet-lab {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.felvitel-merfoldko,
+.felvitel-betoltes {
+  min-height: 350px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.felvitel-merfoldko-jel {
+  width: 58px;
+  height: 58px;
+  margin-bottom: 18px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #3f8a65;
+  border-radius: 50%;
+  background: #173a2b;
+  color: #8cddb0;
+  font-size: 26px;
+  box-shadow: 0 0 0 9px rgba(63, 138, 101, 0.08);
+}
+
+.felvitel-merfoldko p,
+.felvitel-betoltes p { max-width: 470px; margin: 2px 0 24px; color: #829bab; line-height: 1.6; }
+
+.felvitel-betoltes > span {
+  width: 34px;
+  height: 34px;
+  margin-bottom: 20px;
+  border: 3px solid #294355;
+  border-top-color: #df6842;
+  border-radius: 50%;
+  animation: forog 700ms linear infinite;
+}
+
+.felvitel-betoltes > .felvitel-hiba-jel {
+  display: grid;
+  place-items: center;
+  border-color: #8b4437;
+  background: #321c19;
+  color: #ef9b87;
+  font-weight: 800;
+  animation: none;
+}
+
+@keyframes forog { to { transform: rotate(360deg); } }
+
+.felvitel-osszegzes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.felvitel-osszegzes div {
+  padding: 15px;
+  border: 1px solid #294355;
+  border-radius: 12px;
+  background: #0c1923;
+}
+
+.felvitel-osszegzes span { display: block; color: #708b9d; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; }
+.felvitel-osszegzes strong { display: block; margin-top: 6px; color: #f3f7f9; font-size: 20px; }
+
+.felvitel-szabalylista {
+  display: grid;
+  gap: 7px;
+  margin-top: 18px;
+  color: #a8bdc9;
+  font-size: 12px;
+}
+
+.felvitel-szabalylista span { line-height: 1.45; }
+.felvitel-szabalylista em { color: #df805d; font-style: normal; }
+
 .felvitel-lab {
+  min-height: 48px;
   display: flex;
   align-items: center;
   gap: 12px;
-  padding-top: 8px;
 }
 
-.felvitel-vissza {
+.felvitel-vissza,
+.felvitel-egyiksem,
+.felvitel-tovabb {
   padding: 11px 20px;
-  border: 1px solid #24374A;
   border-radius: 10px;
-  background: transparent;
-  color: #B9D4E6;
-  font-size: 14px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
 }
 
-.felvitel-vissza:hover:not(:disabled) { border-color: #3A5670; }
-.felvitel-vissza:disabled { opacity: 0.35; cursor: default; }
+.felvitel-vissza,
+.felvitel-egyiksem {
+  border: 1px solid #304b5d;
+  background: transparent;
+  color: #a9bfcc;
+}
 
 .felvitel-tovabb {
-  padding: 11px 26px;
-  border: none;
-  border-radius: 10px;
-  background: #E0603A;
-  color: #FFFFFF;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
+  border: 1px solid #df6842;
+  background: #df6842;
+  color: #fff;
 }
 
-.felvitel-tovabb:hover:not(:disabled) { background: #C9522F; }
-.felvitel-tovabb:disabled { opacity: 0.4; cursor: default; }
+.felvitel-vissza:hover:not(:disabled),
+.felvitel-egyiksem:hover:not(:disabled) { border-color: #527389; color: #edf4f7; }
+.felvitel-tovabb:hover:not(:disabled) { border-color: #f07950; background: #c95431; }
+.felvitel-vissza:disabled,
+.felvitel-egyiksem:disabled,
+.felvitel-tovabb:disabled { opacity: 0.38; cursor: default; }
 
-.felvitel-futo {
-  margin-left: auto;
-  font-size: 12px;
-  color: #7A94A8;
-}
+.felvitel-futo { margin-left: auto; color: #6d8798; font-size: 11px; }
 
 .felvitel-uzenet {
-  margin: 0 0 10px;
-  padding: 10px 14px;
-  border-radius: 8px;
-  background: #2A1614;
-  border: 1px solid #4A2620;
-  color: #E8A79B;
-  font-size: 13px;
+  margin: 0 0 12px;
+  padding: 11px 14px;
+  border: 1px solid #63362c;
+  border-radius: 9px;
+  background: #2b1917;
+  color: #f0ab9a;
+  font-size: 12px;
+  line-height: 1.45;
 }
 
 .felvitel-hibalap {
-  max-width: 520px;
+  width: min(520px, calc(100% - 40px));
   margin: 60px auto;
   padding: 28px;
-  background: #101E2A;
-  border: 1px solid #1E2E3C;
-  border-radius: 14px;
+  border: 1px solid #22394a;
+  border-radius: 16px;
+  background: #101f2b;
 }
 
-@media (max-width: 620px) {
-  .felvitel-kartya { padding: 24px 20px; }
-  .felvitel-kartya h2 { font-size: 20px; }
+@media (max-width: 680px) {
+  .felvitel-topbar { padding: 14px 18px; }
+  .felvitel-szervezet { max-width: 45%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .felvitel { min-height: calc(100vh - 58px); padding: 0 13px 16px; }
+  .felvitel-szinpad { min-height: 520px; padding: 14px 0; }
+  .felvitel-kartya { min-height: 420px; max-height: calc(100vh - 155px); padding: 25px 21px; border-radius: 18px; }
+  .felvitel-valasztek-ketto { grid-template-columns: 1fr; }
+  .felvitel-osszegzes { grid-template-columns: 1fr; }
+  .felvitel-kezmutato { right: 22px; bottom: 108px; }
+  .felvitel-reszlet-lab { align-items: stretch; flex-direction: column-reverse; }
+  .felvitel-reszlet-lab button { width: 100%; }
+  .felvitel-futo { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .felvitel-kartya,
+  .felvitel-halado-sav,
+  .felvitel-kez,
+  .felvitel-kezmutato,
+  .felvitel-betoltes > span {
+    animation: none !important;
+    transition: none !important;
+  }
 }
