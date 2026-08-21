@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "../../lib/supabase/server";
-import SystemFinder from "./SystemFinder";
+import SystemFinder from '@/components/rendszerek/SystemFinder';
 
 const PAGE_SIZE = 5;
 
