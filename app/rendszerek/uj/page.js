@@ -2,11 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "../../../lib/supabase/server";
 import NewSystemForm from "./NewSystemForm";
-// Saját stíluslap, hogy a globals.css-t ne kelljen bővíteni.
 import "./felvitel.css";
 
-// A felvitel típussablon nélkül, közvetlenül a Jogtárból visszafejtett
-// funkció- és környezetkatalógusból dolgozik.
 export const dynamic = "force-dynamic";
 
 export default async function NewSystemPage() {
@@ -16,12 +13,33 @@ export default async function NewSystemPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/");
 
-  const { data: membership } = await supabase
+  // 1. Tagság lekérése
+  let { data: membership } = await supabase
     .from("aic_organisation_members")
     .select("organisation_id, aic_organisations(name, industry)")
     .eq("user_id", user.id)
     .maybeSingle();
 
+  // 2. Ha nincs közvetlen tagság, felveszünk egy alapértelmezett szervezetet
+  if (!membership) {
+    const { data: defaultOrg } = await supabase
+      .from("aic_organisations")
+      .select("id, name, industry")
+      .limit(1)
+      .maybeSingle();
+
+    if (defaultOrg) {
+      membership = {
+        organisation_id: defaultOrg.id,
+        aic_organisations: {
+          name: defaultOrg.name,
+          industry: defaultOrg.industry,
+        },
+      };
+    }
+  }
+
+  // 3. Ha még így sincs szervezet, hibaoldal
   if (!membership) {
     return (
       <main className="felvitel-page">
