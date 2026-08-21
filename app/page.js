@@ -116,18 +116,17 @@ export default function LoginPage() {
 
     if (error || !data.user) {
       setLoadingMode(null);
-      setMessage(
-        /anonymous sign-ins are disabled/i.test(error?.message || "")
-          ? "A Demó mód Supabase-beállítása még nincs bekapcsolva."
-          : `Hiba a demó belépéskor: ${error?.message || "Nem sikerült azonosítani a felhasználót."}`
-      );
+      setMessage(`Auth hiba: ${error?.message || "Nem sikerült azonosítani a felhasználót."}`);
       return;
     }
 
     try {
       await createInitialAccountData(supabase, data.user);
     } catch (err) {
-      console.warn("Bootstrap figyelmeztetés (a belépés folytatódik):", err);
+      console.error("Demó létrehozási hiba:", err);
+      setLoadingMode(null);
+      setMessage(`Adatbázis hiba: ${err.message || JSON.stringify(err)}`);
+      return;
     }
 
     router.replace("/vezerlopult");
