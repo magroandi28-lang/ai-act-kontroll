@@ -37,8 +37,9 @@ export default async function SystemRoute({ params }) {
             <p>{latestPolicy
               ? `A mentett szabályzat ${latestPolicy.version}. verziója elérhető. Megnyitáskor a rendszer ellenőrzi, változtak-e a forrásmodulok.`
               : "A művelet a dokumentált aktív funkciók és az ellenőrzött alkalmazási adatok alapján készíti el a szabályzatot."}</p>
-            <Link className="primary-button" href={latestPolicy ? `/rendszerek/${system.id}/szabalyzat` : `/rendszerek/${system.id}/szabalyzat?inditas=1`}>
-              {latestPolicy ? "Szabályzat megnyitása" : "Szabályzat elkészítése"}
+            <Link className="profile-policy-button" href={latestPolicy ? `/rendszerek/${system.id}/szabalyzat` : `/rendszerek/${system.id}/szabalyzat?inditas=1`}>
+              <span>{latestPolicy ? "Szabályzat megnyitása" : "Szabályzat elkészítése"}</span>
+              <span className="profile-policy-arrow" aria-hidden="true">→</span>
             </Link>
         </section>
       </section>
