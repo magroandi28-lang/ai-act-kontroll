@@ -1,48 +1,75 @@
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { createClient } from "../../../lib/supabase/server";
+import NewSystemForm from "./NewSystemForm";
+import "./felvitel.css";
 
-export default async function SystemRoute({ params }) {
+export const dynamic = "force-dynamic";
+
+export default async function NewSystemPage() {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/");
 
-  const { data: system } = await supabase
-    .from("aic_ai_systems")
-    .select("id,name,intended_purpose,aic_system_type_templates(name_hu),aic_ai_system_capabilities(capability_code)")
-    .eq("id", params.id)
-    .eq("inventory_status", "active")
+  // 1. Tagság lekérése
+  let { data: membership } = await supabase
+    .from("aic_organisation_members")
+    .select("organisation_id, aic_organisations(name, industry)")
+    .eq("user_id", user.id)
     .maybeSingle();
-  if (!system) notFound();
 
-  const { data: latestPolicy } = await supabase
-    .from("aic_generated_policies")
-    .select("id,version")
-    .eq("ai_system_id", system.id)
-    .order("version", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  // 2. Ha nincs közvetlen tagság, felveszünk egy alapértelmezett szervezetet
+  if (!membership) {
+    const { data: defaultOrg } = await supabase
+      .from("aic_organisations")
+      .select("id, name, industry")
+      .limit(1)
+      .maybeSingle();
+
+    if (defaultOrg) {
+      membership = {
+        organisation_id: defaultOrg.id,
+        aic_organisations: {
+          name: defaultOrg.name,
+          industry: defaultOrg.industry,
+        },
+      };
+    }
+  }
+
+  // 3. Ha még így sincs szervezet, hibaoldal
+  if (!membership) {
+    return (
+      <main className="felvitel-page">
+        <section className="felvitel-hibalap">
+          <Link className="felvitel-back" href="/vezerlopult">← Vissza az irányítópultra</Link>
+          <h1>A szervezet nem érhető el</h1>
+          <p>A fiókhoz nem tartozik szervezet.</p>
+        </section>
+      </main>
+    );
+  }
+
+  const { data: industries } = await supabase
+    .from("aic_industries")
+    .select("code, name_hu")
+    .eq("active", true)
+    .order("sort_order");
 
   return (
-    <main className="system-form-page">
-      <section className="system-form-shell edit-system-shell">
-        <Link className="back-link" href={`/rendszerek?rendszer=${system.id}`}>← Vissza ehhez a rendszerhez</Link>
-        <p className="system-form-eyebrow">SZABÁLYZAT</p>
-        <h1>{system.name}</h1>
-        <p className="system-form-intro">{system.intended_purpose}</p>
+    <main className="felvitel-page">
+      <div className="felvitel-topbar">
+        <Link className="felvitel-back" href="/vezerlopult">← Vissza az irányítópultra</Link>
+        <span className="felvitel-szervezet">{membership.aic_organisations?.name}</span>
+      </div>
 
-        <section className="profile-confirmation">
-            <p className="profile-label">{system.aic_system_type_templates?.name_hu}</p>
-            <h2>{latestPolicy ? "Megnyitod a szabályzatot?" : "Elkészíted a szabályzatot?"}</h2>
-            <p>{latestPolicy
-              ? `A mentett szabályzat ${latestPolicy.version}. verziója elérhető. Megnyitáskor a rendszer ellenőrzi, változtak-e a forrásmodulok.`
-              : "A művelet a dokumentált aktív funkciók és az ellenőrzött alkalmazási adatok alapján készíti el a szabályzatot."}</p>
-            <Link className="profile-policy-button" href={latestPolicy ? `/rendszerek/${system.id}/szabalyzat` : `/rendszerek/${system.id}/szabalyzat?inditas=1`}>
-              <span>{latestPolicy ? "Szabályzat megnyitása" : "Szabályzat elkészítése"}</span>
-              <span className="profile-policy-arrow" aria-hidden="true">→</span>
-            </Link>
-        </section>
-      </section>
+      <NewSystemForm
+        organisationId={membership.organisation_id}
+        organisationIndustry={membership.aic_organisations?.industry || null}
+        industries={industries || []}
+      />
     </main>
   );
 }
