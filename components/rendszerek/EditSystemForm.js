@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { archiveSystem, updateSystem, updateSystemCapabilities } from "./actions";
-import FunctionCombobox from "../../FunctionCombobox";
+import { archiveSystem, updateSystem, updateSystemCapabilities } from '@/app/rendszerek/[id]/szerkesztes/actions';
+import FunctionCombobox from '@/components/rendszerek/FunctionCombobox';
 
 const lifecycleOptions = [
   ["planned", "Tervezett"],

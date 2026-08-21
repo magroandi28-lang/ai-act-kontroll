@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { changeRole, inviteMember, removeMember } from "./actions";
+import { changeRole, inviteMember, removeMember } from '@/app/szervezet/actions';
 
 // A szerepkörök jelentése egy helyen. Ugyanezt látja a felhasználó a
 // felületen is, hogy ne kelljen kitalálnia, mit választ.

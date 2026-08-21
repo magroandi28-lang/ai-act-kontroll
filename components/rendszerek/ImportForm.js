@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { importSystems, previewImport } from "./actions";
+import { importSystems, previewImport } from '@/app/rendszerek/importalas/actions';
 
 export default function ImportForm() {
   const router = useRouter();

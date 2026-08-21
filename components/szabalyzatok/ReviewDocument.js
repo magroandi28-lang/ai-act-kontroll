@@ -4,7 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import {
   approveDocument, approveRule, editSection, insertModule, resetSection, sendBack,
-} from "./actions";
+} from '@/app/szabalyzatok/[id]/actions';
 
 const SULYOSSAG = { magas: "Magas", kozepes: "Közepes", alacsony: "Alacsony" };
 

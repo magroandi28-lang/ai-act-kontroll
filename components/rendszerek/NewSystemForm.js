@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "../../../lib/supabase/client";
+import { createClient } from '@/lib/supabase/client';
 
 const SZEREPKOROK = [
   ["deployer", "Használjuk", "A szervezet saját felelősségére használja vagy üzemelteti."],

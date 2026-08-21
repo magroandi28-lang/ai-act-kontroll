@@ -3,7 +3,7 @@
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { approvePolicy, rejectPolicy, submitPolicyForReview } from "./actions";
+import { approvePolicy, rejectPolicy, submitPolicyForReview } from '@/app/rendszerek/[id]/szabalyzat/actions';
 
 const statusLabels = {
   draft: "Piszkozat",
