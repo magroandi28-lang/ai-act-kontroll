@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "../lib/supabase/client";
+import { createInitialAccountData } from "../lib/auth/bootstrap";
 
 function Logo() {
   return (
@@ -53,7 +54,8 @@ export default function LoginPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loadingMode, setLoadingMode] = useState(null);
+  const loading = Boolean(loadingMode);
 
   function rememberPrivacyChoice(event) {
     const form = event.currentTarget.closest("form");
@@ -74,7 +76,7 @@ export default function LoginPage() {
       return;
     }
 
-    setLoading(true);
+    setLoadingMode("login");
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithPassword({
       email: String(data.get("email") || "").trim(),
@@ -82,8 +84,52 @@ export default function LoginPage() {
     });
 
     if (error) {
-      setLoading(false);
+      setLoadingMode(null);
       setMessage("Hibás e-mail-cím vagy jelszó.");
+      return;
+    }
+
+    router.replace("/vezerlopult");
+    router.refresh();
+  }
+
+  async function handleDemo(event) {
+    const form = event.currentTarget.closest("form");
+    setMessage("");
+
+    if (!form?.elements?.privacy?.checked) {
+      setMessage("A demó indításához fogadd el az adatkezelési nyilatkozatot.");
+      return;
+    }
+
+    setLoadingMode("demo");
+    const supabase = createClient();
+    const { data, error } = await supabase.auth.signInAnonymously({
+      options: {
+        data: {
+          full_name: "Demó látogató",
+          organisation_name: "Demó szervezet",
+          demo_mode: true,
+        },
+      },
+    });
+
+    if (error || !data.user) {
+      setLoadingMode(null);
+      setMessage(
+        /anonymous sign-ins are disabled/i.test(error?.message || "")
+          ? "A Demó mód Supabase-beállítása még nincs bekapcsolva."
+          : "A demó most nem indítható. Kérlek, próbáld újra."
+      );
+      return;
+    }
+
+    try {
+      await createInitialAccountData(supabase, data.user);
+    } catch {
+      await supabase.auth.signOut();
+      setLoadingMode(null);
+      setMessage("A demókörnyezet létrehozása nem sikerült. Kérlek, próbáld újra.");
       return;
     }
 
@@ -122,9 +168,13 @@ export default function LoginPage() {
             <span>Elfogadom az <a href="/adatkezeles">adatkezelési nyilatkozatot</a></span>
           </label>
           {message && <p className="form-message" role="alert">{message}</p>}
-          <button className="primary-button" type="submit" disabled={loading}>{loading ? "Belépés…" : "Belépés"}</button>
+          <button className="primary-button" type="submit" disabled={loading}>{loadingMode === "login" ? "Belépés…" : "Belépés"}</button>
           <a className="forgot-link" href="/jelszo">Elfelejtett jelszó?</a>
           <div className="divider" />
+          <button className="demo-button" type="button" onClick={handleDemo} disabled={loading}>
+            {loadingMode === "demo" ? "Demó indítása…" : "Kipróbálom regisztráció nélkül"}
+          </button>
+          <p className="demo-help">Saját, elkülönített próbakörnyezetet kapsz.</p>
           <a className="register-link" href="/regisztracio" onClick={rememberPrivacyChoice}>Regisztráció</a>
         </form>
       </section>

@@ -1,4 +1,5 @@
 import "./globals.css";
+import DemoBanner from "./DemoBanner";
 
 export const metadata = {
   title: "EnergiaAI Kontroll",
@@ -8,7 +9,10 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="hu">
-      <body>{children}</body>
+      <body>
+        <DemoBanner />
+        {children}
+      </body>
     </html>
   );
 }
