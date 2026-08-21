@@ -11,6 +11,7 @@ export default async function OrganisationPage() {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/");
+  const isDemo = Boolean(user.is_anonymous);
 
   const { data: organisations, error: orgError } = await supabase.rpc("aic_szervezeteim");
 
@@ -45,6 +46,12 @@ export default async function OrganisationPage() {
           szabályzatokat. Szabályzatot szerkeszteni kizárólag jogász tud.
         </p>
 
+        {isDemo && (
+          <p className="org-demo-note">
+            Demó módban a szerepkörök megtekinthetők, de tag nem hívható meg és nem módosítható.
+          </p>
+        )}
+
         {orgError && (
           <p className="org-error" role="alert">
             A szervezeti adatok nem tölthetők be: {orgError.message}
@@ -66,6 +73,7 @@ export default async function OrganisationPage() {
             organisationId={organisation.organisation_id}
             myRole={organisation.member_role}
             members={members}
+            readOnly={isDemo}
           />
         )}
       </section>

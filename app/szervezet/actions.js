@@ -63,6 +63,9 @@ async function bejelentkezettFelhasznalo() {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) throw new Error("A művelethez bejelentkezés szükséges.");
+  if (user.is_anonymous) {
+    throw new Error("Demó módban a szervezeti tagok nem módosíthatók.");
+  }
   return supabase;
 }
 

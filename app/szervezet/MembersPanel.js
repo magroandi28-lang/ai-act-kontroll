@@ -20,12 +20,12 @@ function initials(name, email) {
   return (reszek[0]?.[0] || "?").toUpperCase() + (reszek[1]?.[0] || "").toUpperCase();
 }
 
-export default function MembersPanel({ organisationId, myRole, members }) {
+export default function MembersPanel({ organisationId, myRole, members, readOnly = false }) {
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState(null);
   const [selectedRole, setSelectedRole] = useState("compliance");
 
-  const canManage = myRole === "owner" || myRole === "admin";
+  const canManage = !readOnly && (myRole === "owner" || myRole === "admin");
 
   function run(action) {
     setMessage(null);
