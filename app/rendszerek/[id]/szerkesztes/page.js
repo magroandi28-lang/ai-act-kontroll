@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "../../../../lib/supabase/server";
-import EditSystemForm from "./EditSystemForm";
+import EditSystemForm from "@/components/rendszerek/EditSystemForm";
 
 export default async function EditSystemPage({ params }) {
   const supabase = createClient();

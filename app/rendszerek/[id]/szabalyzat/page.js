@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "../../../../lib/supabase/server";
-import SearchablePolicy from "./SearchablePolicy";
+import SearchablePolicy from "@/components/szabalyzatok/SearchablePolicy";
 
 export default async function PolicyPage({ params, searchParams }) {
   const supabase = createClient();

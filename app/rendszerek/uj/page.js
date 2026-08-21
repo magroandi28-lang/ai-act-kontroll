@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "../../../lib/supabase/server";
-import NewSystemForm from "./NewSystemForm";
-import "./felvitel.css";
+import NewSystemForm from "@/components/rendszerek/NewSystemForm";
+import "@/styles/felvitel.css";
 
 export const dynamic = "force-dynamic";
 

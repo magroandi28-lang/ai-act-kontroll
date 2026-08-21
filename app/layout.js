@@ -1,5 +1,5 @@
-import "./globals.css";
-import DemoBanner from "./DemoBanner";
+import "@/styles/globals.css";
+import DemoBanner from "@/components/ui/DemoBanner";
 
 export const metadata = {
   title: "EnergiaAI Kontroll",

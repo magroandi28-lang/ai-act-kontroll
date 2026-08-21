@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "../../lib/supabase/server";
-import MembersPanel from "./MembersPanel";
+import MembersPanel from "@/components/szervezet/MembersPanel";
 
 export const dynamic = "force-dynamic";
 

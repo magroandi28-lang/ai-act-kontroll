@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "../../lib/supabase/server";
-import JogtarView from "./JogtarView";
+import JogtarView from "@/components/jogtar/JogtarView";
 // A jogtár saját stíluslapja. Külön fájlban van, hogy a globals.css-t ne
 // kelljen bővíteni: a világos olvasófelület nem keveredik a sötét alkalmazás
 // stílusaival, és egy fájl cseréjével áttervezhető.
-import "./jogtar.css";
+import "@/styles/jogtar.css";
 
 // A jogtár szabályközpontú: egy képernyő, egy döntés. A törvényszöveg
 // bizonyíték, ezért összecsukva áll a szabály alatt.

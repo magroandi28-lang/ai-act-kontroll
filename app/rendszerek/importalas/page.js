@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "../../../lib/supabase/server";
-import ImportForm from "./ImportForm";
+import ImportForm from "@/components/rendszerek/ImportForm";
 
 export default async function ImportPage() {
   const supabase = createClient();
