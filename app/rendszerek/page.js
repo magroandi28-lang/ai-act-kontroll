@@ -14,47 +14,63 @@ export default async function SystemsPage({ searchParams }) {
   const currentPage = Number.isFinite(requestedPage) && requestedPage > 0 ? requestedPage : 1;
   const selectedSystemId = searchParams?.rendszer || "";
 
+  // Szervezeti tagság lekérése (ha nincs, nem dobunk hibát/átirányítást)
   const { data: membership } = await supabase
     .from("aic_organisation_members")
     .select("organisation_id, aic_organisations(name)")
     .eq("user_id", user.id)
     .maybeSingle();
 
-  if (!membership) redirect("/vezerlopult");
+  const organisationId = membership?.organisation_id || null;
+  const orgDisplayName = membership?.aic_organisations?.name || "Szervezet";
 
-  const { data: allSystems } = await supabase
+  // Összes mentett rendszer lekérése
+  let allSystemsQuery = supabase
     .from("aic_ai_systems")
     .select("id, name, intended_purpose, created_at, aic_system_type_templates(name_hu)")
-    .eq("organisation_id", membership.organisation_id)
     .eq("inventory_status", "active")
     .order("created_at", { ascending: false });
 
+  if (organisationId) {
+    allSystemsQuery = allSystemsQuery.eq("organisation_id", organisationId);
+  }
+
+  const { data: allSystemsData } = await allSystemsQuery;
+  const allSystems = allSystemsData || [];
+
+  // Lapozott lekérdezés
   const from = (currentPage - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
+
   let systemsQuery = supabase
     .from("aic_ai_systems")
     .select("id, name, intended_purpose, organisation_role, lifecycle_stage, assessment_status, created_at, aic_system_type_templates(name_hu)")
-    .eq("organisation_id", membership.organisation_id)
     .eq("inventory_status", "active")
     .order("created_at", { ascending: false });
 
-  const { data: systems } = selectedSystemId
+  if (organisationId) {
+    systemsQuery = systemsQuery.eq("organisation_id", organisationId);
+  }
+
+  const { data: systemsData } = selectedSystemId
     ? await systemsQuery.eq("id", selectedSystemId).limit(1)
     : await systemsQuery.range(from, to);
 
-  if (selectedSystemId && !systems?.length) redirect("/rendszerek");
+  const systems = systemsData || [];
 
-  const systemIds = (systems || []).map((system) => system.id);
+  if (selectedSystemId && !systems.length) redirect("/rendszerek");
+
+  const systemIds = systems.map((system) => system.id);
   const { data: generatedPolicies } = systemIds.length
     ? await supabase.from("aic_generated_policies").select("ai_system_id").in("ai_system_id", systemIds)
     : { data: [] };
   const systemsWithPolicy = new Set((generatedPolicies || []).map((policy) => policy.ai_system_id));
 
-  const total = (allSystems || []).length;
+  const total = allSystems.length;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   if (currentPage > totalPages && total > 0) redirect(`/rendszerek?oldal=${totalPages}`);
 
-  const finderSystems = (allSystems || []).map((system, index) => ({
+  const finderSystems = allSystems.map((system, index) => ({
     id: system.id,
     name: system.name,
     purpose: system.intended_purpose,
@@ -68,7 +84,7 @@ export default async function SystemsPage({ searchParams }) {
         <div className="systems-topbar">
           <div>
             <Link className="back-link" href="/vezerlopult">← Vissza az irányítópultra</Link>
-            <p className="system-form-eyebrow">{membership.aic_organisations?.name}</p>
+            <p className="system-form-eyebrow">{orgDisplayName}</p>
             <h1>Mentett MI-rendszerek</h1>
             <p>{total} nyilvántartott rendszer</p>
           </div>
@@ -93,27 +109,27 @@ export default async function SystemsPage({ searchParams }) {
 
         <SystemFinder key={selectedSystemId || "all"} systems={finderSystems} selectedSystemId={selectedSystemId} />
 
-        {systems?.length ? (
+        {systems.length ? (
           <div className="systems-list">
             {systems.map((system) => {
               const hasPolicy = systemsWithPolicy.has(system.id);
               const policyHref = hasPolicy ? `/rendszerek/${system.id}/szabalyzat` : `/rendszerek/${system.id}`;
               return (
-              <article className="system-row-wrap" key={system.id}>
-              <div className="system-row" id={`rendszer-${system.id}`}>
-                <div className="system-row-main">
-                  <span>{system.aic_system_type_templates?.name_hu || "Egyéb MI-rendszer"}</span>
-                  <h2>{system.name}</h2>
-                  <p>{system.intended_purpose}</p>
-                </div>
-                <div className="system-row-buttons">
-                  <Link className="system-row-edit" href={`/rendszerek/${system.id}/szerkesztes`}>Szerkesztés</Link>
-                  <Link className="system-row-policy" href={policyHref}>
-                    {hasPolicy ? "Szabályzat megnyitása" : "Szabályzat elkészítése"}
-                  </Link>
-                </div>
-              </div>
-              </article>
+                <article className="system-row-wrap" key={system.id}>
+                  <div className="system-row" id={`rendszer-${system.id}`}>
+                    <div className="system-row-main">
+                      <span>{system.aic_system_type_templates?.name_hu || "Egyéb MI-rendszer"}</span>
+                      <h2>{system.name}</h2>
+                      <p>{system.intended_purpose}</p>
+                    </div>
+                    <div className="system-row-buttons">
+                      <Link className="system-row-edit" href={`/rendszerek/${system.id}/szerkesztes`}>Szerkesztés</Link>
+                      <Link className="system-row-policy" href={policyHref}>
+                        {hasPolicy ? "Szabályzat megnyitása" : "Szabályzat elkészítése"}
+                      </Link>
+                    </div>
+                  </div>
+                </article>
               );
             })}
           </div>
