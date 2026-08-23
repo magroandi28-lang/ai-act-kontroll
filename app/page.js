@@ -204,6 +204,8 @@ function TourModal({ lang, onLang, onClose }) {
 
   const startX = useRef(0);
   const moved = useRef(false);
+  const pendingDx = useRef(0);
+  const raf = useRef(null);
 
   const kw = cardWidth(winW);
   const lep = kw + GAP;
@@ -253,10 +255,16 @@ function TourModal({ lang, onLang, onClose }) {
     if (!dragging) return;
     const d = e.clientX - startX.current;
     if (Math.abs(d) > 6) moved.current = true;
-    setDx(d);
+    pendingDx.current = d;
+    if (raf.current) return;
+    raf.current = requestAnimationFrame(() => {
+      raf.current = null;
+      setDx(pendingDx.current);
+    });
   }
 
   function onUp() {
+    if (raf.current) { cancelAnimationFrame(raf.current); raf.current = null; }
     if (!dragging) return;
     const kuszob = Math.max(40, lep * 0.26);
     if (dx < -kuszob) step(1);
@@ -330,8 +338,8 @@ function TourModal({ lang, onLang, onClose }) {
                         transform: `translateZ(${tz.toFixed(0)}px) rotateY(${ry.toFixed(1)}deg) scale(${sc.toFixed(3)})`,
                         opacity: op.toFixed(2),
                         transition: dragging
-                          ? "border-color 300ms ease, background 300ms ease"
-                          : "transform 460ms cubic-bezier(0.22,1,0.36,1), opacity 460ms ease, border-color 300ms ease, box-shadow 300ms ease, background 300ms ease",
+                          ? "border-color 240ms ease"
+                          : "transform 460ms cubic-bezier(0.22,1,0.36,1), opacity 460ms ease, border-color 240ms ease",
                       }}
                     >
                       <span className="tour-badge">{"0" + (i + 1)}</span>
