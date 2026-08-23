@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "../lib/supabase/client";
 import { createInitialAccountData } from "../lib/auth/bootstrap";
-import "./belepes.css";
 
 function MailIcon() {
   return (
