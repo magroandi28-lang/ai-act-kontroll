@@ -1,0 +1,352 @@
+/* ==========================================================================
+   AI Act Kontroll – belépés oldal
+   Fájl: app/belepes.css     (a page.js importálja: import "./belepes.css";)
+   ========================================================================== */
+
+.belepes-page {
+  --bel-narancs: #e08a4f;
+  --bel-narancs-vil: #f0a875;
+  --bel-narancs-hal: rgba(224, 138, 79, 0.55);
+  --bel-keret: rgba(224, 138, 79, 0.42);
+
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 32px;
+  background: radial-gradient(120% 90% at 50% 8%, #10202e 0%, #0b1620 46%, #070f16 100%);
+  color: #e8eef3;
+  font-family: "Manrope", Arial, sans-serif;
+}
+
+.belepes-page * { box-sizing: border-box; }
+
+/* --- háttér: rács, fénycsíkok, szemcsék ---------------------------------- */
+.belepes-racs {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.55;
+  background-image:
+    linear-gradient(rgba(41, 67, 85, 0.14) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(41, 67, 85, 0.14) 1px, transparent 1px);
+  background-size: 58px 58px;
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, transparent 30%, #000 100%);
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, transparent 30%, #000 100%);
+}
+
+.belepes-csik { position: absolute; top: 0; width: 1px; pointer-events: none; }
+.belepes-csik-1 { left: 2.5%;  height: 30%; background: linear-gradient(180deg, rgba(224, 138, 79, 0.55), transparent); }
+.belepes-csik-2 { left: 6.5%;  height: 14%; background: linear-gradient(180deg, rgba(127, 169, 200, 0.34), transparent); }
+.belepes-csik-3 { left: 11%;   height: 22%; background: linear-gradient(180deg, rgba(224, 138, 79, 0.26), transparent); }
+.belepes-csik-4 { left: 88%;   height: 40%; background: linear-gradient(180deg, rgba(224, 138, 79, 0.50), transparent); }
+.belepes-csik-5 { left: 93.5%; height: 18%; background: linear-gradient(180deg, rgba(127, 169, 200, 0.30), transparent); }
+.belepes-csik-6 { left: 97%;   height: 28%; background: linear-gradient(180deg, rgba(224, 138, 79, 0.30), transparent); }
+
+.belepes-szemcse {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--bel-narancs);
+  box-shadow: 0 0 12px 3px rgba(224, 138, 79, 0.6);
+  pointer-events: none;
+}
+.belepes-szemcse-1 { left: 1.5%;  top: 34%; }
+.belepes-szemcse-2 { left: 85.5%; top: 13%; width: 4px; height: 4px; }
+
+/* --- padló --------------------------------------------------------------- */
+.belepes-padlo {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 34vh;
+  min-height: 210px;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(10, 18, 26, 0) 0%, rgba(9, 16, 23, 0.75) 26%, rgba(7, 13, 19, 0.95) 100%);
+}
+
+.belepes-padlo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.4;
+  background-image: linear-gradient(90deg, rgba(140, 170, 190, 0.16) 1px, transparent 1px);
+  background-size: 110px 100%;
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 22%, transparent 85%);
+  mask-image: linear-gradient(180deg, transparent, #000 22%, transparent 85%);
+}
+
+/* --- kártya -------------------------------------------------------------- */
+.belepes-keret {
+  position: relative;
+  z-index: 2;
+  width: min(1080px, 76vw);
+  min-width: 0;
+}
+
+.belepes-logo {
+  display: block;
+  height: clamp(34px, 3.6vw, 46px);
+  width: auto;
+  margin: 0 0 clamp(18px, 2.2vw, 28px);
+}
+
+.belepes-kartya {
+  position: relative;
+  width: 100%;
+  padding: clamp(28px, 3.6vw, 52px) clamp(28px, 4.2vw, 60px);
+  border: 1px solid var(--bel-keret);
+  border-radius: clamp(20px, 2.2vw, 30px);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.03), transparent 42%), #0e1a25;
+  box-shadow: 0 40px 110px rgba(0, 0, 0, 0.55), inset 0 0 60px rgba(224, 138, 79, 0.06);
+  animation: belepesBe 560ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes belepesBe {
+  from { opacity: 0; transform: translateY(34px) scale(0.985); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* fénycsík a kártya alsó élén + lefelé sugárzó fény */
+.belepes-glow,
+.belepes-fenycsik {
+  position: absolute;
+  top: 100%;
+  pointer-events: none;
+}
+.belepes-glow {
+  left: -16vw;
+  right: -16vw;
+  height: min(30vh, 220px);
+  background: radial-gradient(ellipse 42% 100% at 50% 0%, rgba(224, 138, 79, 0.34), rgba(224, 138, 79, 0.10) 44%, transparent 78%);
+}
+.belepes-fenycsik {
+  left: -11vw;
+  right: -11vw;
+  height: 2px;
+  margin-top: -2px;
+  background: linear-gradient(90deg, transparent, rgba(240, 168, 117, 0.85) 10%, #ffd0a6 50%, rgba(240, 168, 117, 0.85) 90%, transparent);
+  box-shadow: 0 0 34px 9px rgba(224, 138, 79, 0.45);
+}
+
+/* --- két oszlop ---------------------------------------------------------- */
+.belepes-oszlopok {
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr;
+  gap: 0 clamp(26px, 4vw, 56px);
+  align-items: start;
+}
+
+.belepes-valaszto {
+  width: 1px;
+  height: 100%;
+  min-height: 300px;
+  background: linear-gradient(180deg, transparent, rgba(224, 138, 79, 0.28) 18%, rgba(224, 138, 79, 0.28) 82%, transparent);
+}
+
+.belepes-jobb { display: flex; flex-direction: column; }
+
+/* --- bal oszlop: cím, mezők --------------------------------------------- */
+.belepes-page h1 {
+  margin: 0 0 clamp(20px, 2.6vw, 34px);
+  color: #f5f9fb;
+  font-size: clamp(27px, 3.2vw, 40px);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.belepes-page label {
+  display: block;
+  margin: 0 0 8px;
+  color: #c9d8e2;
+  font-size: clamp(12px, 1.15vw, 14px);
+  font-weight: 500;
+}
+
+.belepes-mezo-sor {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: clamp(16px, 1.9vw, 26px);
+}
+.belepes-mezo-sor-jelszo { margin-bottom: clamp(18px, 2.2vw, 30px); }
+
+.belepes-mezo-sor > svg {
+  position: absolute;
+  left: clamp(13px, 1.5vw, 18px);
+  width: clamp(15px, 1.6vw, 19px);
+  height: clamp(15px, 1.6vw, 19px);
+  fill: none;
+  stroke: #8aa2b3;
+  stroke-width: 1.5;
+}
+
+.belepes-mezo {
+  width: 100%;
+  padding: clamp(12px, 1.4vw, 17px) 18px clamp(12px, 1.4vw, 17px) clamp(40px, 3.6vw, 50px);
+  border: 1px solid var(--bel-narancs-hal);
+  border-radius: 12px;
+  outline: 0;
+  background: #0b1721;
+  color: #eef4f7;
+  font: inherit;
+  font-size: clamp(13px, 1.35vw, 16px);
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+.belepes-mezo::placeholder { color: #63798a; }
+.belepes-mezo:focus {
+  border-color: var(--bel-narancs);
+  box-shadow: 0 0 0 3px rgba(224, 138, 79, 0.14);
+}
+.belepes-mezo:disabled { opacity: 0.6; }
+.belepes-mezo-jelszo { padding-right: 54px; }
+
+.belepes-szem {
+  position: absolute;
+  right: 10px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #8aa2b3;
+  cursor: pointer;
+}
+.belepes-szem:hover { color: var(--bel-narancs); }
+.belepes-szem svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.5; }
+
+.belepes-privacy {
+  display: flex !important;
+  align-items: center;
+  gap: clamp(10px, 1.1vw, 14px);
+  margin: 0 !important;
+  color: #c9d8e2;
+  font-size: clamp(12px, 1.25vw, 15px);
+  font-weight: 400 !important;
+  cursor: pointer;
+}
+.belepes-privacy input {
+  width: clamp(18px, 1.9vw, 24px);
+  height: clamp(18px, 1.9vw, 24px);
+  flex: none;
+  margin: 0;
+  border-radius: 6px;
+  accent-color: var(--bel-narancs);
+  cursor: pointer;
+}
+.belepes-privacy a {
+  color: var(--bel-narancs);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.belepes-privacy a:hover { color: var(--bel-narancs-vil); }
+
+/* --- jobb oszlop: gombok ------------------------------------------------- */
+.belepes-fo-gomb {
+  width: 100%;
+  padding: clamp(14px, 1.7vw, 20px) 24px;
+  border: 1px solid #e9a374;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #e69a63, #c26f3f);
+  color: #fff;
+  font: inherit;
+  font-size: clamp(14px, 1.45vw, 17px);
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 14px 36px rgba(224, 138, 79, 0.26);
+  transition: filter 140ms ease;
+}
+.belepes-fo-gomb:hover:not(:disabled) { filter: brightness(1.07); }
+
+.belepes-elvalaszto {
+  height: 1px;
+  margin: clamp(16px, 2vw, 26px) 0;
+  background: rgba(224, 138, 79, 0.22);
+}
+
+.belepes-elfelejtett {
+  align-self: flex-start;
+  color: var(--bel-narancs);
+  font-size: clamp(12px, 1.25vw, 15px);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.belepes-elfelejtett:hover { color: var(--bel-narancs-vil); }
+
+.belepes-demo-gomb {
+  width: 100%;
+  margin-top: clamp(16px, 2vw, 26px);
+  padding: clamp(13px, 1.6vw, 19px) 20px;
+  border: 1px solid rgba(224, 138, 79, 0.6);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--bel-narancs);
+  font: inherit;
+  font-size: clamp(12px, 1.35vw, 16px);
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 140ms ease, border-color 140ms ease;
+}
+.belepes-demo-gomb:hover:not(:disabled) {
+  border-color: var(--bel-narancs);
+  background: rgba(224, 138, 79, 0.08);
+}
+
+.belepes-fo-gomb:disabled,
+.belepes-demo-gomb:disabled { opacity: 0.5; cursor: default; }
+
+.belepes-demo-sugo {
+  margin: clamp(12px, 1.4vw, 18px) 0 0;
+  color: #a9bfcc;
+  font-size: clamp(11px, 1.15vw, 14px);
+  text-align: center;
+  line-height: 1.5;
+}
+
+.belepes-regisztracio {
+  margin-top: clamp(16px, 2vw, 26px);
+  color: var(--bel-narancs);
+  font-size: clamp(14px, 1.5vw, 18px);
+  font-weight: 500;
+  text-align: center;
+}
+.belepes-regisztracio:hover { color: var(--bel-narancs-vil); }
+
+.belepes-uzenet {
+  margin: 14px 0 0;
+  padding: 11px 14px;
+  border: 1px solid #63362c;
+  border-radius: 9px;
+  background: #2b1917;
+  color: #f0ab9a;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+/* --- mobil --------------------------------------------------------------- */
+@media (max-width: 900px) {
+  .belepes-keret { width: min(560px, 100%); }
+  .belepes-oszlopok { grid-template-columns: 1fr; gap: 0; }
+  .belepes-valaszto {
+    width: 100%;
+    height: 1px;
+    min-height: 0;
+    margin: 26px 0;
+    background: linear-gradient(90deg, transparent, rgba(224, 138, 79, 0.28), transparent);
+  }
+  .belepes-glow, .belepes-fenycsik { left: -6vw; right: -6vw; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .belepes-kartya { animation: none; }
+}
