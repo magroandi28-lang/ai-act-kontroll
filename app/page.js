@@ -28,7 +28,7 @@ const COPY = {
     errPrivacyDemo: "A demó indításához fogadd el az adatkezelési nyilatkozatot.",
     errLogin: "Hibás e-mail-cím vagy jelszó.",
     introQ:
-      "Mi lenne, ha néhány perc alatt átláthatnád, milyen MI-rendszereket használ a céged, és automatikusan elkészülne hozzájuk a kapcsolódó jogszabályzat?",
+      "Az EU AI Act követelményei már érvényben vannak. Készítsd el MI-rendszereid megfelelőségi szabályzatát percek alatt, a hatályos jogszabályok alapján.",
     introCta: "Nézd meg, hogyan működik",
     prev: "Előző",
     next: "Következő",
@@ -65,7 +65,7 @@ const COPY = {
     errPrivacyDemo: "Please accept the privacy notice to start the demo.",
     errLogin: "Incorrect email address or password.",
     introQ:
-      "What if you could see in a few minutes which AI systems your company uses — and have the matching policy documents generated automatically?",
+      "The EU AI Act is already in force. Build the compliance policy for your AI systems in minutes, based on the legislation in effect.",
     introCta: "See how it works",
     prev: "Back",
     next: "Next",
