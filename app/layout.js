@@ -1,4 +1,3 @@
-import "./belepes.css";
 import "./globals.css";
 import "./arculat.css";   // <-- EZ AZ ÚJ SOR
 import "./szabalyzat-arculat.css";
