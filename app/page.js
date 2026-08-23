@@ -468,13 +468,23 @@ export default function LoginPage() {
     const supabase = createClient();
     const { data, error } = await supabase.auth.signInAnonymously({
       options: {
-        data: { full_name: "Demó látogató", organisation_name: "Demó szervezet", demo_mode: true },
+        data: { full_name: "Demó látogató", demo_mode: true },
       },
     });
 
     if (error || !data.user) {
       setLoadingMode(null);
       setMessage(`Auth hiba: ${error?.message || "Nem sikerült azonosítani a felhasználót."}`);
+      return;
+    }
+
+    // A demó látogató a meglévő, tartalommal rendelkező szervezet tagja lesz,
+    // így ugyanazt látja, mint egy éles felhasználó. Ennek FUTNIA KELL a
+    // createInitialAccountData előtt, különben az üres demó szervezetet hoz létre.
+    const { error: joinError } = await supabase.rpc("aic_demo_csatlakozas");
+    if (joinError) {
+      setLoadingMode(null);
+      setMessage(`A demó nem indítható: ${joinError.message}`);
       return;
     }
 
