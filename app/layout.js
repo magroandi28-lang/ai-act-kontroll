@@ -1,3 +1,4 @@
+import "./belepes.css";
 import "./globals.css";
 import "./arculat.css";   // <-- EZ AZ ÚJ SOR
 import DemoBanner from "./DemoBanner";
