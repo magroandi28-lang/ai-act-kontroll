@@ -1,5 +1,5 @@
 /* ==========================================================================
-   AI Act Kontroll – belépés oldal
+   AI Act Kontroll – belépés oldal + interaktív bemutató modal
    Fájl: app/belepes.css     (a page.js importálja: import "./belepes.css";)
    ========================================================================== */
 
@@ -24,7 +24,7 @@
 
 .belepes-page * { box-sizing: border-box; }
 
-/* --- háttér: rács, fénycsíkok, szemcsék ---------------------------------- */
+/* --- háttér -------------------------------------------------------------- */
 .belepes-racs {
   position: absolute;
   inset: 0;
@@ -58,7 +58,6 @@
 .belepes-szemcse-1 { left: 1.5%;  top: 34%; }
 .belepes-szemcse-2 { left: 85.5%; top: 13%; width: 4px; height: 4px; }
 
-/* --- padló --------------------------------------------------------------- */
 .belepes-padlo {
   position: absolute;
   left: 0;
@@ -70,7 +69,6 @@
   pointer-events: none;
   background: linear-gradient(180deg, rgba(10, 18, 26, 0) 0%, rgba(9, 16, 23, 0.75) 26%, rgba(7, 13, 19, 0.95) 100%);
 }
-
 .belepes-padlo::after {
   content: "";
   position: absolute;
@@ -82,21 +80,46 @@
   mask-image: linear-gradient(180deg, transparent, #000 22%, transparent 85%);
 }
 
-/* --- kártya -------------------------------------------------------------- */
-.belepes-keret {
-  position: relative;
-  z-index: 2;
-  width: min(1080px, 76vw);
-  min-width: 0;
-}
+/* --- fejléc: logó + nyelvváltó ------------------------------------------ */
+.belepes-keret { position: relative; z-index: 2; width: min(1080px, 76vw); min-width: 0; }
 
-.belepes-logo {
-  display: block;
-  height: clamp(34px, 3.6vw, 46px);
-  width: auto;
+.belepes-fejlec {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
   margin: 0 0 clamp(18px, 2.2vw, 28px);
 }
 
+.belepes-logo { display: block; height: clamp(34px, 3.6vw, 46px); width: auto; }
+
+.belepes-lang {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+  padding: 4px;
+  border: 1px solid rgba(224, 138, 79, 0.34);
+  border-radius: 10px;
+  background: rgba(11, 23, 33, 0.72);
+}
+.belepes-lang button {
+  padding: 6px 11px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #8296a6;
+  font: inherit;
+  font-size: clamp(11px, 1vw, 13px);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease;
+}
+.belepes-lang button:hover { color: #cfdce5; }
+.belepes-lang button.is-active { background: var(--bel-narancs); color: #12202b; }
+
+/* --- kártya -------------------------------------------------------------- */
 .belepes-kartya {
   position: relative;
   width: 100%;
@@ -113,13 +136,8 @@
   to   { opacity: 1; transform: none; }
 }
 
-/* fénycsík a kártya alsó élén + lefelé sugárzó fény */
 .belepes-glow,
-.belepes-fenycsik {
-  position: absolute;
-  top: 100%;
-  pointer-events: none;
-}
+.belepes-fenycsik { position: absolute; top: 100%; pointer-events: none; }
 .belepes-glow {
   left: -16vw;
   right: -16vw;
@@ -135,7 +153,6 @@
   box-shadow: 0 0 34px 9px rgba(224, 138, 79, 0.45);
 }
 
-/* --- két oszlop ---------------------------------------------------------- */
 .belepes-oszlopok {
   display: grid;
   grid-template-columns: 1fr 1px 1fr;
@@ -152,7 +169,7 @@
 
 .belepes-jobb { display: flex; flex-direction: column; }
 
-/* --- bal oszlop: cím, mezők --------------------------------------------- */
+/* --- mezők --------------------------------------------------------------- */
 .belepes-page h1 {
   margin: 0 0 clamp(20px, 2.6vw, 34px);
   color: #f5f9fb;
@@ -170,12 +187,7 @@
   font-weight: 500;
 }
 
-.belepes-mezo-sor {
-  position: relative;
-  display: flex;
-  align-items: center;
-  margin-bottom: clamp(16px, 1.9vw, 26px);
-}
+.belepes-mezo-sor { position: relative; display: flex; align-items: center; margin-bottom: clamp(16px, 1.9vw, 26px); }
 .belepes-mezo-sor-jelszo { margin-bottom: clamp(18px, 2.2vw, 30px); }
 
 .belepes-mezo-sor > svg {
@@ -201,10 +213,7 @@
   transition: border-color 140ms ease, box-shadow 140ms ease;
 }
 .belepes-mezo::placeholder { color: #63798a; }
-.belepes-mezo:focus {
-  border-color: var(--bel-narancs);
-  box-shadow: 0 0 0 3px rgba(224, 138, 79, 0.14);
-}
+.belepes-mezo:focus { border-color: var(--bel-narancs); box-shadow: 0 0 0 3px rgba(224, 138, 79, 0.14); }
 .belepes-mezo:disabled { opacity: 0.6; }
 .belepes-mezo-jelszo { padding-right: 54px; }
 
@@ -243,14 +252,10 @@
   accent-color: var(--bel-narancs);
   cursor: pointer;
 }
-.belepes-privacy a {
-  color: var(--bel-narancs);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
+.belepes-privacy a { color: var(--bel-narancs); text-decoration: underline; text-underline-offset: 3px; }
 .belepes-privacy a:hover { color: var(--bel-narancs-vil); }
 
-/* --- jobb oszlop: gombok ------------------------------------------------- */
+/* --- gombok -------------------------------------------------------------- */
 .belepes-fo-gomb {
   width: 100%;
   padding: clamp(14px, 1.7vw, 20px) 24px;
@@ -261,17 +266,14 @@
   font: inherit;
   font-size: clamp(14px, 1.45vw, 17px);
   font-weight: 600;
+  white-space: nowrap;
   cursor: pointer;
   box-shadow: 0 14px 36px rgba(224, 138, 79, 0.26);
   transition: filter 140ms ease;
 }
 .belepes-fo-gomb:hover:not(:disabled) { filter: brightness(1.07); }
 
-.belepes-elvalaszto {
-  height: 1px;
-  margin: clamp(16px, 2vw, 26px) 0;
-  background: rgba(224, 138, 79, 0.22);
-}
+.belepes-elvalaszto { height: 1px; margin: clamp(16px, 2vw, 26px) 0; background: rgba(224, 138, 79, 0.22); }
 
 .belepes-elfelejtett {
   align-self: flex-start;
@@ -297,10 +299,7 @@
   cursor: pointer;
   transition: background 140ms ease, border-color 140ms ease;
 }
-.belepes-demo-gomb:hover:not(:disabled) {
-  border-color: var(--bel-narancs);
-  background: rgba(224, 138, 79, 0.08);
-}
+.belepes-demo-gomb:hover:not(:disabled) { border-color: var(--bel-narancs); background: rgba(224, 138, 79, 0.08); }
 
 .belepes-fo-gomb:disabled,
 .belepes-demo-gomb:disabled { opacity: 0.5; cursor: default; }
@@ -333,6 +332,259 @@
   line-height: 1.45;
 }
 
+/* ==========================================================================
+   BEMUTATÓ MODAL
+   ========================================================================== */
+
+@keyframes tourFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes tourIn   { from { opacity: 0; transform: translateY(30px) scale(0.975); } to { opacity: 1; transform: none; } }
+@keyframes tourText { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@keyframes tourGlow { 0%, 100% { box-shadow: 0 12px 34px rgba(224, 138, 79, 0.18); } 50% { box-shadow: 0 12px 44px rgba(224, 138, 79, 0.38); } }
+@keyframes tourHuz  { 0%, 100% { transform: translateX(-6px); } 50% { transform: translateX(6px); } }
+
+.tour-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(12px, 2.4vw, 40px);
+  background: rgba(5, 10, 15, 0.8);
+  backdrop-filter: blur(9px);
+  animation: tourFade 280ms ease both;
+  font-family: "Manrope", Arial, sans-serif;
+}
+
+.tour-panel {
+  position: relative;
+  width: min(1020px, 100%);
+  max-height: 94vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgba(224, 138, 79, 0.5);
+  border-radius: clamp(18px, 2vw, 28px);
+  background: linear-gradient(165deg, rgba(224, 138, 79, 0.10), transparent 40%), #0d1a25;
+  box-shadow: 0 44px 120px rgba(0, 0, 0, 0.68), 0 0 70px rgba(224, 138, 79, 0.12);
+  animation: tourIn 440ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.tour-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex: none;
+  padding: clamp(14px, 1.7vw, 24px) clamp(16px, 2.2vw, 34px);
+  border-bottom: 1px solid rgba(224, 138, 79, 0.18);
+}
+.tour-head img { display: block; height: clamp(24px, 2.3vw, 32px); width: auto; }
+.tour-head-actions { display: flex; align-items: center; gap: clamp(8px, 1vw, 12px); flex: none; }
+
+.tour-close {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: clamp(34px, 3vw, 40px);
+  height: clamp(34px, 3vw, 40px);
+  border: 1px solid #2f4759;
+  border-radius: 10px;
+  background: #0b1721;
+  color: #a9bfcc;
+  cursor: pointer;
+  transition: border-color 140ms ease, color 140ms ease;
+}
+.tour-close:hover { border-color: var(--bel-narancs, #e08a4f); color: #e08a4f; }
+.tour-close svg { width: 16px; height: 16px; }
+
+/* --- nyitó képernyő ------------------------------------------------------ */
+.tour-intro { padding: clamp(34px, 5vw, 74px) clamp(22px, 4vw, 76px); text-align: center; }
+.tour-intro h2 {
+  max-width: 770px;
+  margin: 0 auto;
+  color: #f2f6f9;
+  font-size: clamp(18px, 2.05vw, 30px);
+  font-weight: 500;
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+  text-wrap: pretty;
+  animation: tourText 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.tour-intro-vonal {
+  display: block;
+  width: clamp(44px, 4vw, 60px);
+  height: 3px;
+  margin: clamp(24px, 3vw, 40px) auto;
+  border-radius: 999px;
+  background: #c47a4a;
+  animation: tourText 620ms cubic-bezier(0.16, 1, 0.3, 1) 90ms both;
+}
+.tour-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: clamp(12px, 1.4vw, 20px);
+  padding: clamp(14px, 1.6vw, 20px) clamp(20px, 2.4vw, 34px);
+  border: 1px solid #a46c48;
+  border-radius: 11px;
+  background: linear-gradient(115deg, #9a6544 0%, #7a4c33 52%, #5c3a28 100%);
+  color: #f3e7de;
+  font: inherit;
+  font-size: clamp(13px, 1.15vw, 16px);
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  animation: tourText 620ms cubic-bezier(0.16, 1, 0.3, 1) 180ms both, tourGlow 3.2s ease-in-out 900ms infinite;
+  transition: filter 140ms ease;
+}
+.tour-cta:hover { filter: brightness(1.12); }
+.tour-cta span { font-size: 1.1em; }
+
+/* --- kártyák ------------------------------------------------------------- */
+.tour-cards { overflow: hidden; }
+
+.tour-viewport {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  padding: clamp(24px, 3vw, 40px) 0;
+  perspective: 1400px;
+  outline: none;
+  touch-action: pan-y;
+  user-select: none;
+  cursor: grab;
+}
+.tour-viewport:active { cursor: grabbing; }
+
+.tour-track {
+  position: relative;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.tour-card {
+  flex: none;
+  height: clamp(276px, 38vh, 326px);
+  overflow: hidden;
+  padding: clamp(15px, 1.4vw, 22px);
+  border: 1px solid #22394a;
+  border-radius: 16px;
+  background: #0b1721;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.34);
+  transform-origin: 50% 50%;
+  backface-visibility: hidden;
+  cursor: pointer;
+}
+.tour-card.is-active {
+  border-color: var(--bel-narancs, #e08a4f);
+  background: linear-gradient(170deg, rgba(224, 138, 79, 0.09), transparent 46%), #0f1c27;
+  box-shadow: 0 26px 62px rgba(0, 0, 0, 0.5), 0 0 40px rgba(224, 138, 79, 0.16);
+}
+
+.tour-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border: 1px solid rgba(51, 80, 99, 0.5);
+  border-radius: 8px;
+  color: #c47a4a;
+  font-size: clamp(10px, 0.95vw, 12px);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  transition: color 300ms ease, border-color 300ms ease;
+}
+.tour-card.is-active .tour-badge { border-color: #e08a4f; color: #e08a4f; }
+
+.tour-icon {
+  display: block;
+  width: clamp(52px, 6vh, 70px);
+  height: clamp(52px, 6vh, 70px);
+  margin: clamp(14px, 2.4vh, 26px) auto;
+  color: #5f7d92;
+  transition: color 300ms ease;
+}
+.tour-card.is-active .tour-icon { color: #e08a4f; }
+
+.tour-card h3 {
+  margin: 0 0 clamp(8px, 1.4vh, 14px);
+  color: #eef4f8;
+  font-size: clamp(14px, 1.3vw, 19px);
+  font-weight: 500;
+  line-height: 1.3;
+}
+.tour-card p { margin: 0; color: #8fa6b7; font-size: clamp(11px, 0.95vw, 13px); line-height: 1.8; }
+
+/* --- navigáció ----------------------------------------------------------- */
+.tour-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(12px, 2vw, 26px);
+  padding: clamp(10px, 1.4vw, 18px) clamp(16px, 2.2vw, 34px) clamp(14px, 1.8vw, 22px);
+}
+
+.tour-nav-prev,
+.tour-nav-next {
+  display: flex;
+  white-space: nowrap;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+  padding: 11px 20px;
+  border-radius: 10px;
+  font: inherit;
+  font-size: clamp(11px, 1vw, 14px);
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.tour-nav-prev { border: 1px solid #2f4759; background: #0b1721; color: #c9d8e2; transition: border-color 140ms ease; }
+.tour-nav-prev:hover { border-color: #4d6c82; }
+.tour-nav-next {
+  border: 1px solid #a46c48;
+  background: linear-gradient(115deg, #9a6544 0%, #7a4c33 52%, #5c3a28 100%);
+  color: #f3e7de;
+  transition: filter 140ms ease;
+}
+.tour-nav-next:hover { filter: brightness(1.12); }
+
+.tour-dots { display: flex; align-items: center; gap: 7px; min-width: 0; overflow: hidden; }
+.tour-dot {
+  flex: none;
+  width: 8px;
+  height: 5px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: #25384a;
+  cursor: pointer;
+  transition: width 300ms ease, background 300ms ease;
+}
+.tour-dot.is-active { width: 26px; background: var(--bel-narancs, #e08a4f); }
+
+.tour-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 11px;
+  margin: 0;
+  padding: 0 20px clamp(14px, 1.8vw, 22px);
+  color: #6f8598;
+  font-size: clamp(10px, 0.95vw, 13px);
+}
+.tour-hint span { display: inline-flex; color: #8296a6; animation: tourHuz 1.9s ease-in-out infinite; }
+.tour-hint { min-height: 38px; }
+.tour-hint-closing {
+  color: var(--bel-narancs, #e08a4f);
+  font-size: clamp(12px, 1.15vw, 15px);
+  font-weight: 500;
+  text-align: center;
+  animation: tourText 460ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.tour-hint svg { width: 24px; height: 10px; }
+
 /* --- mobil --------------------------------------------------------------- */
 @media (max-width: 900px) {
   .belepes-keret { width: min(560px, 100%); }
@@ -345,8 +597,18 @@
     background: linear-gradient(90deg, transparent, rgba(224, 138, 79, 0.28), transparent);
   }
   .belepes-glow, .belepes-fenycsik { left: -6vw; right: -6vw; }
+  .tour-nav { flex-wrap: wrap; justify-content: center; }
+  .tour-dots { order: -1; width: 100%; justify-content: center; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .belepes-kartya { animation: none; }
+  .belepes-kartya,
+  .tour-overlay,
+  .tour-panel,
+  .tour-intro h2,
+  .tour-intro-vonal,
+  .tour-cta,
+  .tour-hint-closing,
+  .tour-hint span { animation: none !important; }
+  .tour-card { transition: none !important; }
 }
