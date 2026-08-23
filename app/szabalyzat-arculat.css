@@ -1,24 +1,50 @@
 /* ==========================================================================
-   AI Act Kontroll – szabályzat felület: gombok az alkalmazás arculatában
+   AI Act Kontroll – szabályzat felület az alkalmazás arculatában
    Fájl:  app/szabalyzat-arculat.css
    Betöltés: app/layout.js – a globals.css UTÁN:
              import "./globals.css";
              import "./arculat.css";
              import "./szabalyzat-arculat.css";
              import "./szabalyzat-nyomtatas.css";
+
+   A világos, dokumentumszerű alapot megtartja: csak a türkiz (#087d94) és a
+   lapos narancs elemeket váltja az alkalmazás bronz palettájára.
    ========================================================================== */
+
+.policy-page {
+  --pol-bronz: #a9622f;
+  --pol-bronz-melyebb: #8d4f22;
+  --pol-bronz-halk: #f8efe7;
+  --pol-bronz-keret: #e3cbb6;
+  --pol-tinta: #102a37;
+}
+
+/* --- eszköztár ----------------------------------------------------------- */
+.policy-toolbar a {
+  color: #33505f;
+  font-family: "Manrope", Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+}
+.policy-toolbar a:hover { color: var(--pol-bronz); }
+
+.policy-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
 
 .policy-print-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
   min-height: 44px;
   padding: 0 24px;
   border: 1px solid #a46c48;
   border-radius: 10px;
   background: linear-gradient(115deg, #9a6544 0%, #7a4c33 52%, #5c3a28 100%);
-  color: #f3e7de;
+  color: #f6ede5;
   font-family: "Manrope", Arial, sans-serif;
   font-size: 13px;
   font-weight: 500;
@@ -27,41 +53,206 @@
   cursor: pointer;
   transition: filter 140ms ease, border-color 140ms ease;
 }
+.policy-print-button:hover { border-color: #c17a5a; filter: brightness(1.12); }
+.policy-print-button:focus-visible { outline: 2px solid var(--pol-bronz); outline-offset: 2px; }
 
-.policy-print-button:hover {
+.policy-search input {
+  min-height: 44px;
+  border: 1px solid #b3c0c7;
+  border-radius: 10px;
+  background: #fff;
+  color: #17222b;
+  font-family: "Manrope", Arial, sans-serif;
+  font-size: 13px;
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+.policy-search input:focus {
+  outline: 0;
+  border-color: var(--pol-bronz);
+  box-shadow: 0 0 0 3px rgba(169, 98, 47, 0.12);
+}
+
+/* --- dokumentum: türkiz helyett bronz ----------------------------------- */
+.policy-cover { border-bottom-color: var(--pol-bronz); }
+
+.policy-cover > p {
+  color: var(--pol-bronz) !important;
+  font-family: "Manrope", Arial, sans-serif;
+  font-weight: 700;
+}
+
+.policy-cover h1,
+.policy-section h2 {
+  color: var(--pol-tinta);
+  font-family: "Manrope", Arial, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.policy-chapter h3 {
+  color: var(--pol-bronz-melyebb);
+  font-family: "Manrope", Arial, sans-serif;
+  font-weight: 600;
+}
+
+.policy-toc a,
+.policy-legal-reference a { color: var(--pol-bronz-melyebb); }
+.policy-toc a:hover,
+.policy-legal-reference a:hover { color: var(--pol-bronz); }
+
+.policy-cover dt,
+.policy-approval-header .profile-label {
+  font-family: "Manrope", Arial, sans-serif;
+  font-weight: 700;
+}
+
+/* --- címkék: egységes, halk pasztillák ---------------------------------- */
+.policy-kind {
+  padding: 4px 9px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-family: "Manrope", Arial, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+}
+.policy-kind-legal_requirement {
+  color: var(--pol-bronz-melyebb);
+  border-color: var(--pol-bronz-keret);
+  background: var(--pol-bronz-halk);
+}
+.policy-kind-internal_control {
+  color: #4a5b64;
+  border-color: #d3dde2;
+  background: #f2f6f8;
+}
+.policy-kind-guidance {
+  color: #5c666d;
+  border-color: #dde2e5;
+  background: #f6f8f9;
+}
+.policy-kind-pending {
+  color: #9c3b22;
+  border-color: #eccdc3;
+  background: #fdf3f0;
+}
+
+/* --- frissítési figyelmeztetés ------------------------------------------ */
+.policy-refresh-warning {
+  color: #5b3a20;
+  border-color: var(--pol-bronz-keret);
+  background: var(--pol-bronz-halk);
+  border-radius: 12px;
+  box-shadow: none;
+}
+.policy-refresh-warning strong {
+  color: var(--pol-bronz-melyebb);
+  font-family: "Manrope", Arial, sans-serif;
+}
+.policy-refresh-warning a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 16px;
+  border: 1px solid #a46c48;
+  border-radius: 10px;
+  background: linear-gradient(115deg, #9a6544 0%, #7a4c33 52%, #5c3a28 100%);
+  color: #f6ede5;
+  font-family: "Manrope", Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+}
+.policy-refresh-warning a:hover { filter: brightness(1.12); }
+
+/* --- felülvizsgálati jelzés a dokumentumban ----------------------------- */
+.policy-review-notice {
+  border-color: var(--pol-bronz-keret) !important;
+  background: var(--pol-bronz-halk) !important;
+}
+.policy-review-notice strong {
+  color: var(--pol-bronz-melyebb);
+  font-family: "Manrope", Arial, sans-serif;
+}
+
+/* --- jóváhagyási sáv ---------------------------------------------------- */
+.policy-approval { border-radius: 12px; }
+.policy-approval-in_review {
+  border-left-color: var(--pol-bronz);
+  background: var(--pol-bronz-halk);
+}
+.policy-approval-rejected {
+  border-left-color: #a3341f;
+  background: #fdf3f0;
+}
+.policy-approval-header strong {
+  color: var(--pol-tinta);
+  font-family: "Manrope", Arial, sans-serif;
+  font-weight: 600;
+}
+
+.policy-approval-actions textarea {
+  border: 1px solid #b3c0c7;
+  border-radius: 10px;
+  font-family: "Manrope", Arial, sans-serif;
+  font-size: 13px;
+}
+.policy-approval-actions textarea:focus {
+  outline: 0;
+  border-color: var(--pol-bronz);
+  box-shadow: 0 0 0 3px rgba(169, 98, 47, 0.12);
+}
+
+.policy-approval-buttons .primary-button {
+  min-height: 44px;
+  padding: 0 22px;
+  border: 1px solid #a46c48;
+  border-radius: 10px;
+  background: linear-gradient(115deg, #9a6544 0%, #7a4c33 52%, #5c3a28 100%);
+  color: #f6ede5;
+  font-family: "Manrope", Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: filter 140ms ease, border-color 140ms ease;
+}
+.policy-approval-buttons .primary-button:hover:not(:disabled) {
   border-color: #c17a5a;
   filter: brightness(1.12);
 }
 
-.policy-print-button:focus-visible {
-  outline: 2px solid #c17a5a;
-  outline-offset: 2px;
-}
-
-/* A keresősáv és a gomb egy sorban, ne törjön szét szűk nézetben sem. */
-.policy-toolbar-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.policy-search input {
+.policy-approval-buttons .secondary-button {
   min-height: 44px;
-  padding: 0 14px;
-  border: 1px solid #294355;
+  padding: 0 20px;
+  border: 1px solid #b3c0c7;
   border-radius: 10px;
-  background: #0a1721;
-  color: #eef4f7;
+  color: #33505f;
   font-family: "Manrope", Arial, sans-serif;
   font-size: 13px;
-  outline: 0;
-  transition: border-color 140ms ease, box-shadow 140ms ease;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.policy-approval-buttons .secondary-button:hover { border-color: var(--pol-bronz); color: var(--pol-bronz-melyebb); }
+
+.policy-approval .system-form-message {
+  color: #8a2a10;
+  border-radius: 10px;
+  background: #fdf3f0;
 }
 
-.policy-search input:focus {
-  border-color: #b36949;
-  box-shadow: 0 0 0 3px rgba(179, 105, 73, 0.12);
+/* --- hibaoldal ---------------------------------------------------------- */
+.policy-generation-error { border-radius: 12px; }
+.policy-generation-error .primary-button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 46px;
+  width: auto;
+  padding: 0 22px;
+  border: 1px solid #a46c48;
+  border-radius: 10px;
+  background: linear-gradient(115deg, #9a6544 0%, #7a4c33 52%, #5c3a28 100%);
+  color: #f6ede5;
+  font-family: "Manrope", Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
 }
-
-.policy-search input::placeholder { color: #526a7a; }
+.policy-generation-error .primary-button:hover { filter: brightness(1.12); }
