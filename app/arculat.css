@@ -895,11 +895,31 @@
 .import-step-card input[type="file"] {
   border-style: dashed;
   border-color: var(--aic-keret-eros);
+  cursor: pointer;
   color: #7892a4;
   font-size: 13px;
 }
 .import-step-card .primary-button { margin-top: 16px; }
-.import-download { margin-top: 0; }
+
+/* natív fájlválasztó gomb az alkalmazás arculatában */
+.import-step-card input[type="file"]::file-selector-button,
+.import-step-card input[type="file"]::-webkit-file-upload-button {
+  margin: -4px 14px -4px -4px;
+  padding: 9px 16px;
+  border: 1px solid #a46c48;
+  border-radius: 8px;
+  background: linear-gradient(115deg, #9a6544 0%, #7a4c33 52%, #5c3a28 100%);
+  color: #f3e7de;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 140ms ease, border-color 140ms ease;
+}
+.import-step-card input[type="file"]::file-selector-button:hover {
+  border-color: #c17a5a;
+  filter: brightness(1.12);
+}.import-download { margin-top: 0; }
 
 .import-preview { padding: 24px 26px; border-radius: var(--aic-r-panel); }
 .import-preview-header h2 { margin: 0 0 18px !important; font-size: 19px !important; }
