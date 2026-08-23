@@ -20,7 +20,7 @@ export default async function DashboardPage() {
   return (
     <main className="dashboard-page">
       <header className="dashboard-header">
-        <Link className="dashboard-brand" href="/vezerlopult">EnergiaAI Kontroll</Link>
+        <Link className="dashboard-brand" href="/vezerlopult">AI Act Kontroll</Link>
         <form action="/auth/signout" method="post">
           <button className="dashboard-signout" type="submit">Kijelentkezés</button>
         </form>
@@ -28,7 +28,11 @@ export default async function DashboardPage() {
 
       <section className="dashboard-content" aria-labelledby="dashboard-title">
         <p className="dashboard-eyebrow">MI-rendszerek szabályozási vizsgálata</p>
-        <h1 id="dashboard-title">Üdv, {profile?.full_name || "felhasználó"}!</h1>
+        <h1 id="dashboard-title">
+  {user.is_anonymous
+    ? "Üdv az AI Act Kontrollban!"
+    : `Üdv, ${profile?.full_name || "felhasználó"}!`}
+</h1>
         <p className="dashboard-intro">
           Rögzíts egy MI-rendszert, és az alkalmazás kiválasztja a rá vonatkozó szabályokat.
         </p>
