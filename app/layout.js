@@ -3,7 +3,7 @@ import "./arculat.css";   // <-- EZ AZ ÚJ SOR
 import DemoBanner from "./DemoBanner";
 
 export const metadata = {
-  title: "EnergiaAI Kontroll",
+  title: "AI Act Kontroll",
   description: "Vállalati MI-megfelelőség egyszerűen.",
 };
 
