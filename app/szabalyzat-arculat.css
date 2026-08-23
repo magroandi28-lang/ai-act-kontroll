@@ -1,0 +1,67 @@
+/* ==========================================================================
+   AI Act Kontroll – szabályzat felület: gombok az alkalmazás arculatában
+   Fájl:  app/szabalyzat-arculat.css
+   Betöltés: app/layout.js – a globals.css UTÁN:
+             import "./globals.css";
+             import "./arculat.css";
+             import "./szabalyzat-arculat.css";
+             import "./szabalyzat-nyomtatas.css";
+   ========================================================================== */
+
+.policy-print-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 24px;
+  border: 1px solid #a46c48;
+  border-radius: 10px;
+  background: linear-gradient(115deg, #9a6544 0%, #7a4c33 52%, #5c3a28 100%);
+  color: #f3e7de;
+  font-family: "Manrope", Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: filter 140ms ease, border-color 140ms ease;
+}
+
+.policy-print-button:hover {
+  border-color: #c17a5a;
+  filter: brightness(1.12);
+}
+
+.policy-print-button:focus-visible {
+  outline: 2px solid #c17a5a;
+  outline-offset: 2px;
+}
+
+/* A keresősáv és a gomb egy sorban, ne törjön szét szűk nézetben sem. */
+.policy-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.policy-search input {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid #294355;
+  border-radius: 10px;
+  background: #0a1721;
+  color: #eef4f7;
+  font-family: "Manrope", Arial, sans-serif;
+  font-size: 13px;
+  outline: 0;
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.policy-search input:focus {
+  border-color: #b36949;
+  box-shadow: 0 0 0 3px rgba(179, 105, 73, 0.12);
+}
+
+.policy-search input::placeholder { color: #526a7a; }
