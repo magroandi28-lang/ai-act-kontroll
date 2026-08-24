@@ -1800,3 +1800,121 @@ input:disabled {
   font-size: 13px;
   letter-spacing: .04em;
 }
+
+/* ---------------------------------------------------------------------------
+   Rendszer adatlap és szerkesztés.
+   A régi capability-táblák helyett a ténylapból származó funkciólistát
+   jelenítjük meg, ezért ezek az elemek újak.
+--------------------------------------------------------------------------- */
+
+.rendszer-adatsor {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 14px;
+  margin: 26px 0 0;
+  padding: 0;
+}
+.rendszer-adatsor > div {
+  padding: 14px 16px;
+  border: 1px solid var(--vonal, #e3e0d8);
+  border-radius: 10px;
+  background: #fff;
+}
+.rendszer-adatsor dt {
+  margin: 0 0 4px;
+  color: #6f6a60;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.rendszer-adatsor dd {
+  margin: 0;
+  color: #1f1c17;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.rendszer-blokk {
+  margin: 28px 0 0;
+  padding: 24px 26px;
+  border: 1px solid var(--vonal, #e3e0d8);
+  border-radius: 12px;
+  background: #fff;
+}
+.rendszer-blokk h2 { margin: 0; font-size: 19px; font-weight: 600; }
+.rendszer-blokk-sugo { margin: 6px 0 18px; color: #6f6a60; font-size: 14px; line-height: 1.6; }
+
+.rendszer-funkciolista {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 8px 20px;
+  margin: 0 0 20px;
+  padding: 0;
+  list-style: none;
+}
+.rendszer-funkciolista li {
+  position: relative;
+  padding-left: 18px;
+  color: #2c2822;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.rendszer-funkciolista li::before {
+  content: "";
+  position: absolute;
+  top: 9px;
+  left: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--kiemeles, #b4703c);
+}
+
+.rendszer-ures { margin: 0 0 18px; color: #8a5a2b; font-size: 15px; }
+.rendszer-figyelmeztetes {
+  margin: 12px 0 0;
+  padding: 10px 14px;
+  border-left: 3px solid #b4703c;
+  background: #fbf4ec;
+  color: #6d4520;
+  font-size: 14px;
+}
+
+.rendszer-kivezetes { margin: 34px 0 0; }
+.rendszer-kivezetes-inditas {
+  border: 0;
+  background: none;
+  color: #8a6a4a;
+  font: inherit;
+  font-size: 14px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.rendszer-kivezetes-inditas:hover { color: #9c3f2a; }
+.rendszer-kivezetes-doboz {
+  padding: 18px 20px;
+  border: 1px solid #e0cfc2;
+  border-radius: 10px;
+  background: #fdf7f2;
+}
+.rendszer-kivezetes-doboz p { margin: 0 0 14px; color: #4a3a2c; font-size: 14px; line-height: 1.6; }
+.rendszer-kivezetes-gombok { display: flex; gap: 10px; }
+.rendszer-kivezetes-gombok button {
+  padding: 9px 16px;
+  border: 1px solid var(--vonal, #e3e0d8);
+  border-radius: 8px;
+  background: #fff;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.rendszer-kivezetes-gombok .is-veszelyes { border-color: #b3543c; background: #b3543c; color: #fff; }
+.rendszer-kivezetes-gombok button:disabled { opacity: 0.55; cursor: default; }
+
+.felvitel-korabbi {
+  margin: 0 0 4px;
+  color: #8fa6b7;
+  font-size: 13px;
+}
+.felvitel-korabbi strong { color: #e08a4f; font-weight: 600; }

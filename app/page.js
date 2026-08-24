@@ -196,9 +196,12 @@ function LangSwitch({ lang, onChange }) {
 
 const GAP = 16;
 
+// A kártya szélessége korábban 240 pixelnél megállt, és három kártyát
+// próbált egyszerre kirakni. Emiatt a szöveg három-négy szavanként tördelt.
+// Most a középső kártya kap valódi szélességet, a szomszédok csak sejlenek.
 function cardWidth(winW) {
-  const belso = Math.min(1020, winW || 1020) - 90;
-  return Math.max(166, Math.min(240, belso / 3.4));
+  const belso = Math.min(1080, winW || 1080) - 80;
+  return Math.max(252, Math.min(392, belso / 2.3));
 }
 
 function TourModal({ lang, onLang, onClose }) {
