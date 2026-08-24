@@ -27,8 +27,10 @@ const COPY = {
     errPrivacy: "A belépéshez fogadd el az adatkezelési nyilatkozatot.",
     errPrivacyDemo: "A demó indításához fogadd el az adatkezelési nyilatkozatot.",
     errLogin: "Hibás e-mail-cím vagy jelszó.",
+    introLead:
+      "Az EnergiaAI Kontroll elkészíti azt a szabályzatot, amelyet az MI-rendelet megkövetel.",
     introQ:
-      "Az EU AI Act követelményei már érvényben vannak. Készítsd el MI-rendszereid megfelelőségi szabályzatát percek alatt, a hatályos jogszabályok alapján.",
+      "A rendszer működésének rögzítése után meghatározza, mely jogszabályi kötelezettségek vonatkoznak rá, és ezekből kiadható dokumentumot állít össze – minden előírás mögött a hivatkozott jogszabályhellyel. Az MI-rendelet 2026. augusztus 2-tól alkalmazandó.",
     introCta: "Nézd meg, hogyan működik",
     prev: "Előző",
     next: "Következő",
@@ -37,13 +39,18 @@ const COPY = {
     closeCta: "Lépj be!",
     closeTour: "Bemutató bezárása",
     cards: [
-      { title: "MI-rendszer", body: "Rögzítsd a vállalat által használt MI-rendszert." },
-      { title: "Jogtár", body: "Hatályos jogszabályok egy helyen." },
-      { title: "Jogszabályfrissítés", body: "A rendszer jelzi, ha a jogi háttér változik." },
-      { title: "Szabályzat", body: "Automatikusan összeáll a kapcsolódó szabályzat." },
-      { title: "MI-rendszereim", body: "A rendszer és a hozzá tartozó szabályzat elmentésre kerül." },
-      { title: "Tömeges felvitel", body: "Több MI-rendszer rögzítése letölthető, kitölthető és visszatölthető intelligens táblázattal." },
-      { title: "Verziókövetés", body: "Módosításkor új szabályzatverzió készül, a korábbi verzió megmarad." },
+      { title: "Rendszernyilvántartás",
+        body: "A szervezet MI-rendszereinek rögzítése: rendeltetés, működési jellemzők, szerepkör." },
+      { title: "A kötelezettségek meghatározása",
+        body: "Az alkalmazandó előírások a rögzített működésből és a hatályos jogszabályokból következnek." },
+      { title: "Jogi jóváhagyás",
+        body: "Az előírásokat jogász hagyja jóvá, szükség esetén átfogalmazza, és rögzíti hozzá az értelmezést." },
+      { title: "Megfelelőségi szabályzat",
+        body: "A jóváhagyott előírásokból kiadható dokumentum áll össze, jogforrás-hivatkozásokkal." },
+      { title: "Jogszabálykövetés",
+        body: "Jogszabályváltozás esetén az érintett előírások felülvizsgálati állapotba kerülnek." },
+      { title: "Szerepkörök és verziók",
+        body: "Szolgáltatóra, alkalmazóra, importőrre más kötelezettségek vonatkoznak; minden módosítás új verziót képez." },
     ],
   },
   en: {
@@ -64,8 +71,10 @@ const COPY = {
     errPrivacy: "Please accept the privacy notice to sign in.",
     errPrivacyDemo: "Please accept the privacy notice to start the demo.",
     errLogin: "Incorrect email address or password.",
+    introLead:
+      "EnergiaAI Kontroll produces the policy that the AI Act requires.",
     introQ:
-      "The EU AI Act is already in force. Build the compliance policy for your AI systems in minutes, based on the legislation in effect.",
+      "Once the operation of the system is recorded, it determines which statutory obligations apply and assembles them into a document ready for issue — each requirement citing the provision it derives from. The AI Act applies from 2 August 2026.",
     introCta: "See how it works",
     prev: "Back",
     next: "Next",
@@ -292,7 +301,8 @@ function TourModal({ lang, onLang, onClose }) {
 
         {phase === "intro" && (
           <div className="tour-intro">
-            <h2>{t.introQ}</h2>
+            <h2>{t.introLead}</h2>
+            <p className="tour-intro-leiras">{t.introQ}</p>
             <span className="tour-intro-vonal" aria-hidden="true" />
             <button type="button" className="tour-cta" onClick={() => { setPhase("cards"); setIndex(0); setDx(0); }}>
               {t.introCta} <span aria-hidden="true">→</span>

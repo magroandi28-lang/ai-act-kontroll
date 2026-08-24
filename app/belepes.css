@@ -613,3 +613,41 @@
   .tour-hint span { animation: none !important; }
   .tour-card { transition: none !important; }
 }
+
+/* ---------------------------------------------------------------------------
+   Bemutató – nyitószöveg és kártyák.
+   A kártyák eddig tömzsik voltak: a nagy ikon elvitte a helyet, a szövegre
+   11–13 pixel maradt. Az ikon kisebb, a szöveg nagyobb, a kártya magasabb.
+--------------------------------------------------------------------------- */
+
+.tour-intro-leiras {
+  margin: 16px 0 0;
+  max-width: 46em;
+  color: #a9bcc7;
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.tour-card {
+  height: clamp(320px, 46vh, 400px);
+  padding: clamp(20px, 1.8vw, 28px);
+}
+
+.tour-icon {
+  width: clamp(38px, 4vh, 46px);
+  height: clamp(38px, 4vh, 46px);
+  margin: clamp(12px, 1.8vh, 18px) 0;
+}
+
+.tour-card h3 {
+  margin: 0 0 10px;
+  font-size: clamp(16px, 1.15vw, 19px);
+  font-weight: 600;
+  line-height: 1.32;
+}
+
+.tour-card p {
+  color: #a9bcc7;
+  font-size: clamp(13px, 1vw, 15px);
+  line-height: 1.65;
+}
