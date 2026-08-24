@@ -257,66 +257,166 @@
 }
 .policy-generation-error .primary-button:hover { filter: brightness(1.12); }
 
-/* ---------------------------------------------------------------------------
-   Képernyős olvasás: a szövegoszlop szélessége.
-   900 pixelen 15 pixeles betűvel a sor ~100 karakter – jogi szövegnél
-   olvashatatlanul hosszú. 65–75 karakter a mérték.
---------------------------------------------------------------------------- */
+/* ===========================================================================
+   EGYSÉGES DOKUMENTUMKÉP
+   Egy betűrendszer, egy színrend. A szabályzat nyomtatva és képernyőn is
+   ugyanúgy néz ki; a bronz szín csak a jelöléseké, a szövegé mindig tinta.
+   =========================================================================== */
 
 .policy-document {
+  /* 820 pixel és 16 pixeles betű: soronként ~70 karakter. */
   width: min(100%, 820px);
-  padding: 64px 68px;
+  padding: 64px 68px 56px;
+  font-family: Georgia, "Times New Roman", serif;
   font-size: 16px;
-  line-height: 1.75;
+  line-height: 1.78;
+  color: #1a2430;
 }
 
-/* A fejezet fejléce: cím balra, besorolás jobbra. */
+/* A böngésző a számot tartalmazó szövegeket telefonszámnak nézi és
+   hivatkozássá alakítja – ettől lettek barnák a szövegben. */
+.policy-document a[href^="tel:"],
+.policy-document a[href^="sms:"],
+.policy-document a[href^="mailto:"] {
+  color: inherit !important;
+  text-decoration: none !important;
+}
+
+/* --- címlap -------------------------------------------------------------- */
+.policy-cover { padding: 0 0 40px; border-bottom: 1px solid #d5dde1; }
+
+.policy-cover > p {
+  margin: 0 0 22px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--pol-bronz);
+  color: var(--pol-bronz) !important;
+  font-family: "Manrope", Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .18em;
+}
+
+.policy-cover h1 {
+  margin: 0 0 40px;
+  color: var(--pol-tinta);
+  font-family: "Manrope", Arial, sans-serif;
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 1.22;
+}
+
+.policy-cover dl { gap: 20px 34px; }
+.policy-cover dd { font-family: Georgia, serif; font-size: 16px; }
+
+/* --- szakaszok és fejezetek ---------------------------------------------- */
+.policy-section { margin-top: 40px; }
+
+.policy-section > h2 {
+  margin: 0 0 20px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #d5dde1;
+  color: var(--pol-tinta);
+  font-family: "Manrope", Arial, sans-serif;
+  font-size: 21px;
+  font-weight: 600;
+}
+
+.policy-section p { color: #1a2430; font-size: 16px; line-height: 1.78; }
+
+/* A vezetői összefoglaló ugyanaz a szöveg, mint a többi – csak tagolt. */
+.policy-summary p {
+  white-space: pre-line;
+  font-family: Georgia, serif;
+  font-size: 16px;
+  line-height: 1.78;
+  color: #1a2430;
+}
+
+.policy-chapter { margin-top: 30px; padding-top: 22px; border-top: 1px solid #e6ebee; }
+.policy-chapter:first-of-type { border-top: 0; padding-top: 0; }
+
 .policy-chapter-head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 18px;
+  gap: 20px;
   margin-bottom: 12px;
 }
 
-.policy-chapter-head h3 { margin: 0; }
-.policy-chapter-head .policy-kind-row { flex: none; margin: 0; }
-
-@media (max-width: 720px) {
-  .policy-chapter-head { flex-direction: column; gap: 8px; }
-  .policy-document { padding: 34px 22px; font-size: 15px; }
-}
-
-/* Záró blokk. */
-.policy-closing {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 16px 28px;
-  margin: 0 0 18px;
-}
-
-.policy-closing div { padding-top: 10px; border-top: 1px solid #d5dde1; }
-
-.policy-closing dt {
-  color: #60737d;
+.policy-chapter-head h3 {
+  margin: 0;
+  color: var(--pol-tinta);
   font-family: "Manrope", Arial, sans-serif;
-  font-size: 10px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.policy-chapter-head .policy-kind-row { flex: none; margin: 0; display: flex; gap: 8px; }
+
+.policy-chapter p { margin: 0; }
+
+/* --- jogforrás ----------------------------------------------------------- */
+.policy-legal-reference {
+  margin-top: 12px;
+  padding-top: 9px;
+  border-top: 1px dotted #cfd8dd;
+  color: #5a666f !important;
+  font-family: "Manrope", Arial, sans-serif;
+  font-size: 12.5px;
+  line-height: 1.7;
+}
+
+.policy-legal-reference strong {
+  font-size: 10.5px;
   font-weight: 700;
-  letter-spacing: .07em;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #6b7580;
+}
+
+/* --- tartalomjegyzék ------------------------------------------------------ */
+.policy-toc ol { font-family: "Manrope", Arial, sans-serif; font-size: 14px; }
+.policy-toc li { margin-bottom: 9px; }
+
+/* --- záró blokk ----------------------------------------------------------- */
+.policy-footer { margin-top: 44px; padding-top: 20px; border-top: 2px solid var(--pol-bronz); }
+
+.policy-closing-id {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin: 0 0 8px;
+}
+
+.policy-closing-id span {
+  color: #6b7580;
+  font-family: "Manrope", Arial, sans-serif;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .1em;
   text-transform: uppercase;
 }
 
-.policy-closing dd { margin: 5px 0 0; color: #172b35; font-size: 15px; }
-
-.policy-closing dd code {
+.policy-closing-id code {
   font-family: ui-monospace, Menlo, monospace;
   font-size: 14px;
   letter-spacing: .04em;
+  color: #1a2430;
 }
 
-.policy-closing-note {
-  margin: 0 0 14px;
-  color: #5a6167;
-  font-size: 13px;
-  line-height: 1.6;
+.policy-closing-note,
+.policy-footer p {
+  margin: 0 0 10px;
+  color: #5a666f;
+  font-family: "Manrope", Arial, sans-serif;
+  font-size: 12.5px;
+  line-height: 1.65;
+}
+
+.policy-footer p:last-child { margin-bottom: 0; }
+
+@media (max-width: 720px) {
+  .policy-document { padding: 34px 22px; font-size: 15px; }
+  .policy-chapter-head { flex-direction: column; gap: 8px; }
+  .policy-cover h1 { font-size: 25px; }
 }

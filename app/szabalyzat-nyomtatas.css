@@ -24,18 +24,11 @@
       font-size: 8pt;
       color: #6c757d;
     }
-    @top-right {
-      content: "EnergiaAI Kontroll";
-      font-family: Manrope, Arial, sans-serif;
-      font-size: 7.5pt;
-      letter-spacing: 0.12em;
-      color: #a9622f;
-    }
   }
 
-  /* A címlapon nincs fejléc. */
+  /* A címlapon nincs oldalszám. */
   @page :first {
-    @top-right { content: ""; }
+    @bottom-center { content: ""; }
   }
 
   html,
@@ -92,17 +85,17 @@
     background: #fff !important;
   }
 
-  a { color: inherit !important; text-decoration: none !important; }
+  a,
+  a[href^="tel:"],
+  a[href^="sms:"],
+  a[href^="mailto:"] { color: inherit !important; text-decoration: none !important; }
 
   /* --- címoldal ---------------------------------------------------------- */
   /* A címlap egy teljes oldal: a tartalom függőlegesen középen áll, nem a
      lap tetején. Enélkül az alsó kétharmad üresen marad. */
   .policy-cover {
-    display: flex !important;
-    flex-direction: column;
-    justify-content: center;
-    min-height: 248mm;
-    padding: 0 !important;
+    display: block !important;
+    padding: 55mm 0 0 !important;
     border: 0 !important;
     background: none !important;
     break-after: page;
@@ -346,16 +339,14 @@
   .policy-chapter-head .policy-kind-row { flex: none; white-space: nowrap; }
 
   /* Záró blokk: kiállító, dátum, verzió, dokumentumazonosító. */
-  .policy-closing {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr;
-    gap: 5mm 12mm;
-    margin: 0 0 5mm !important;
-    padding: 0 !important;
+  .policy-closing-id {
+    display: flex !important;
+    align-items: baseline;
+    gap: 4mm;
+    margin: 0 0 2mm !important;
   }
 
-  .policy-closing dt {
-    margin: 0 0 1mm !important;
+  .policy-closing-id span {
     color: #6c757d !important;
     font-family: Manrope, Arial, sans-serif !important;
     font-size: 7.5pt !important;
@@ -364,20 +355,15 @@
     text-transform: uppercase;
   }
 
-  .policy-closing dd {
-    margin: 0 !important;
-    color: #14181c !important;
-    font-size: 10.5pt !important;
-  }
-
-  .policy-closing dd code {
+  .policy-closing-id code {
     font-family: ui-monospace, Menlo, monospace;
     font-size: 9.5pt;
     letter-spacing: 0.04em;
+    color: #14181c !important;
   }
 
   .policy-closing-note {
-    margin: 0 0 4mm !important;
+    margin: 0 0 3mm !important;
     color: #5a6167 !important;
     font-size: 8.5pt !important;
   }
