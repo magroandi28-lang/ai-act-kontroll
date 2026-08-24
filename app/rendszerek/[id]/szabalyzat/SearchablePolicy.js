@@ -3,6 +3,7 @@
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { frissitsSzabalyzat } from "./actions";
 // A jóváhagyás a jogtárban történik, szabályonként. A szabályzatnak nincs
 // külön felülvizsgálati köre, ezért innen kikerültek a beküldő és döntő
 // műveletek. Az állapot a benne lévő előírások jóváhagyottságából következik.
@@ -22,8 +23,24 @@ function formatDate(value) {
 
 // A jóváhagyási sáv a dokumentum tetején. A jogosultságot az adatbázis dönti el,
 // ezért itt minden művelet felkínálható: illetéktelen hívást a szerver utasít el.
-function ApprovalPanel({ policy }) {
+function ApprovalPanel({ policy, systemId }) {
+  const router = useRouter();
+  const [uzenet, setUzenet] = useState("");
+  const [folyamatban, startTransition] = useTransition();
   const status = policy.status || "draft";
+  const elavult = Boolean(policy.elavult_ok);
+
+  function frissites() {
+    setUzenet("");
+    startTransition(async () => {
+      const eredmeny = await frissitsSzabalyzat(systemId);
+      if (eredmeny?.error) {
+        setUzenet(eredmeny.error);
+        return;
+      }
+      router.refresh();
+    });
+  }
 
   return (
     <section className={`policy-approval policy-approval-${status}`} aria-live="polite">
@@ -32,14 +49,34 @@ function ApprovalPanel({ policy }) {
           <p className="profile-label">A dokumentum állapota</p>
           <strong>{statusLabels[status] || status}</strong>
         </div>
-        {status === "approved" && policy.updated_at && (
+        {policy.updated_at && (
           <p className="policy-approval-meta">
             Utolsó frissítés: {formatDate(policy.updated_at)}
           </p>
         )}
       </div>
 
-      {status === "draft" && (
+      {/* A rendszer adatai a szabályzat elkészítése óta megváltoztak. Az új
+          verziót nem készítjük el magától: más kötelezettségeket hozhat. */}
+      {elavult && (
+        <div className="policy-outdated">
+          <p><strong>A szabályzat elavult.</strong> {policy.elavult_ok}</p>
+          <p>
+            Frissítéskor új verzió készül a mostani adatokból. A korábbi verzió
+            megmarad, visszakereshető.
+          </p>
+          <button
+            className="primary-button"
+            type="button"
+            disabled={folyamatban}
+            onClick={frissites}
+          >
+            {folyamatban ? "Frissítés…" : "Szabályzat frissítése"}
+          </button>
+        </div>
+      )}
+
+      {status === "draft" && !elavult && (
         <p className="policy-approval-note">
           A szabályzat akkor válik kiadhatóvá, ha a jogász a jogtárban minden
           benne szereplő előírást jóváhagyott. Külön beküldés nem szükséges.
@@ -51,6 +88,8 @@ function ApprovalPanel({ policy }) {
           Tartalmi ujjlenyomat: <code>{policy.content_sha256.slice(0, 16)}…</code>
         </p>
       )}
+
+      {uzenet && <p className="system-form-message is-error" role="alert">{uzenet}</p>}
     </section>
   );
 }
