@@ -1016,7 +1016,22 @@ input:disabled {
 .policy-clause { margin: 0 0 25px; padding: 0 0 20px; border-bottom: 1px solid #e0e5e8; break-inside: avoid; }
 .policy-clause:last-child { border-bottom: 0; }
 .policy-clause h4 { margin: 0 0 8px; color: #152e3a; font-size: 16px; }
-.policy-legal-reference { color: #596c76 !important; font-size: 12px; }
+/* A jogforrás-hivatkozás a szöveg alatt, elkülönítve. A hosszú címek miatt a
+   sortörés a hivatkozások között történjen, ne egy hivatkozás közepén. */
+.policy-legal-reference {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #e3e9ec;
+  color: #596c76 !important;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.policy-legal-reference > span { white-space: nowrap; }
+
+@media (max-width: 640px) {
+  .policy-legal-reference > span { white-space: normal; }
+}
 .policy-footer { margin-top: 50px; padding-top: 16px; color: #687983; border-top: 1px solid #aab8bf; font-size: 11px; }
 .policy-toolbar-actions { display: flex; align-items: center; gap: 12px; }
 .policy-search input { width: min(310px,38vw); min-height: 44px; padding: 0 14px; color: #17222b; border: 1px solid #9aabb4; border-radius: 7px; background: #fff; font: inherit; }
@@ -1052,8 +1067,20 @@ input:disabled {
   .is-search-hidden { display: block; }
   .is-search-muted { opacity: 1; }
   .policy-document { width: 100%; margin: 0; padding: 0; box-shadow: none; font-size: 10.5pt; }
-  .policy-cover { min-height: 215mm; padding-top: 22mm; break-after: page; }
-  .policy-cover h1 { font-size: 30pt; }
+  /* A címlap egy teljes oldal, a tartalom függőlegesen középen. Enélkül a
+     lap alsó kétharmada üresen tátong. */
+  .policy-cover {
+    min-height: 235mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 0;
+    border-bottom: none;
+    break-after: page;
+  }
+  .policy-cover h1 { font-size: 28pt; margin-bottom: 26mm; }
+  .policy-cover > p { margin-bottom: 8mm; }
+  .policy-cover dl { gap: 10mm 14mm; }
   .policy-section h2 { font-size: 17pt; }
   .policy-chapter h3 { font-size: 13pt; }
   .policy-clause h4 { font-size: 11.5pt; }
@@ -1756,54 +1783,20 @@ input:disabled {
 .policy-outdated p { margin: 0 0 8px; font-size: 14px; line-height: 1.65; }
 .policy-outdated p:last-of-type { margin-bottom: 12px; }
 
-/* ---------------------------------------------------------------------------
-   Szabályzat – nyomtatott megjelenés.
-   A dokumentumot ki is nyomtatják, ezért a tördelés ugyanolyan fontos, mint a
-   képernyős olvasás: fejezet ne szakadjon ketté, a jogforrás maradjon a
-   szövegével egy oldalon.
---------------------------------------------------------------------------- */
 
-/* A fejezet fejléce: a cím a hangsúlyos, a besorolás melléktipográfia. */
-.policy-kind-row {
-  margin: 4px 0 12px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+
+/* A böngésző a dátumot és a számsorokat automatikusan hivatkozássá alakítja,
+   ezért narancsra színezi őket a címlapon. A saját színünket kényszerítjük. */
+.policy-cover dd,
+.policy-cover dd a,
+.policy-document a[href^="tel:"],
+.policy-document a[href^="sms:"] {
+  color: #172b35 !important;
+  text-decoration: none !important;
 }
 
-.policy-chapter h3 { margin-bottom: 2px; }
-
-@media print {
-  @page {
-    size: A4;
-    margin: 18mm 16mm 20mm;
-  }
-
-  /* A böngésző fejléce és lábléce helyett a dokumentum saját adatai. */
-  .policy-document { position: relative; }
-
-  .policy-chapter {
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
-
-  .policy-legal-reference {
-    break-before: avoid;
-    page-break-before: avoid;
-  }
-
-  .policy-chapter h3 {
-    break-after: avoid;
-    page-break-after: avoid;
-  }
-
-  .policy-toc { break-after: page; }
-  .policy-summary { break-after: page; }
-
-  .policy-kind-row { margin-bottom: 8px; }
-  .policy-kind { font-size: 8pt; }
-
-  /* Az elavulás-jelzés és a művelet nem tartozik a dokumentumhoz. */
-  .policy-outdated,
-  .policy-approval-note { display: none; }
+.policy-cover dd code {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: 13px;
+  letter-spacing: .04em;
 }
