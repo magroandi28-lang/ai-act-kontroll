@@ -615,70 +615,274 @@
 }
 
 /* ---------------------------------------------------------------------------
-   Bemutató – nyitószöveg és kártyák.
+   Bemutató – magától pergő film.
 
-   Két hiba volt itt. A nyitószöveg bekezdése a teljes panelszélességet
-   kihasználta, középre zárva: emiatt cikk-cakkos, nehezen olvasható tömb lett
-   belőle. A kártyák pedig 240 pixelnél nem lettek szélesebbek, így a szöveg
-   három szavanként tördelt. A mérték most mindkét helyen kötött.
+   Képkockánként egy sor szöveg, alatta a felület valódi tartalma. A korábbi
+   3D-s körhinta helyett ez azért jobb, mert minden olvasható marad.
 --------------------------------------------------------------------------- */
 
-.tour-intro { padding: clamp(30px, 4vw, 60px) clamp(22px, 4vw, 64px); }
-
-.tour-intro h2 {
-  max-width: 24ch;
-  font-size: clamp(22px, 2.3vw, 34px);
-  font-weight: 600;
-  line-height: 1.24;
-  letter-spacing: -0.015em;
+@keyframes filmBe {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
 }
 
-.tour-intro-leiras {
-  max-width: 58ch;
-  margin: 18px auto 0;
+/* --- nyitó és záró képernyő --- */
+
+.film-intro {
+  padding: clamp(38px, 5vw, 76px) clamp(26px, 5vw, 76px) clamp(30px, 4vw, 56px);
+  text-align: left;
+}
+.film-intro > * { animation: filmBe 620ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+.film-intro-sor {
+  max-width: 22ch;
+  margin: 0 0 6px;
+  color: #f2f6f9;
+  font-size: clamp(23px, 2.6vw, 38px);
+  font-weight: 600;
+  line-height: 1.18;
+  letter-spacing: -0.02em;
+  hyphens: none;
+}
+
+.film-intro-nev {
+  margin: 20px 0 0;
+  color: var(--bel-narancs, #e08a4f);
+  font-size: clamp(13px, 1.1vw, 15px);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.film-intro-leiras {
+  max-width: 56ch;
+  margin: 14px 0 0;
   color: #9fb3c1;
   font-size: clamp(14px, 1.05vw, 16px);
   line-height: 1.7;
-  text-wrap: pretty;
+  hyphens: auto;
 }
 
-.tour-intro-vonal { margin: clamp(22px, 2.6vw, 34px) auto; }
+.film-intro .tour-cta { margin-top: clamp(24px, 3vw, 36px); }
 
-/* --- kártyák --- */
+/* --- film --- */
 
-.tour-card {
+.film { padding: clamp(26px, 3.4vw, 44px) clamp(26px, 5vw, 76px) clamp(16px, 2vw, 24px); }
+
+.film-fej { animation: filmBe 460ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+.film-felirat {
+  margin: 0 0 8px;
+  color: #7b93a5;
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.film-sor-nagy {
+  max-width: 34ch;
+  margin: 0;
+  color: #f2f6f9;
+  font-size: clamp(18px, 1.85vw, 26px);
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: -0.014em;
+  hyphens: none;
+}
+
+.film-szinpad {
+  margin: clamp(18px, 2.4vw, 28px) 0 0;
+  animation: filmBe 520ms cubic-bezier(0.16, 1, 0.3, 1) 90ms both;
+}
+
+/* --- a képernyőrészletek közös doboza --- */
+
+.film-kep {
+  padding: clamp(16px, 1.8vw, 22px);
+  border: 1px solid #22394a;
+  border-radius: 12px;
+  background: #0b1721;
+  min-height: clamp(168px, 22vh, 216px);
+}
+
+.film-sor-fej {
   display: flex;
-  flex-direction: column;
-  height: clamp(300px, 44vh, 372px);
-  padding: clamp(22px, 2vw, 30px);
-  text-align: left;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
-.tour-badge {
-  align-self: flex-start;
-  padding: 3px 9px;
+.film-kod {
+  color: #7b93a5;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.film-cimke {
+  flex: none;
+  padding: 2px 9px;
+  border: 1px solid #2f4759;
+  border-radius: 999px;
+  color: #8fa6b7;
   font-size: 11px;
-  letter-spacing: 0.08em;
+  white-space: nowrap;
 }
+.film-cimke.is-jo { border-color: #2f6b52; color: #6fbd97; }
+.film-cimke.is-varo { border-color: #6b5a2f; color: #c9a45e; }
+.film-cimke.is-hiba { border-color: #7a3a34; color: #d98a80; }
 
-.tour-icon {
-  width: 34px;
-  height: 34px;
-  margin: clamp(16px, 2vh, 22px) 0 0;
-}
-
-.tour-card h3 {
-  margin: clamp(14px, 1.8vh, 20px) 0 0;
-  font-size: clamp(17px, 1.3vw, 21px);
+.film-cim {
+  margin: 0 0 8px;
+  color: #eef4f8;
+  font-size: clamp(14px, 1.15vw, 16px);
   font-weight: 600;
-  line-height: 1.28;
-  letter-spacing: -0.01em;
+  line-height: 1.3;
 }
 
-.tour-card p {
-  margin: 10px 0 0;
-  color: #a3b7c5;
-  font-size: clamp(13.5px, 1vw, 15px);
+.film-szoveg {
+  margin: 0;
+  color: #93a9b8;
+  font-size: clamp(12.5px, 0.98vw, 14px);
+  line-height: 1.65;
+  hyphens: auto;
+}
+
+.film-hivatkozas {
+  margin: 12px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid #1c3040;
+  color: #c47a4a;
+  font-size: 12px;
+}
+
+.film-labjegyzet {
+  margin: 12px 0 0;
+  color: #6d859a;
+  font-size: 11.5px;
   line-height: 1.6;
-  text-wrap: pretty;
+}
+
+.film-halvany { color: #5f7a8d; }
+
+.film-lista { margin: 0; padding: 0; list-style: none; }
+.film-lista li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #162836;
+  color: #b3c6d3;
+  font-size: clamp(12.5px, 0.98vw, 14px);
+}
+.film-lista li:last-child { border-bottom: 0; }
+
+/* --- felviteli kérdés --- */
+
+.film-kerdes-felirat {
+  margin: 0 0 10px;
+  color: #7b93a5;
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+}
+.film-kerdes-szoveg {
+  margin: 0 0 16px;
+  color: #eef4f8;
+  font-size: clamp(14px, 1.15vw, 16px);
+  font-weight: 500;
+  line-height: 1.45;
+}
+.film-kerdes-gombok { display: flex; gap: 10px; }
+.film-kerdes-gombok span {
+  padding: 7px 15px;
+  border: 1px solid #2f4759;
+  border-radius: 9px;
+  color: #8fa6b7;
+  font-size: 12.5px;
+}
+.film-kerdes-gombok .is-igen { border-color: var(--bel-narancs, #e08a4f); color: #e08a4f; }
+
+/* --- haladásjelző és láb --- */
+
+.film-halado { display: flex; gap: 5px; margin: clamp(20px, 2.6vw, 30px) 0 0; }
+.film-vonal {
+  flex: 1;
+  height: 2px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: #22394a;
+  cursor: pointer;
+  transition: background 220ms ease;
+}
+.film-vonal.is-kesz { background: #3c5568; }
+.film-vonal.is-aktiv { background: var(--bel-narancs, #e08a4f); }
+
+.film-lab {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: clamp(16px, 2vw, 22px) 0 0;
+}
+.film-lab .tour-nav-prev:disabled { opacity: 0.4; cursor: default; }
+
+.film-szunet {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid #2f4759;
+  border-radius: 8px;
+  background: transparent;
+  color: #c9d8e2;
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color 140ms ease;
+}
+.film-szunet:hover { border-color: var(--bel-narancs, #e08a4f); color: #e08a4f; }
+
+/* --- felelősségi mondat --- */
+
+.film-jogi {
+  margin: 0;
+  padding: 12px clamp(26px, 5vw, 76px);
+  border-top: 1px solid #16283e;
+  color: #6d859a;
+  font-size: 11.5px;
+  line-height: 1.55;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .film-intro > *,
+  .film-fej,
+  .film-szinpad { animation: none !important; }
+}
+
+/* ---------------------------------------------------------------------------
+   Érkezés a bemutatóból a demó felé.
+   A záró gomb ígérete az, hogy indul a demó. A nyilatkozat elfogadása viszont
+   nem hagyható ki, ezért a demó gombot és a nyilatkozat sorát is kiemeljük.
+--------------------------------------------------------------------------- */
+
+@keyframes demoFigyelem {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(224, 138, 79, 0); }
+  50%      { box-shadow: 0 0 0 4px rgba(224, 138, 79, 0.22); }
+}
+
+.belepes-demo-gomb.is-kiemelt {
+  border-color: var(--bel-narancs, #e08a4f);
+  animation: demoFigyelem 1.8s ease-in-out 3;
+}
+
+.belepes-privacy.is-kiemelt span { color: var(--bel-narancs, #e08a4f); }
+.belepes-privacy.is-kiemelt input {
+  outline: 2px solid rgba(224, 138, 79, 0.55);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .belepes-demo-gomb.is-kiemelt { animation: none; }
 }

@@ -27,30 +27,31 @@ const COPY = {
     errPrivacy: "A belépéshez fogadd el az adatkezelési nyilatkozatot.",
     errPrivacyDemo: "A demó indításához fogadd el az adatkezelési nyilatkozatot.",
     errLogin: "Hibás e-mail-cím vagy jelszó.",
+    introSorok: [
+      "Az MI-rendelet már alkalmazandó.",
+      "A szabályzat néhány perc alatt elkészül.",
+    ],
+    introNev: "AI Act Kontroll",
     introLead:
-      "Az EnergiaAI Kontroll elkészíti azt a szabályzatot, amelyet az MI-rendelet megkövetel.",
-    introQ:
-      "A rendszer működésének rögzítése után meghatározza, mely jogszabályi kötelezettségek vonatkoznak rá, és ezekből kiadható dokumentumot állít össze – minden előírás mögött a hivatkozott jogszabályhellyel. Az MI-rendelet 2026. augusztus 2-tól alkalmazandó.",
-    introCta: "Nézd meg, hogyan működik",
-    prev: "Előző",
-    next: "Következő",
-    dragHint: "Húzza el a kártyákat",
-    closingLine: "Lépj be! Regisztráció nélkül is kipróbálhatod!",
-    closeCta: "Lépj be!",
+      "Az AI Act Kontroll nyilvántartja a vállalat MI-rendszereit, azonosítja a rájuk vonatkozó követelményeket, és összeállítja a szükséges szabályzatokat.",
+    introCta: "Nézze meg, hogyan működik",
+    prev: "Vissza",
+    next: "Tovább",
+    szunet: "Szünet",
+    folytatas: "Folytatás",
     closeTour: "Bemutató bezárása",
-    cards: [
-      { title: "Rendszernyilvántartás",
-        body: "A szervezet MI-rendszereinek rögzítése: rendeltetés, működési jellemzők, szerepkör." },
-      { title: "A kötelezettségek meghatározása",
-        body: "Az alkalmazandó előírások a rögzített működésből és a hatályos jogszabályokból következnek." },
-      { title: "Jogi jóváhagyás",
-        body: "Az előírásokat jogász hagyja jóvá, szükség esetén átfogalmazza, és rögzíti hozzá az értelmezést." },
-      { title: "Megfelelőségi szabályzat",
-        body: "A jóváhagyott előírásokból kiadható dokumentum áll össze, jogforrás-hivatkozásokkal." },
-      { title: "Jogszabálykövetés",
-        body: "Jogszabályváltozás esetén az érintett előírások felülvizsgálati állapotba kerülnek." },
-      { title: "Szerepkörök és verziók",
-        body: "Szolgáltatóra, alkalmazóra, importőrre más kötelezettségek vonatkoznak; minden módosítás új verziót képez." },
+    jogiZarolag:
+      "Az alkalmazás nem ad jogi tanácsot. A szabályzatot kiadás előtt jogásznak kell jóváhagynia.",
+    zaroSor: "Próbálja ki működés közben, regisztráció nélkül.",
+    closeCta: "Belépés a demóba",
+    frames: [
+      { cim: "MI-rendszer rögzítése", sor: "Néhány kérdés a rendszer tényleges működéséről." },
+      { cim: "Jogtár", sor: "A jogász egyszer átnézi a jogszabályt — onnantól minden szabályzat abból épül." },
+      { cim: "Jogszabályfrissítés", sor: "A rendszer figyeli a jogforrások szövegét." },
+      { cim: "Szabályzat", sor: "Kiadható dokumentum, minden előírás alatt a jogszabályhellyel." },
+      { cim: "Mentett MI-rendszerek", sor: "A teljes MI-leltár egy helyen, a szabályzatok állapotával." },
+      { cim: "Tömeges felvitel", sor: "Több rendszer egyetlen táblázatból, soronkénti ellenőrzéssel." },
+      { cim: "Verziókövetés", sor: "Minden módosítás új verziót képez, a korábbi megmarad." },
     ],
   },
   en: {
@@ -71,25 +72,31 @@ const COPY = {
     errPrivacy: "Please accept the privacy notice to sign in.",
     errPrivacyDemo: "Please accept the privacy notice to start the demo.",
     errLogin: "Incorrect email address or password.",
+    introSorok: [
+      "The AI Act already applies.",
+      "The policy is ready in minutes.",
+    ],
+    introNev: "AI Act Kontroll",
     introLead:
-      "EnergiaAI Kontroll produces the policy that the AI Act requires.",
-    introQ:
-      "Once the operation of the system is recorded, it determines which statutory obligations apply and assembles them into a document ready for issue — each requirement citing the provision it derives from. The AI Act applies from 2 August 2026.",
+      "AI Act Kontroll keeps a register of your company's AI systems, identifies the requirements that apply to them, and assembles the policies you need.",
     introCta: "See how it works",
     prev: "Back",
     next: "Next",
-    dragHint: "Drag the cards",
-    closingLine: "Come on in! You can try it without signing up.",
-    closeCta: "Come on in!",
+    szunet: "Pause",
+    folytatas: "Resume",
     closeTour: "Close the tour",
-    cards: [
-      { title: "AI system", body: "Register the AI system your company uses." },
-      { title: "Legal library", body: "Current legislation in one place." },
-      { title: "Legal updates", body: "You are notified when the legal background changes." },
-      { title: "Policy", body: "The matching policy is assembled automatically." },
-      { title: "My AI systems", body: "The system and its policy are saved together." },
-      { title: "Bulk upload", body: "Register several AI systems with a downloadable, fillable smart spreadsheet." },
-      { title: "Version history", body: "Every change creates a new policy version; the previous one is kept." },
+    jogiZarolag:
+      "This application does not give legal advice. The policy must be approved by a lawyer before it is issued.",
+    zaroSor: "Try it in action, no sign-up needed.",
+    closeCta: "Enter the demo",
+    frames: [
+      { cim: "Recording an AI system", sor: "A few questions about how the system actually works." },
+      { cim: "Legal library", sor: "A lawyer checks the legislation once — every policy is built from it." },
+      { cim: "Monitoring the law", sor: "The system watches the text of each legal source." },
+      { cim: "Policy", sor: "An issuable document, each requirement citing its provision." },
+      { cim: "Saved AI systems", sor: "The whole AI inventory in one place, with policy status." },
+      { cim: "Bulk upload", sor: "Several systems from one spreadsheet, validated row by row." },
+      { cim: "Version history", sor: "Every change creates a new version; the previous one is kept." },
     ],
   },
 };
@@ -194,105 +201,247 @@ function LangSwitch({ lang, onChange }) {
 
 /* ───────────────────────── bemutató modal ───────────────────────── */
 
-const GAP = 16;
+/* ───────────────────────── bemutató ─────────────────────────
 
-// A kártya szélessége korábban 240 pixelnél megállt, és három kártyát
-// próbált egyszerre kirakni. Emiatt a szöveg három-négy szavanként tördelt.
-// Most a középső kártya kap valódi szélességet, a szomszédok csak sejlenek.
-function cardWidth(winW) {
-  const belso = Math.min(1080, winW || 1080) - 80;
-  return Math.max(252, Math.min(392, belso / 2.3));
+   A bemutató magától pereg, mint egy rövid film. Képkockánként egy sor
+   szöveg, alatta a felület valódi tartalma. A korábbi 3D-s körhinta helyett
+   ez azért jobb, mert minden olvasható marad, és nem kell húzogatni.
+
+   A képernyőrészletek tartalma a valódi jogtárból származik: a felviteli
+   kérdés a kapcsolókatalógusból, a szabály és a jogalap a jogtárból, a
+   szabályzatrészlet egy elkészült dokumentumból.
+   ------------------------------------------------------------------- */
+
+const KEPKOCKA_IDO = 5200;
+
+function Kerdes() {
+  return (
+    <div className="film-kep">
+      <div className="film-kerdes">
+        <p className="film-kerdes-felirat">Döntés és értékelés · 3/6</p>
+        <p className="film-kerdes-szoveg">
+          Értékel a rendszer személyeket hosszabb időn át társadalmi viselkedésük vagy személyes
+          jellemzőik alapján?
+        </p>
+        <div className="film-kerdes-gombok">
+          <span>← Nem érinti</span>
+          <span className="is-igen">Érinti →</span>
+        </div>
+      </div>
+    </div>
+  );
 }
+
+function Szabaly() {
+  return (
+    <div className="film-kep">
+      <div className="film-sor film-sor-fej">
+        <span className="film-kod">GDPR 35. cikk</span>
+        <span className="film-cimke is-jo">Ellenőrizve</span>
+      </div>
+      <p className="film-cim">Adatvédelmi hatásvizsgálat elvégzése</p>
+      <p className="film-szoveg">
+        Ha az adatkezelés – jellegére, hatókörére és céljaira tekintettel – valószínűsíthetően magas
+        kockázattal jár a természetes személyek jogaira nézve, a szervezet az adatkezelés megkezdése
+        előtt hatásvizsgálatot végez.
+      </p>
+    </div>
+  );
+}
+
+function Kovetes() {
+  const forrasok = [
+    ["MI-rendelet", "2024/1689"],
+    ["GDPR", "2016/679"],
+    ["VET", "2007. évi LXXXVI."],
+    ["Ekertv.", "2001. évi CVIII."],
+    ["Fttv.", "2008. évi XLVII."],
+  ];
+  return (
+    <div className="film-kep">
+      <div className="film-sor film-sor-fej">
+        <span className="film-kod">15 jogforrás figyelve</span>
+        <span className="film-cimke is-jo">Nincs eltérés</span>
+      </div>
+      <ul className="film-lista">
+        {forrasok.map(([nev, azon]) => (
+          <li key={nev}>
+            <span>{nev}</span>
+            <span className="film-halvany">{azon}</span>
+          </li>
+        ))}
+      </ul>
+      <p className="film-labjegyzet">
+        A rendszer a szöveg tartalmi ujjlenyomatát hasonlítja össze, és megmutatja, melyik mondat
+        változott.
+      </p>
+    </div>
+  );
+}
+
+function Szabalyzat() {
+  return (
+    <div className="film-kep">
+      <div className="film-sor film-sor-fej">
+        <span className="film-kod">Ügyfélszolgálati chatbot · 3. verzió</span>
+        <span className="film-cimke">1. szakasz</span>
+      </div>
+      <p className="film-cim">Tudásforrások irányítása és elsőbbségi rendje</p>
+      <p className="film-szoveg">
+        A rendszer kimenetének forrási sorrendje: hatályos jogszabály; hatósági követelmény;
+        jóváhagyott belső szabályzat. Ellentmondás vagy lejárt forrás esetén a rendszer nem pótolhatja
+        becsléssel, hanem emberi felülvizsgálatra irányít.
+      </p>
+      <p className="film-hivatkozas">MI-rendelet 26. cikk — Alkalmazói kötelezettségek</p>
+    </div>
+  );
+}
+
+function Leltar() {
+  const sorok = [
+    ["Ügyfélszolgálati chatbot", "Hatályos", "is-jo"],
+    ["Számla Segéd", "Hatályos", "is-jo"],
+    ["Mérőállás Asszisztens", "Hatályos", "is-jo"],
+    ["Panasz Kapu", "Nincs szabályzat", "is-varo"],
+  ];
+  return (
+    <div className="film-kep">
+      <ul className="film-lista">
+        {sorok.map(([nev, allapot, jel]) => (
+          <li key={nev}>
+            <span>{nev}</span>
+            <span className={"film-cimke " + jel}>{allapot}</span>
+          </li>
+        ))}
+      </ul>
+      <p className="film-labjegyzet">
+        Ha a működés vagy a jogszabály változik, az érintett szabályzat elavultként jelenik meg.
+      </p>
+    </div>
+  );
+}
+
+function Tomeges() {
+  const sorok = [
+    ["2", "Energia Tudástár", "Rendben", "is-jo"],
+    ["3", "Fogyasztás Magyarázó", "Rendben", "is-jo"],
+    ["4", "Tartozás Tájékoztató", "Hiányzik a szerepkör", "is-hiba"],
+  ];
+  return (
+    <div className="film-kep">
+      <div className="film-sor film-sor-fej">
+        <span className="film-kod">Ellenőrzési eredmény</span>
+        <span className="film-cimke">2 megfelelő, 1 hibás sor</span>
+      </div>
+      <ul className="film-lista">
+        {sorok.map(([szam, nev, allapot, jel]) => (
+          <li key={szam}>
+            <span>
+              <span className="film-halvany">{szam}.</span> {nev}
+            </span>
+            <span className={"film-cimke " + jel}>{allapot}</span>
+          </li>
+        ))}
+      </ul>
+      <p className="film-labjegyzet">Hibás fájl nem importálható. A program soronként ellenőriz.</p>
+    </div>
+  );
+}
+
+function Verziok() {
+  const sorok = [
+    ["3. verzió", "2026. 08. 14.", "Hatályos", "is-jo"],
+    ["2. verzió", "2026. 06. 02.", "Archív", ""],
+    ["1. verzió", "2026. 04. 18.", "Archív", ""],
+  ];
+  return (
+    <div className="film-kep">
+      <ul className="film-lista">
+        {sorok.map(([verzio, datum, allapot, jel]) => (
+          <li key={verzio}>
+            <span>
+              {verzio} <span className="film-halvany">{datum}</span>
+            </span>
+            <span className={"film-cimke " + jel}>{allapot}</span>
+          </li>
+        ))}
+      </ul>
+      <p className="film-labjegyzet">
+        Auditnál visszakereshető, mikor mi volt hatályban, és melyik jogszabályhelyen alapult.
+      </p>
+    </div>
+  );
+}
+
+const KEPERNYOK = [Kerdes, Szabaly, Kovetes, Szabalyzat, Leltar, Tomeges, Verziok];
 
 function TourModal({ lang, onLang, onClose }) {
   const t = COPY[lang];
-  const n = t.cards.length;
+  const n = t.frames.length;
 
-  const [phase, setPhase] = useState("intro");
+  const [fazis, setFazis] = useState("intro");
   const [index, setIndex] = useState(0);
-  const [dx, setDx] = useState(0);
-  const [dragging, setDragging] = useState(false);
-  const [winW, setWinW] = useState(typeof window === "undefined" ? 1020 : window.innerWidth);
+  const [all, setAll] = useState(false);
 
-  const startX = useRef(0);
-  const moved = useRef(false);
-  const pendingDx = useRef(0);
-  const raf = useRef(null);
-
-  const kw = cardWidth(winW);
-  const lep = kw + GAP;
-
-  const step = useCallback(
-    (dir) => {
-      setDx(0);
-      setDragging(false);
+  // A film magától lép tovább, amíg meg nem állítják. Az utolsó képkocka
+  // után a záró szöveg jön, nem ugrik vissza az elejére.
+  useEffect(() => {
+    if (fazis !== "film" || all) return undefined;
+    const ido = setTimeout(() => {
       setIndex((i) => {
-        const nextIndex = i + dir;
-        if (nextIndex > n - 1) {
-          onClose();
+        if (i >= n - 1) {
+          setFazis("zaras");
           return i;
         }
-        return Math.max(0, nextIndex);
+        return i + 1;
       });
+    }, KEPKOCKA_IDO);
+    return () => clearTimeout(ido);
+  }, [fazis, all, index, n]);
+
+  const lep = useCallback(
+    (irany) => {
+      setAll(true);
+      setIndex((i) => Math.min(n - 1, Math.max(0, i + irany)));
     },
-    [n, onClose]
+    [n],
   );
 
   useEffect(() => {
-    const onResize = () => setWinW(window.innerWidth);
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
-
-  useEffect(() => {
-    const onKey = (e) => {
+    function billentyu(e) {
       if (e.key === "Escape") onClose();
-      if (phase !== "cards") return;
-      if (e.key === "ArrowRight") { e.preventDefault(); step(1); }
-      if (e.key === "ArrowLeft") { e.preventDefault(); step(-1); }
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [phase, step, onClose]);
+      if (fazis !== "film") return;
+      if (e.key === "ArrowRight") lep(1);
+      if (e.key === "ArrowLeft") lep(-1);
+      if (e.key === " ") {
+        e.preventDefault();
+        setAll((v) => !v);
+      }
+    }
+    window.addEventListener("keydown", billentyu);
+    return () => window.removeEventListener("keydown", billentyu);
+  }, [fazis, lep, onClose]);
 
-  function onDown(e) {
-    startX.current = e.clientX;
-    moved.current = false;
-    if (e.currentTarget.setPointerCapture) e.currentTarget.setPointerCapture(e.pointerId);
-    setDragging(true);
-    setDx(0);
-  }
-
-  function onMove(e) {
-    if (!dragging) return;
-    const d = e.clientX - startX.current;
-    if (Math.abs(d) > 6) moved.current = true;
-    pendingDx.current = d;
-    if (raf.current) return;
-    raf.current = requestAnimationFrame(() => {
-      raf.current = null;
-      setDx(pendingDx.current);
-    });
-  }
-
-  function onUp() {
-    if (raf.current) { cancelAnimationFrame(raf.current); raf.current = null; }
-    if (!dragging) return;
-    const kuszob = Math.max(40, lep * 0.26);
-    if (dx < -kuszob) step(1);
-    else if (dx > kuszob) step(-1);
-    else { setDragging(false); setDx(0); }
-  }
-
-  const off = -(index * lep + kw / 2) + dx;
+  const Kepernyo = KEPERNYOK[index];
+  const kocka = t.frames[index];
 
   return (
-    <div className="tour-overlay" role="presentation">
-      <div className="tour-panel" role="dialog" aria-modal="true" aria-label="AI Act Kontroll">
+    <div className="tour-overlay" role="dialog" aria-modal="true" aria-label={t.introNev}>
+      <div className="tour-panel">
         <div className="tour-head">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo-ai-act-kontroll.png" alt="AI Act Kontroll" />
           <div className="tour-head-actions">
+            {fazis === "film" && (
+              <button
+                type="button"
+                className="film-szunet"
+                onClick={() => setAll((v) => !v)}
+                aria-label={all ? t.folytatas : t.szunet}
+              >
+                {all ? "▶" : "❚❚"}
+              </button>
+            )}
             <LangSwitch lang={lang} onChange={onLang} />
             <button type="button" className="tour-close" onClick={onClose} aria-label={t.closeTour}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
@@ -302,104 +451,93 @@ function TourModal({ lang, onLang, onClose }) {
           </div>
         </div>
 
-        {phase === "intro" && (
-          <div className="tour-intro">
-            <h2>{t.introLead}</h2>
-            <p className="tour-intro-leiras">{t.introQ}</p>
-            <span className="tour-intro-vonal" aria-hidden="true" />
-            <button type="button" className="tour-cta" onClick={() => { setPhase("cards"); setIndex(0); setDx(0); }}>
+        {fazis === "intro" && (
+          <div className="film-intro">
+            {t.introSorok.map((sor, i) => (
+              <p key={sor} className="film-intro-sor" style={{ animationDelay: 120 + i * 420 + "ms" }}>
+                {sor}
+              </p>
+            ))}
+            <p className="film-intro-nev" style={{ animationDelay: "960ms" }}>
+              {t.introNev}
+            </p>
+            <p className="film-intro-leiras" style={{ animationDelay: "1180ms" }}>
+              {t.introLead}
+            </p>
+            <button
+              type="button"
+              className="tour-cta"
+              style={{ animationDelay: "1400ms" }}
+              onClick={() => {
+                setFazis("film");
+                setIndex(0);
+                setAll(false);
+              }}
+            >
               {t.introCta} <span aria-hidden="true">→</span>
             </button>
           </div>
         )}
 
-        {phase === "cards" && (
-          <div className="tour-cards">
-            <div
-              className="tour-viewport"
-              role="group"
-              aria-label="AI Act Kontroll"
-              tabIndex={0}
-              onPointerDown={onDown}
-              onPointerMove={onMove}
-              onPointerUp={onUp}
-              onPointerCancel={onUp}
-            >
-              <div
-                className="tour-track"
-                style={{
-                  gap: GAP + "px",
-                  transform: `translate3d(${off.toFixed(1)}px,0,0)`,
-                  transition: dragging ? "none" : "transform 460ms cubic-bezier(0.22,1,0.36,1)",
-                }}
-              >
-                {t.cards.map((card, i) => {
-                  const rel = i - index - (lep ? dx / lep : 0);
-                  const at = Math.abs(rel);
-                  const kiemelt = at < 0.5;
-                  const ry = Math.max(-38, Math.min(38, -rel * 26));
-                  const tz = -Math.min(210, at * 100);
-                  const sc = Math.max(0.87, 1.04 - at * 0.1);
-                  const op = Math.max(0.42, 1 - at * 0.3);
-                  return (
-                    <article
-                      key={card.title}
-                      className={"tour-card" + (kiemelt ? " is-active" : "")}
-                      onClick={() => { if (!moved.current && i !== index) { setIndex(i); setDx(0); setDragging(false); } }}
-                      style={{
-                        width: kw.toFixed(1) + "px",
-                        transform: `translateZ(${tz.toFixed(0)}px) rotateY(${ry.toFixed(1)}deg) scale(${sc.toFixed(3)})`,
-                        opacity: op.toFixed(2),
-                        transition: dragging
-                          ? "border-color 240ms ease"
-                          : "transform 460ms cubic-bezier(0.22,1,0.36,1), opacity 460ms ease, border-color 240ms ease",
-                      }}
-                    >
-                      <span className="tour-badge">{"0" + (i + 1)}</span>
-                      <HexIcon kind={KINDS[i]} className="tour-icon" />
-                      <h3>{card.title}</h3>
-                      <p>{card.body}</p>
-                    </article>
-                  );
-                })}
-              </div>
+        {fazis === "film" && (
+          <div className="film">
+            <div className="film-fej" key={"fej" + index}>
+              <p className="film-felirat">
+                {"0" + (index + 1)} — {kocka.cim}
+              </p>
+              <p className="film-sor-nagy">{kocka.sor}</p>
             </div>
-
-            <div className="tour-nav">
-              <button type="button" className="tour-nav-prev" onClick={() => step(-1)}>
+            <div className="film-szinpad" key={"kep" + index}>
+              <Kepernyo />
+            </div>
+            <div className="film-halado" role="tablist" aria-label={t.introNev}>
+              {t.frames.map((f, i) => (
+                <button
+                  key={f.cim}
+                  type="button"
+                  role="tab"
+                  aria-selected={i === index}
+                  aria-label={f.cim}
+                  className={"film-vonal" + (i === index ? " is-aktiv" : "") + (i < index ? " is-kesz" : "")}
+                  onClick={() => {
+                    setAll(true);
+                    setIndex(i);
+                  }}
+                />
+              ))}
+            </div>
+            <div className="film-lab">
+              <button type="button" className="tour-nav-prev" onClick={() => lep(-1)} disabled={index === 0}>
                 <span aria-hidden="true">←</span> {t.prev}
               </button>
-              <div className="tour-dots">
-                {t.cards.map((card, i) => (
-                  <button
-                    key={card.title}
-                    type="button"
-                    className={"tour-dot" + (i === index ? " is-active" : "")}
-                    onClick={() => { setIndex(i); setDx(0); setDragging(false); }}
-                    aria-label={String(i + 1)}
-                  />
-                ))}
-              </div>
-              <button type="button" className="tour-nav-next" onClick={() => step(1)}>
-                {index >= n - 1 ? t.closeCta : t.next} <span aria-hidden="true">→</span>
+              <button
+                type="button"
+                className="tour-nav-next"
+                onClick={() => (index >= n - 1 ? setFazis("zaras") : lep(1))}
+              >
+                {t.next} <span aria-hidden="true">→</span>
               </button>
             </div>
-
-            {index >= n - 1 ? (
-              <p className="tour-hint tour-hint-closing">{t.closingLine}</p>
-            ) : (
-              <p className="tour-hint">
-                <span aria-hidden="true">
-                  <svg viewBox="0 0 24 10" fill="none" stroke="currentColor" strokeWidth="1.4">
-                    <path d="M2 5h20M2 5l3.4-3M2 5l3.4 3M22 5l-3.4-3M22 5l-3.4 3" />
-                  </svg>
-                </span>
-                {t.dragHint}
-              </p>
-            )}
           </div>
         )}
 
+        {fazis === "zaras" && (
+          <div className="film-intro">
+            <p className="film-intro-sor" style={{ animationDelay: "80ms" }}>
+              {t.zaroSor}
+            </p>
+            <button
+              type="button"
+              className="tour-cta"
+              style={{ animationDelay: "420ms" }}
+              onClick={() => onClose(true)}
+            >
+              {t.closeCta} <span aria-hidden="true">→</span>
+            </button>
+          </div>
+        )}
+
+        <p className="film-jogi">{t.jogiZarolag}</p>
       </div>
     </div>
   );
@@ -411,6 +549,11 @@ export default function LoginPage() {
   const router = useRouter();
   const [lang, setLang] = useState("hu");
   const [tourOpen, setTourOpen] = useState(true);
+  // Ha a bemutatót a záró gombbal hagyták el, a belépési oldalon a demó
+  // indítására mutatunk rá: fókusz a gombra, és kiemeljük a nyilatkozat sorát,
+  // mert e nélkül a demó nem indítható.
+  const [demoraMutat, setDemoraMutat] = useState(false);
+  const demoGombRef = useRef(null);
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
   const [loadingMode, setLoadingMode] = useState(null);
@@ -431,6 +574,14 @@ export default function LoginPage() {
     document.body.style.overflow = tourOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [tourOpen]);
+
+  useEffect(() => {
+    if (tourOpen || !demoraMutat) return;
+    const gomb = demoGombRef.current;
+    if (!gomb) return;
+    gomb.scrollIntoView({ block: "center", behavior: "smooth" });
+    gomb.focus({ preventScroll: true });
+  }, [tourOpen, demoraMutat]);
 
   function rememberPrivacyChoice(event) {
     const form = event.currentTarget.closest("form");
@@ -568,7 +719,7 @@ export default function LoginPage() {
                 </button>
               </div>
 
-              <label className="belepes-privacy">
+              <label className={"belepes-privacy" + (demoraMutat ? " is-kiemelt" : "")}>
                 <input name="privacy" type="checkbox" disabled={loading} />
                 <span>
                   {t.privacyPre} <a href="/adatkezeles">{t.privacyLink}</a>
@@ -587,7 +738,13 @@ export default function LoginPage() {
 
               <a className="belepes-elfelejtett" href="/jelszo">{t.forgot}</a>
 
-              <button className="belepes-demo-gomb" type="button" onClick={handleDemo} disabled={loading}>
+              <button
+                ref={demoGombRef}
+                className={"belepes-demo-gomb" + (demoraMutat ? " is-kiemelt" : "")}
+                type="button"
+                onClick={handleDemo}
+                disabled={loading}
+              >
                 {loadingMode === "demo" ? t.demoBusy : t.demoBtn}
               </button>
 
@@ -606,7 +763,16 @@ export default function LoginPage() {
         </form>
       </div>
 
-      {tourOpen && <TourModal lang={lang} onLang={valtNyelv} onClose={() => setTourOpen(false)} />}
+      {tourOpen && (
+        <TourModal
+          lang={lang}
+          onLang={valtNyelv}
+          onClose={(demoFele) => {
+            setTourOpen(false);
+            if (demoFele) setDemoraMutat(true);
+          }}
+        />
+      )}
     </main>
   );
 }
