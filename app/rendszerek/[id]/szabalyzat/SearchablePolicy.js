@@ -104,9 +104,15 @@ function normalise(value) {
 function legalReferenceLabel(reference) {
   const sourceTitle = reference.source_title || "Hivatalos jogforrás";
   if (!reference.article_number) return `${sourceTitle} – ${reference.heading || "kapcsolódó rendelkezés"}`;
-  const suffix = /AI Act|Data Protection Regulation|GDPR/i.test(sourceTitle) ? "cikk" :
-    /melléklet/i.test(reference.article_number) ? "" : "§";
-  return `${sourceTitle} – ${reference.article_number}${suffix ? `. ${suffix}` : ""}`;
+  // Az uniós jogi aktusoknak cikke van, a magyar jogszabályoknak szakasza.
+  // A magyar címekben "évi ... törvény" vagy "Korm. rendelet" szerepel, az
+  // uniósakban "(EU)" vagy "irányelv".
+  const unios = /\(EU\)|\bGDPR\b|irányelv|AI Act/i.test(sourceTitle);
+  const suffix = /melléklet/i.test(reference.article_number) ? ""
+    : unios ? "cikk" : "§";
+  const hely = `${reference.article_number}${suffix ? `. ${suffix}` : ""}`;
+  const bekezdes = reference.paragraph_number ? ` (${reference.paragraph_number})` : "";
+  return `${sourceTitle} – ${hely}${bekezdes}`;
 }
 
 function moduleKindLabel(moduleKind) {
@@ -181,6 +187,12 @@ export default function SearchablePolicy({ policy, system, generatedDate, refres
             <div><dt>MI-rendszer</dt><dd>{system.name}</dd></div>
             <div><dt>Dokumentum verziója</dt><dd>{policy.version}. verzió</dd></div>
             <div><dt>Frissítés dátuma</dt><dd>{generatedDate}</dd></div>
+            {policy.content_sha256 && (
+              <div>
+                <dt>Tartalmi ujjlenyomat</dt>
+                <dd><code>{policy.content_sha256.slice(0, 8)}</code></dd>
+              </div>
+            )}
           </dl>
         </header>
 
@@ -218,14 +230,16 @@ export default function SearchablePolicy({ policy, system, generatedDate, refres
               id={`fejezet-${section.number || index + 1}`}
               key={section.section_key || index}
             >
-              <span className={`policy-kind policy-kind-${section.module_kind || "guidance"}`}>
-                {moduleKindLabel(section.module_kind)}
-              </span>
-              {(section.module_lifecycle_status && section.module_lifecycle_status !== "approved") ||
-              section.requires_human_review ? (
-                <span className="policy-kind policy-kind-pending">Szakértői jóváhagyásra vár</span>
-              ) : null}
               <h3>{section.number || index + 1}. {section.title}</h3>
+              <p className="policy-kind-row">
+                <span className={`policy-kind policy-kind-${section.module_kind || "guidance"}`}>
+                  {moduleKindLabel(section.module_kind)}
+                </span>
+                {((section.module_lifecycle_status && section.module_lifecycle_status !== "approved") ||
+                  section.requires_human_review) && (
+                  <span className="policy-kind policy-kind-pending">Jogászi jóváhagyásra vár</span>
+                )}
+              </p>
               <p>{section.content}</p>
               {section.legal_references?.length > 0 && (
                 <p className="policy-legal-reference">
