@@ -14,7 +14,28 @@
   /* --- lap és alaptipográfia --------------------------------------------- */
   @page {
     size: A4;
-    margin: 20mm 18mm 18mm;
+    margin: 20mm 18mm 20mm;
+
+    /* A böngésző saját fejléce helyett a dokumentum adatai. A nyomtatás
+       párbeszédben a "Fejlécek és láblécek" kapcsolót ki kell venni. */
+    @bottom-center {
+      content: counter(page) " / " counter(pages);
+      font-family: Manrope, Arial, sans-serif;
+      font-size: 8pt;
+      color: #6c757d;
+    }
+    @top-right {
+      content: "EnergiaAI Kontroll";
+      font-family: Manrope, Arial, sans-serif;
+      font-size: 7.5pt;
+      letter-spacing: 0.12em;
+      color: #a9622f;
+    }
+  }
+
+  /* A címlapon nincs fejléc. */
+  @page :first {
+    @top-right { content: ""; }
   }
 
   html,
@@ -23,7 +44,8 @@
     padding: 0 !important;
     background: #fff !important;
     color: #14181c !important;
-    font: 10.5pt/1.6 Georgia, "Times New Roman", serif !important;
+    /* 11 pont, 1.55 sortáv: ez adja a 65–75 karakteres sorhosszt A4-en. */
+    font: 11pt/1.55 Georgia, "Times New Roman", serif !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
@@ -309,4 +331,56 @@
     line-height: 1.5 !important;
     text-align: justify;
   }
+
+  /* A fejezet fejléce: cím balra, besorolás jobbra, egy sorban. */
+  .policy-chapter-head {
+    display: flex !important;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 6mm;
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  .policy-chapter-head h3 { margin: 0 !important; }
+  .policy-chapter-head .policy-kind-row { flex: none; white-space: nowrap; }
+
+  /* Záró blokk: kiállító, dátum, verzió, dokumentumazonosító. */
+  .policy-closing {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 5mm 12mm;
+    margin: 0 0 5mm !important;
+    padding: 0 !important;
+  }
+
+  .policy-closing dt {
+    margin: 0 0 1mm !important;
+    color: #6c757d !important;
+    font-family: Manrope, Arial, sans-serif !important;
+    font-size: 7.5pt !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.12em !important;
+    text-transform: uppercase;
+  }
+
+  .policy-closing dd {
+    margin: 0 !important;
+    color: #14181c !important;
+    font-size: 10.5pt !important;
+  }
+
+  .policy-closing dd code {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 9.5pt;
+    letter-spacing: 0.04em;
+  }
+
+  .policy-closing-note {
+    margin: 0 0 4mm !important;
+    color: #5a6167 !important;
+    font-size: 8.5pt !important;
+  }
+
+  .policy-footer { break-inside: avoid; }
 }
