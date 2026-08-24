@@ -18,7 +18,7 @@ export default async function PolicyPage({ params, searchParams }) {
 
   const POLICY_COLUMNS =
     "id,title,executive_summary,document_sections,version,status,created_at,updated_at," +
-    "submitted_at,reviewed_at,review_note,content_sha256";
+    "submitted_at,reviewed_at,review_note,content_sha256,elavult_ok,elavult_ota";
 
   const { data: existingPolicy } = await supabase
     .from("aic_generated_policies")
