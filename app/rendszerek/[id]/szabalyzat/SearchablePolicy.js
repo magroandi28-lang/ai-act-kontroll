@@ -83,12 +83,6 @@ function ApprovalPanel({ policy, systemId }) {
         </p>
       )}
 
-      {status === "approved" && policy.content_sha256 && (
-        <p className="policy-approval-hash">
-          Tartalmi ujjlenyomat: <code>{policy.content_sha256.slice(0, 16)}…</code>
-        </p>
-      )}
-
       {uzenet && <p className="system-form-message is-error" role="alert">{uzenet}</p>}
     </section>
   );
@@ -190,12 +184,6 @@ export default function SearchablePolicy({ policy, system, generatedDate, refres
             <div><dt>MI-rendszer</dt><dd>{system.name}</dd></div>
             <div><dt>Dokumentum verziója</dt><dd>{policy.version}. verzió</dd></div>
             <div><dt>Frissítés dátuma</dt><dd>{generatedDate}</dd></div>
-            {policy.content_sha256 && (
-              <div>
-                <dt>Tartalmi ujjlenyomat</dt>
-                <dd><code>{policy.content_sha256.slice(0, 8)}</code></dd>
-              </div>
-            )}
           </dl>
         </header>
 
@@ -233,16 +221,20 @@ export default function SearchablePolicy({ policy, system, generatedDate, refres
               id={`fejezet-${section.number || index + 1}`}
               key={section.section_key || index}
             >
-              <h3>{section.number || index + 1}. {section.title}</h3>
-              <p className="policy-kind-row">
-                <span className={`policy-kind policy-kind-${section.module_kind || "guidance"}`}>
-                  {moduleKindLabel(section.module_kind)}
+              {/* A besorolás a cím sorába kerül: külön sorban megtörte a
+                  fejezet elejét. */}
+              <div className="policy-chapter-head">
+                <h3>{section.number || index + 1}. {section.title}</h3>
+                <span className="policy-kind-row">
+                  <span className={`policy-kind policy-kind-${section.module_kind || "guidance"}`}>
+                    {moduleKindLabel(section.module_kind)}
+                  </span>
+                  {((section.module_lifecycle_status && section.module_lifecycle_status !== "approved") ||
+                    section.requires_human_review) && (
+                    <span className="policy-kind policy-kind-pending">Jogászi jóváhagyásra vár</span>
+                  )}
                 </span>
-                {((section.module_lifecycle_status && section.module_lifecycle_status !== "approved") ||
-                  section.requires_human_review) && (
-                  <span className="policy-kind policy-kind-pending">Jogászi jóváhagyásra vár</span>
-                )}
-              </p>
+              </div>
               <p>{section.content}</p>
               {section.legal_references?.length > 0 && (
                 <p className="policy-legal-reference">
@@ -266,7 +258,38 @@ export default function SearchablePolicy({ policy, system, generatedDate, refres
         </section>
 
         <footer className="policy-footer">
-          <p>A követelménydokumentumot az EnergiaAI Kontroll determinisztikus szabálymotorja állította össze. A kötelező jogi követelményeket, a belső működési kontrollokat és az alkalmazási útmutatókat elkülönítve jeleníti meg. A dokumentum nem minősül egyedi jogi tanácsadásnak.</p>
+          <dl className="policy-closing">
+            <div>
+              <dt>Kiállító szervezet</dt>
+              <dd>{system.aic_organisations?.name || "Nincs megadva"}</dd>
+            </div>
+            <div>
+              <dt>Kiállítás dátuma</dt>
+              <dd>{generatedDate}</dd>
+            </div>
+            <div>
+              <dt>Verzió</dt>
+              <dd>{policy.version}.</dd>
+            </div>
+            {policy.content_sha256 && (
+              <div>
+                <dt>Dokumentumazonosító</dt>
+                <dd><code>{policy.content_sha256.slice(0, 16)}</code></dd>
+              </div>
+            )}
+          </dl>
+          {policy.content_sha256 && (
+            <p className="policy-closing-note">
+              A dokumentumazonosító a tartalomból számítódik. Ha a tartalom
+              megváltozik, az azonosító is más lesz — ezzel igazolható, hogy a
+              példány a kiadottal azonos.
+            </p>
+          )}
+          <p>
+            A követelménydokumentumot az EnergiaAI Kontroll determinisztikus
+            szabálymotorja állította össze: minden előírás mögött megjelölt
+            jogszabályhely áll. A dokumentum nem minősül egyedi jogi tanácsadásnak.
+          </p>
         </footer>
       </article>
     </main>
