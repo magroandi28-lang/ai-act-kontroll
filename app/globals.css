@@ -1740,3 +1740,18 @@ input:disabled {
   font-style: normal;
   color: #D9A441;
 }
+
+/* Elavult szabályzat: a rendszer adatai a generálás óta megváltoztak.
+   Okker, mert figyelmeztetés és nem hiba. */
+.policy-outdated {
+  margin-top: 14px;
+  padding: 14px 16px;
+  background: #F9F2E1;
+  border: 1px solid #E3D3AE;
+  border-left: 4px solid #C99B3A;
+  border-radius: 8px;
+  color: #5A4410;
+}
+
+.policy-outdated p { margin: 0 0 8px; font-size: 14px; line-height: 1.65; }
+.policy-outdated p:last-of-type { margin-bottom: 12px; }
