@@ -258,32 +258,18 @@ export default function SearchablePolicy({ policy, system, generatedDate, refres
         </section>
 
         <footer className="policy-footer">
-          <dl className="policy-closing">
-            <div>
-              <dt>Kiállító szervezet</dt>
-              <dd>{system.aic_organisations?.name || "Nincs megadva"}</dd>
-            </div>
-            <div>
-              <dt>Kiállítás dátuma</dt>
-              <dd>{generatedDate}</dd>
-            </div>
-            <div>
-              <dt>Verzió</dt>
-              <dd>{policy.version}.</dd>
-            </div>
-            {policy.content_sha256 && (
-              <div>
-                <dt>Dokumentumazonosító</dt>
-                <dd><code>{policy.content_sha256.slice(0, 16)}</code></dd>
-              </div>
-            )}
-          </dl>
           {policy.content_sha256 && (
-            <p className="policy-closing-note">
-              A dokumentumazonosító a tartalomból számítódik. Ha a tartalom
-              megváltozik, az azonosító is más lesz — ezzel igazolható, hogy a
-              példány a kiadottal azonos.
-            </p>
+            <>
+              <p className="policy-closing-id">
+                <span>Dokumentumazonosító</span>
+                <code>{policy.content_sha256.slice(0, 16)}</code>
+              </p>
+              <p className="policy-closing-note">
+                Az azonosító a dokumentum tartalmából számítódik. Ha a tartalom
+                megváltozik, az azonosító is más lesz — ezzel igazolható, hogy a
+                példány a kiadottal azonos.
+              </p>
+            </>
           )}
           <p>
             A követelménydokumentumot az EnergiaAI Kontroll determinisztikus
