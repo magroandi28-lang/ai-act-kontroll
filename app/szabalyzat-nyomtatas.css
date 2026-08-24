@@ -90,12 +90,18 @@
   a[href^="sms:"],
   a[href^="mailto:"] { color: inherit !important; text-decoration: none !important; }
 
+  /* A böngésző a számokat tartalmazó szövegrészeket saját színnel jelöli.
+     A dokumentumban minden szöveg a szülő színét örökli. */
+  .policy-document *:not(.policy-kind):not(.policy-cover > p) {
+    color: inherit !important;
+  }
+
   /* --- címoldal ---------------------------------------------------------- */
   /* A címlap egy teljes oldal: a tartalom függőlegesen középen áll, nem a
      lap tetején. Enélkül az alsó kétharmad üresen marad. */
   .policy-cover {
     display: block !important;
-    padding: 55mm 0 0 !important;
+    padding: 8mm 0 0 !important;
     border: 0 !important;
     background: none !important;
     break-after: page;

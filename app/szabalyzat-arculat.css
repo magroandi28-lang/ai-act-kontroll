@@ -277,7 +277,9 @@
    hivatkozássá alakítja – ettől lettek barnák a szövegben. */
 .policy-document a[href^="tel:"],
 .policy-document a[href^="sms:"],
-.policy-document a[href^="mailto:"] {
+.policy-document a[href^="mailto:"],
+.policy-cover dd *,
+.policy-chapter p * {
   color: inherit !important;
   text-decoration: none !important;
 }
@@ -321,15 +323,27 @@
   font-weight: 600;
 }
 
-.policy-section p { color: #1a2430; font-size: 16px; line-height: 1.78; }
+/* Sorkizárt szedés elválasztással – ez adja a szabályzatszerű képet.
+   Nyomtatásban ugyanez, hogy a két nézet egyforma legyen. */
+.policy-section p,
+.policy-chapter p,
+.policy-summary p {
+  color: #1a2430;
+  font-size: 16px;
+  line-height: 1.78;
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+}
 
 /* A vezetői összefoglaló ugyanaz a szöveg, mint a többi – csak tagolt. */
+/* Az összefoglaló tagolt, ezért nem kizárt: a rövid sorok szétesnének. */
 .policy-summary p {
   white-space: pre-line;
   font-family: Georgia, serif;
-  font-size: 16px;
-  line-height: 1.78;
-  color: #1a2430;
+  text-align: left;
+  hyphens: none;
 }
 
 .policy-chapter { margin-top: 30px; padding-top: 22px; border-top: 1px solid #e6ebee; }
