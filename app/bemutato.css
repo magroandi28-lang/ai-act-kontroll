@@ -1,15 +1,18 @@
-/* Bemutató film + kétoldalas belépés — másold a végére: app/belepes.css */
+/* Belépési oldal + bemutató film — app/bemutato.css
+   Önálló: nem támaszkodik a belepes.css-re. */
 
-.belepes-keret {
+.bk-keret {
   min-height: 100vh;
   display: flex;
   align-items: safe center;
   justify-content: center;
   padding: 24px 32px 28px;
   background: radial-gradient(circle at 46% 0%, rgba(54, 103, 133, 0.18), transparent 760px), #0b1620;
+  font-family: "Manrope", system-ui, -apple-system, sans-serif;
+  color: #e8eef3;
 }
 
-.belepes-belso {
+.bk-belso {
   width: 100%;
   max-width: 2000px;
   display: flex;
@@ -17,58 +20,69 @@
   gap: 22px;
 }
 
-.belepes-fejlec {
+/* ── fejléc ── */
+
+.bk-fejlec {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
 }
 
-/* rács: 1. sor a film + a vele egysíkú, egyforma magas belépési kártya,
-   alatta a figyelmeztetés és a jogi sor a film szélességében */
-.belepes-sor {
+.bk-logo { display: block; height: 34px; width: auto; }
+
+.bk-fejlec-jobb { display: flex; align-items: center; gap: 18px; }
+
+.bk-kicsi {
+  color: #607d91;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.bk-lang {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid #294355;
+  border-radius: 9px;
+}
+
+.bk-lang button {
+  padding: 5px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #607d91;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.bk-lang button.is-active { background: #192c38; color: #e8eef3; }
+
+/* ── rács: 1. sor a film + a vele egyforma magas belépési kártya,
+      alatta a figyelmeztetés és a jogi sor a film szélességében ── */
+
+.bk-sor {
   display: grid;
   grid-template-columns: minmax(700px, 1fr) 460px;
   gap: 16px 32px;
   align-items: stretch;
 }
 
-.belepes-bal {
-  grid-column: 1;
-  grid-row: 1;
-  display: flex;
-  flex-direction: column;
-}
-
+.bk-bal { grid-column: 1; grid-row: 1; display: flex; flex-direction: column; }
 .jogszabaly-sav { grid-column: 1; grid-row: 2; }
-
-/* a belépési űrlap mérete, hogy a kártya kitöltse a film magasságát */
-.belepes-kartya h1,
-.belepes-kartya h2 { margin: 0 0 32px; font-size: 34px; font-weight: 620; letter-spacing: -0.015em; }
-.belepes-kartya label { font-size: 13.5px; }
-.belepes-kartya input[type="email"],
-.belepes-kartya input[type="password"] { padding: 17px 18px; border-radius: 12px; font-size: 15.5px; }
-.belepes-kartya button { padding: 18px 20px; border-radius: 12px; font-size: 16px; }
 .jogi-lablec { grid-column: 1; grid-row: 3; }
 
-.belepes-kartya {
-  grid-column: 2;
-  grid-row: 1;
-  align-self: stretch;
-  display: flex;
-  flex-direction: column;
-  padding: 38px 34px 34px;
-  border: 1px solid #22394a;
-  border-radius: 18px;
-  background: #101f2b;
-}
-
-/* --- a film doboza --- */
+/* ── a film doboza ── */
 
 .bemutato-doboz {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
   border: 1px solid #22394a;
   border-radius: 16px;
@@ -119,18 +133,8 @@
   cursor: pointer;
 }
 
-.bemutato-sav-belso {
-  width: 100%;
-  height: 3px;
-  border-radius: 2px;
-  background: rgba(255, 255, 255, 0.14);
-}
-
-.bemutato-sav-kitolt {
-  height: 100%;
-  border-radius: 2px;
-  background: #a46c48;
-}
+.bemutato-sav-belso { width: 100%; height: 3px; border-radius: 2px; background: rgba(255, 255, 255, 0.14); }
+.bemutato-sav-kitolt { height: 100%; border-radius: 2px; background: #a46c48; }
 
 .bemutato-ora {
   flex: none;
@@ -140,7 +144,7 @@
   white-space: nowrap;
 }
 
-/* --- jogszabályi figyelmeztetés a film alatt --- */
+/* ── jogszabályi figyelmeztetés és jogi sor ── */
 
 .jogszabaly-sav {
   display: flex;
@@ -160,10 +164,177 @@
   text-wrap: pretty;
 }
 
+.jogszabaly-sav strong { font-weight: 700; }
+
 .jogi-lablec {
-  margin: 12px 0 0;
+  margin: 0;
   color: #6d8798;
   font-size: 12.5px;
   line-height: 1.6;
   text-align: center;
+}
+
+/* ── belépési kártya ── */
+
+.bk-kartya {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  padding: 38px 34px 34px;
+  border: 1px solid #22394a;
+  border-radius: 18px;
+  background: #101f2b;
+}
+
+.bk-kartya h1 {
+  margin: 0 0 32px;
+  color: #f5f9fb;
+  font-size: 34px;
+  font-weight: 620;
+  letter-spacing: -0.015em;
+}
+
+.bk-kartya label {
+  display: block;
+  margin: 0 0 8px;
+  color: #b9cedb;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.bk-mezo {
+  width: 100%;
+  margin-bottom: 20px;
+  padding: 17px 18px;
+  border: 1px solid #294355;
+  border-radius: 12px;
+  outline: 0;
+  background: #0a1721;
+  color: #eef4f7;
+  font: inherit;
+  font-size: 15.5px;
+}
+
+.bk-mezo::placeholder { color: #4e6779; }
+.bk-mezo:focus { border-color: #a46c48; }
+
+.bk-jelszo-sor { position: relative; display: flex; align-items: center; }
+.bk-jelszo-sor .bk-mezo { margin-bottom: 24px; padding-right: 48px; }
+
+.bk-szem {
+  position: absolute;
+  right: 8px;
+  top: 10px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #526a7a;
+  cursor: pointer;
+}
+
+.bk-szem svg { width: 18px; height: 18px; }
+
+.bk-privacy {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 0 0 28px;
+  color: #a9bfcc;
+  font-size: 13.5px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.bk-privacy input {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  margin: 1px 0 0;
+  border-radius: 5px;
+  accent-color: #9a6544;
+}
+
+.bk-privacy a { color: #7fa9c8; }
+
+.bk-fo-gomb {
+  width: 100%;
+  padding: 18px 20px;
+  border: 1px solid #a46c48;
+  border-radius: 12px;
+  background: linear-gradient(115deg, #9a6544 0%, #7a4c33 52%, #5c3a28 100%);
+  color: #f3e7de;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.bk-fo-gomb:disabled, .bk-demo-gomb:disabled { opacity: 0.6; cursor: default; }
+
+.bk-elfelejtett {
+  align-self: center;
+  margin-top: 18px;
+  color: #7fa9c8;
+  font-size: 13.5px;
+  text-decoration: none;
+}
+
+.bk-elvalaszto { height: 1px; margin: 28px 0; background: #1c3040; }
+
+.bk-demo-gomb {
+  width: 100%;
+  padding: 17px 20px;
+  border: 1px solid #304b5d;
+  border-radius: 12px;
+  background: transparent;
+  color: #c2d1da;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.bk-demo-sugo {
+  margin: 14px 0 0;
+  color: #6d8798;
+  font-size: 12.5px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.bk-regisztracio {
+  margin: 22px 0 0;
+  color: #88a1b3;
+  font-size: 14px;
+  text-align: center;
+}
+
+.bk-regisztracio a { color: #7fa9c8; text-decoration: none; }
+.bk-regisztracio a:hover, .bk-elfelejtett:hover, .bk-privacy a:hover { color: #a9c6dc; }
+
+.bk-uzenet {
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  border: 1px solid rgba(201, 90, 58, 0.5);
+  border-radius: 10px;
+  background: rgba(201, 90, 58, 0.1);
+  color: #e6a992;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* ── keskeny ablak: a belépés a film alá kerül ── */
+
+@media (max-width: 1240px) {
+  .bk-sor { grid-template-columns: minmax(0, 1fr); }
+  .bk-bal { grid-row: 1; }
+  .bk-kartya { grid-column: 1; grid-row: 2; }
+  .jogszabaly-sav { grid-row: 3; }
+  .jogi-lablec { grid-row: 4; }
 }
