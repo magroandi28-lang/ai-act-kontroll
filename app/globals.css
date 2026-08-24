@@ -1755,3 +1755,55 @@ input:disabled {
 
 .policy-outdated p { margin: 0 0 8px; font-size: 14px; line-height: 1.65; }
 .policy-outdated p:last-of-type { margin-bottom: 12px; }
+
+/* ---------------------------------------------------------------------------
+   Szabályzat – nyomtatott megjelenés.
+   A dokumentumot ki is nyomtatják, ezért a tördelés ugyanolyan fontos, mint a
+   képernyős olvasás: fejezet ne szakadjon ketté, a jogforrás maradjon a
+   szövegével egy oldalon.
+--------------------------------------------------------------------------- */
+
+/* A fejezet fejléce: a cím a hangsúlyos, a besorolás melléktipográfia. */
+.policy-kind-row {
+  margin: 4px 0 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.policy-chapter h3 { margin-bottom: 2px; }
+
+@media print {
+  @page {
+    size: A4;
+    margin: 18mm 16mm 20mm;
+  }
+
+  /* A böngésző fejléce és lábléce helyett a dokumentum saját adatai. */
+  .policy-document { position: relative; }
+
+  .policy-chapter {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .policy-legal-reference {
+    break-before: avoid;
+    page-break-before: avoid;
+  }
+
+  .policy-chapter h3 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  .policy-toc { break-after: page; }
+  .policy-summary { break-after: page; }
+
+  .policy-kind-row { margin-bottom: 8px; }
+  .policy-kind { font-size: 8pt; }
+
+  /* Az elavulás-jelzés és a művelet nem tartozik a dokumentumhoz. */
+  .policy-outdated,
+  .policy-approval-note { display: none; }
+}
