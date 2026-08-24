@@ -1,0 +1,169 @@
+/* Bemutató film + kétoldalas belépés — másold a végére: app/belepes.css */
+
+.belepes-keret {
+  min-height: 100vh;
+  display: flex;
+  align-items: safe center;
+  justify-content: center;
+  padding: 24px 32px 28px;
+  background: radial-gradient(circle at 46% 0%, rgba(54, 103, 133, 0.18), transparent 760px), #0b1620;
+}
+
+.belepes-belso {
+  width: 100%;
+  max-width: 2000px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.belepes-fejlec {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+/* rács: 1. sor a film + a vele egysíkú, egyforma magas belépési kártya,
+   alatta a figyelmeztetés és a jogi sor a film szélességében */
+.belepes-sor {
+  display: grid;
+  grid-template-columns: minmax(700px, 1fr) 460px;
+  gap: 16px 32px;
+  align-items: stretch;
+}
+
+.belepes-bal {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.jogszabaly-sav { grid-column: 1; grid-row: 2; }
+
+/* a belépési űrlap mérete, hogy a kártya kitöltse a film magasságát */
+.belepes-kartya h1,
+.belepes-kartya h2 { margin: 0 0 32px; font-size: 34px; font-weight: 620; letter-spacing: -0.015em; }
+.belepes-kartya label { font-size: 13.5px; }
+.belepes-kartya input[type="email"],
+.belepes-kartya input[type="password"] { padding: 17px 18px; border-radius: 12px; font-size: 15.5px; }
+.belepes-kartya button { padding: 18px 20px; border-radius: 12px; font-size: 16px; }
+.jogi-lablec { grid-column: 1; grid-row: 3; }
+
+.belepes-kartya {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  padding: 38px 34px 34px;
+  border: 1px solid #22394a;
+  border-radius: 18px;
+  background: #101f2b;
+}
+
+/* --- a film doboza --- */
+
+.bemutato-doboz {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border: 1px solid #22394a;
+  border-radius: 16px;
+  background: #0b1620;
+}
+
+/* méretezését a BemutatoFilm.js számolja (inline style) */
+.bemutato-film { display: block; }
+
+.bemutato-vezerlo {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 18px 14px;
+  background: linear-gradient(0deg, rgba(7, 15, 22, 0.92) 0%, rgba(7, 15, 22, 0.45) 60%, transparent 100%);
+}
+
+.bemutato-gomb {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  flex: none;
+  padding: 10px 17px;
+  border: 1px solid #a46c48;
+  border-radius: 9px;
+  background: rgba(11, 22, 32, 0.86);
+  color: #f3e7de;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.bemutato-gomb:hover { background: rgba(154, 101, 68, 0.92); }
+.bemutato-ikon { font-size: 11px; }
+
+.bemutato-sav {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  height: 18px;
+  cursor: pointer;
+}
+
+.bemutato-sav-belso {
+  width: 100%;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.bemutato-sav-kitolt {
+  height: 100%;
+  border-radius: 2px;
+  background: #a46c48;
+}
+
+.bemutato-ora {
+  flex: none;
+  color: #8fa6b7;
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* --- jogszabályi figyelmeztetés a film alatt --- */
+
+.jogszabaly-sav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  width: 100%;
+  text-align: center;
+  padding: 20px 26px;
+  border: 1px solid rgba(201, 155, 58, 0.42);
+  border-left: 3px solid #c99b3a;
+  border-radius: 12px;
+  background: rgba(201, 155, 58, 0.08);
+  color: #e0bd7c;
+  font-size: 16px;
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+.jogi-lablec {
+  margin: 12px 0 0;
+  color: #6d8798;
+  font-size: 12.5px;
+  line-height: 1.6;
+  text-align: center;
+}
