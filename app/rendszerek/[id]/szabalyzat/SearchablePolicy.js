@@ -102,7 +102,10 @@ function normalise(value) {
 }
 
 function legalReferenceLabel(reference) {
-  const sourceTitle = reference.source_title || "Hivatalos jogforrás";
+  // A hivatkozásban a rövid név szerepel: a teljes cím egy bekezdésnyi lenne,
+  // és egy szabályzatban tízszer is előfordul. A teljes cím a forrásjegyzékben.
+  const sourceTitle =
+    reference.source_short || reference.source_title || "Hivatalos jogforrás";
   if (!reference.article_number) return `${sourceTitle} – ${reference.heading || "kapcsolódó rendelkezés"}`;
   // Az uniós jogi aktusoknak cikke van, a magyar jogszabályoknak szakasza.
   // A magyar címekben "évi ... törvény" vagy "Korm. rendelet" szerepel, az
