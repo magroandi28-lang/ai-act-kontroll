@@ -112,24 +112,27 @@ export default function BemutatoFilm({ lang = 'hu' }) {
   const mm = String(Math.floor(t)).padStart(2, '0');
 
   return (
-    <div className="bemutato-doboz" ref={boxRef}>
-      <iframe
-        ref={filmRef}
-        src={'/bemutato.html?lang=' + lang}
-        title="Bemutató film"
-        className="bemutato-film"
-        style={{
-          position: 'absolute',
-          left: 0,
-          top: fit.top + 'px',
-          width: '1600px',
-          height: '1000px',
-          border: 0,
-          transform: 'scale(' + fit.scale + ')',
-          transformOrigin: 'top left',
-          pointerEvents: 'none',
-        }}
-      />
+    <div className="bemutato-keret">
+      <div className="bemutato-doboz" ref={boxRef}>
+        <iframe
+          ref={filmRef}
+          src={'/bemutato.html?lang=' + lang}
+          title="Bemutató film"
+          className="bemutato-film"
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: fit.top + 'px',
+            width: '1600px',
+            height: '1000px',
+            border: 0,
+            transform: 'scale(' + fit.scale + ')',
+            transformOrigin: 'top left',
+            pointerEvents: 'none',
+          }}
+        />
+      </div>
+
       <div className="bemutato-vezerlo">
         <button type="button" onClick={playing ? pause : play} className="bemutato-gomb">
           <span className="bemutato-ikon">{playing ? '❚❚' : '▶'}</span>

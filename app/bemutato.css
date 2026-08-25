@@ -93,15 +93,24 @@
 .jogszabaly-sav { grid-column: 1; grid-row: 2; }
 .jogi-lablec { grid-column: 1; grid-row: 3; }
 
-/* ── a film doboza ── */
+/* ── a film doboza ──
+   A vezérlősáv nem a filmre rétegződik, hanem alatta, saját csíkban ül:
+   a film alsó feliratát korábban eltakarta a sötét színátmenet. */
+
+.bemutato-keret {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #22394a;
+  border-radius: 16px;
+  background: #0b1620;
+}
 
 .bemutato-doboz {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
   overflow: hidden;
-  border: 1px solid #22394a;
-  border-radius: 16px;
   background: #0b1620;
 }
 
@@ -109,15 +118,12 @@
 .bemutato-film { display: block; }
 
 .bemutato-vezerlo {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 16px 18px 14px;
-  background: linear-gradient(0deg, rgba(7, 15, 22, 0.92) 0%, rgba(7, 15, 22, 0.45) 60%, transparent 100%);
+  padding: 12px 16px;
+  border-top: 1px solid #1c3040;
+  background: #0e1c26;
 }
 
 .bemutato-gomb {
@@ -278,6 +284,37 @@
 
 .bk-privacy a { color: #7fa9c8; }
 
+/* Ha valaki a nyilatkozat kipipálása nélkül indítja a belépést vagy a demót,
+   itt kell látnia, miért nem történik semmi — nem a kártya alján. */
+.bk-privacy.is-hiba {
+  margin-bottom: 10px;
+  color: #e6a992;
+  animation: bk-rezzen 0.32s ease-in-out 2;
+}
+
+.bk-privacy.is-hiba input {
+  outline: 2px solid #c95a3a;
+  outline-offset: 2px;
+}
+
+.bk-privacy-hiba {
+  margin: 0 0 24px;
+  padding-left: 32px;
+  color: #e6a992;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+@keyframes bk-rezzen {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bk-privacy.is-hiba { animation: none; }
+}
+
 .bk-fo-gomb {
   width: 100%;
   padding: 18px 20px;
@@ -345,12 +382,17 @@
   line-height: 1.5;
 }
 
-/* ── keskeny ablak: a belépés a film alá kerül ── */
+/* ── keskeny ablak: a belépés a film alá kerül ──
+   A töréspont 1260 px: a kétoszlopos rács 700 + 460 + 32 rés + 64 belső margó,
+   azaz 1256 px alatt már nem fér el. 1240-nél a rács túlcsordult. */
 
-@media (max-width: 1240px) {
+@media (max-width: 1260px) {
   .bk-sor { grid-template-columns: minmax(0, 1fr); }
   .bk-bal { grid-row: 1; }
-  .bk-kartya { grid-column: 1; grid-row: 2; }
-  .jogszabaly-sav { grid-row: 3; }
-  .jogi-lablec { grid-row: 4; }
+
+  /* A figyelmeztetés a filmhez tartozik, ezért keskeny ablakban is közvetlenül
+     alatta marad — nem csúszik a belépési kártya alá, a lap aljára. */
+  .jogszabaly-sav { grid-column: 1; grid-row: 2; }
+  .bk-kartya { grid-column: 1; grid-row: 3; }
+  .jogi-lablec { grid-column: 1; grid-row: 4; }
 }
