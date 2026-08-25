@@ -27,10 +27,12 @@ export default async function JogtarPage() {
     .eq("active", true)
     .order("sort_order");
 
+  // A kezdőállapotnak egyeznie kell a JogtarView legördülőjének alapértékével,
+  // különben a szerveren megjelenített lista mást mutat, mint amit a szűrő ír.
   const { data: lista, error } = await supabase.rpc("aic_jogtar_szabalyok", {
     p_reteg: "mind",
     p_szerepkor: null,
-    p_allapot: "jovahagyasra_var",
+    p_allapot: "jovahagyott",
     p_kereses: null,
   });
 

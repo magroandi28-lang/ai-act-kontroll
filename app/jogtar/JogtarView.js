@@ -86,7 +86,10 @@ export default function JogtarView({ kezdoLista, iparagak, dontheto }) {
   const [lista, setLista] = useState(kezdoLista);
   const [reteg, setReteg] = useState("mind");
   const [szerepkor, setSzerepkor] = useState("");
-  const [allapot, setAllapot] = useState("jovahagyasra_var");
+  // Belépéskor a jóváhagyott jogszabályok látszanak, mert azokból van tartalom:
+  // korábban a „Jóváhagyásra vár" volt az alapállapot, és üres képernyő fogadta
+  // azt, aki nem állította át. A munkalista egy kattintás az Állapot legördülőben.
+  const [allapot, setAllapot] = useState("jovahagyott");
   const [kereses, setKereses] = useState("");
   const [keresesMezo, setKeresesMezo] = useState("");
 
