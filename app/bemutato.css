@@ -2,11 +2,12 @@
    Önálló: nem támaszkodik a belepes.css-re. */
 
 .bk-keret {
+  --sk: min(1vw, 1.66vh);
   min-height: 100vh;
   display: flex;
   align-items: safe center;
   justify-content: center;
-  padding: 24px 32px 28px;
+  padding: clamp(12px, calc(var(--sk) * 1.250), 24px) clamp(14px, calc(var(--sk) * 1.667), 32px) clamp(14px, calc(var(--sk) * 1.458), 28px);
   background: radial-gradient(circle at 46% 0%, rgba(54, 103, 133, 0.18), transparent 760px), #0b1620;
   font-family: "Manrope", system-ui, -apple-system, sans-serif;
   color: #e8eef3;
@@ -14,10 +15,11 @@
 
 .bk-belso {
   width: 100%;
-  max-width: 2000px;
+  max-width: min(2000px, calc(var(--sk) * 96));
+  margin-inline: auto;
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: clamp(12px, calc(var(--sk) * 1.146), 22px);
 }
 
 /* ── fejléc ── */
@@ -29,32 +31,23 @@
   gap: 20px;
 }
 
-.bk-fejlec-bal {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  min-width: 0;
-}
+.bk-fejlec-bal { display: flex; align-items: center; gap: 16px; min-width: 0; }
 
-.bk-logo { display: block; height: 34px; width: auto; flex: none; }
+.bk-logo { display: block; height: clamp(24px, calc(var(--sk) * 1.771), 34px); width: auto; flex: none; }
 
 .bk-fejlec-jobb { display: flex; align-items: center; gap: 18px; }
 
-/* A felirat a logó mellett, tőle egy vékony vonallal elválasztva:
-   ott olvassák, ahol a nevet is. */
 .bk-kicsi {
   padding-left: 16px;
   border-left: 1px solid #294355;
   color: #9fb6c5;
-  font-size: 13.5px;
+  font-size: clamp(11.5px, calc(var(--sk) * 0.703), 13.5px);
   font-weight: 500;
   letter-spacing: 0.01em;
   white-space: nowrap;
 }
 
-@media (max-width: 560px) {
-  .bk-kicsi { display: none; }
-}
+@media (max-width: 560px) { .bk-kicsi { display: none; } }
 
 .bk-lang {
   display: flex;
@@ -84,19 +77,16 @@
 
 .bk-sor {
   display: grid;
-  grid-template-columns: minmax(700px, 1fr) 460px;
-  grid-template-rows: auto auto 1fr;
-  gap: 16px 32px;
+  grid-template-columns: minmax(0, 1fr) clamp(300px, calc(var(--sk) * 23.96), 460px);
+  gap: clamp(10px, calc(var(--sk) * 0.833), 16px) clamp(16px, calc(var(--sk) * 1.667), 32px);
   align-items: stretch;
 }
 
 .bk-bal { grid-column: 1; grid-row: 1; display: flex; flex-direction: column; }
-.jogszabaly-sav { grid-column: 1; grid-row: 2; align-self: start; }
-.jogi-lablec { grid-column: 1; grid-row: 3; align-self: start; }
+.jogszabaly-sav { grid-column: 1; grid-row: 2; }
+.jogi-lablec { grid-column: 1; grid-row: 3; }
 
-/* ── a film doboza ──
-   A vezérlősáv nem a filmre rétegződik, hanem alatta, saját csíkban ül:
-   a film alsó feliratát korábban eltakarta a sötét színátmenet. */
+/* ── a film doboza ── */
 
 .bemutato-keret {
   display: flex;
@@ -122,7 +112,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 12px 16px;
+  padding: clamp(8px, calc(var(--sk) * 0.625), 12px) clamp(10px, calc(var(--sk) * 0.833), 16px);
   border-top: 1px solid #1c3040;
   background: #0e1c26;
 }
@@ -176,13 +166,13 @@
   gap: 14px;
   width: 100%;
   text-align: center;
-  padding: 20px 26px;
+  padding: clamp(11px, calc(var(--sk) * 1.042), 20px) clamp(14px, calc(var(--sk) * 1.354), 26px);
   border: 1px solid rgba(201, 155, 58, 0.42);
   border-left: 3px solid #c99b3a;
   border-radius: 12px;
   background: rgba(201, 155, 58, 0.08);
   color: #e0bd7c;
-  font-size: 16px;
+  font-size: clamp(13px, calc(var(--sk) * 0.833), 16px);
   line-height: 1.55;
   text-wrap: pretty;
 }
@@ -192,7 +182,7 @@
 .jogi-lablec {
   margin: 0;
   color: #6d8798;
-  font-size: 12.5px;
+  font-size: clamp(11px, calc(var(--sk) * 0.651), 12.5px);
   line-height: 1.6;
   text-align: center;
 }
@@ -201,50 +191,50 @@
 
 .bk-kartya {
   grid-column: 2;
-  grid-row: 1 / 4;
+  grid-row: 1;
   align-self: stretch;
   display: flex;
   flex-direction: column;
-  padding: 38px 34px 34px;
+  padding: clamp(22px, calc(var(--sk) * 1.979), 38px) clamp(18px, calc(var(--sk) * 1.771), 34px) clamp(20px, calc(var(--sk) * 1.771), 34px);
   border: 1px solid #22394a;
   border-radius: 18px;
   background: #101f2b;
 }
 
 .bk-kartya h1 {
-  margin: 0 0 32px;
+  margin: 0 0 clamp(18px, calc(var(--sk) * 1.667), 32px);
   color: #f5f9fb;
-  font-size: 34px;
+  font-size: clamp(23px, calc(var(--sk) * 1.771), 34px);
   font-weight: 620;
   letter-spacing: -0.015em;
 }
 
 .bk-kartya label {
   display: block;
-  margin: 0 0 8px;
+  margin: 0 0 clamp(5px, calc(var(--sk) * 0.417), 8px);
   color: #b9cedb;
-  font-size: 13.5px;
+  font-size: clamp(12px, calc(var(--sk) * 0.703), 13.5px);
   font-weight: 600;
 }
 
 .bk-mezo {
   width: 100%;
-  margin-bottom: 20px;
-  padding: 17px 18px;
+  margin-bottom: clamp(11px, calc(var(--sk) * 1.042), 20px);
+  padding: clamp(10px, calc(var(--sk) * 0.885), 17px) clamp(12px, calc(var(--sk) * 0.938), 18px);
   border: 1px solid #294355;
   border-radius: 12px;
   outline: 0;
   background: #0a1721;
   color: #eef4f7;
   font: inherit;
-  font-size: 15.5px;
+  font-size: clamp(13.5px, calc(var(--sk) * 0.807), 15.5px);
 }
 
 .bk-mezo::placeholder { color: #4e6779; }
 .bk-mezo:focus { border-color: #a46c48; }
 
 .bk-jelszo-sor { position: relative; display: flex; align-items: center; }
-.bk-jelszo-sor .bk-mezo { margin-bottom: 24px; padding-right: 48px; }
+.bk-jelszo-sor .bk-mezo { margin-bottom: clamp(13px, calc(var(--sk) * 1.250), 24px); padding-right: 48px; }
 
 .bk-szem {
   position: absolute;
@@ -267,9 +257,9 @@
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  margin: 0 0 28px;
+  margin: 0 0 clamp(15px, calc(var(--sk) * 1.458), 28px);
   color: #a9bfcc;
-  font-size: 13.5px;
+  font-size: clamp(12px, calc(var(--sk) * 0.703), 13.5px);
   font-weight: 400;
   line-height: 1.5;
 }
@@ -285,18 +275,14 @@
 
 .bk-privacy a { color: #7fa9c8; }
 
-/* Ha valaki a nyilatkozat kipipálása nélkül indítja a belépést vagy a demót,
-   itt kell látnia, miért nem történik semmi — nem a kártya alján. */
+/* Nyilatkozat nélküli belépés/demó: a figyelmeztetés a négyzet mellett. */
 .bk-kartya .bk-privacy.is-hiba {
   margin-bottom: 10px;
   color: #e6a992;
   animation: bk-rezzen 0.32s ease-in-out 2;
 }
 
-.bk-kartya .bk-privacy.is-hiba input {
-  outline: 2px solid #c95a3a;
-  outline-offset: 2px;
-}
+.bk-kartya .bk-privacy.is-hiba input { outline: 2px solid #c95a3a; outline-offset: 2px; }
 
 .bk-privacy-hiba {
   margin: 0 0 24px;
@@ -318,13 +304,13 @@
 
 .bk-fo-gomb {
   width: 100%;
-  padding: 18px 20px;
+  padding: clamp(11px, calc(var(--sk) * 0.938), 18px) 20px;
   border: 1px solid #a46c48;
   border-radius: 12px;
   background: linear-gradient(115deg, #9a6544 0%, #7a4c33 52%, #5c3a28 100%);
   color: #f3e7de;
   font: inherit;
-  font-size: 16px;
+  font-size: clamp(14px, calc(var(--sk) * 0.833), 16px);
   font-weight: 650;
   cursor: pointer;
 }
@@ -333,39 +319,39 @@
 
 .bk-elfelejtett {
   align-self: center;
-  margin-top: 18px;
+  margin-top: clamp(10px, calc(var(--sk) * 0.938), 18px);
   color: #7fa9c8;
-  font-size: 13.5px;
+  font-size: clamp(12px, calc(var(--sk) * 0.703), 13.5px);
   text-decoration: none;
 }
 
-.bk-elvalaszto { height: 1px; margin: 28px 0; background: #1c3040; }
+.bk-elvalaszto { height: 1px; margin: clamp(14px, calc(var(--sk) * 1.458), 28px) 0; background: #1c3040; }
 
 .bk-demo-gomb {
   width: 100%;
-  padding: 17px 20px;
+  padding: clamp(10px, calc(var(--sk) * 0.885), 17px) 20px;
   border: 1px solid #304b5d;
   border-radius: 12px;
   background: transparent;
   color: #c2d1da;
   font: inherit;
-  font-size: 15px;
+  font-size: clamp(13px, calc(var(--sk) * 0.781), 15px);
   font-weight: 600;
   cursor: pointer;
 }
 
 .bk-demo-sugo {
-  margin: 14px 0 0;
+  margin: clamp(8px, calc(var(--sk) * 0.729), 14px) 0 0;
   color: #6d8798;
-  font-size: 12.5px;
+  font-size: clamp(11.5px, calc(var(--sk) * 0.651), 12.5px);
   text-align: center;
   line-height: 1.5;
 }
 
 .bk-regisztracio {
-  margin: 22px 0 0;
+  margin: clamp(12px, calc(var(--sk) * 1.146), 22px) 0 0;
   color: #88a1b3;
-  font-size: 14px;
+  font-size: clamp(12.5px, calc(var(--sk) * 0.729), 14px);
   text-align: center;
 }
 
@@ -383,128 +369,46 @@
   line-height: 1.5;
 }
 
-/* ── keskeny ablak: a belépés a film alá kerül ──
-   A töréspont 1260 px: a kétoszlopos rács 700 + 460 + 32 rés + 64 belső margó,
-   azaz 1256 px alatt már nem fér el. 1240-nél a rács túlcsordult. */
+/* ── keskeny ablak: a belépés a film alá kerül ── */
 
-@media (max-width: 1260px) {
-  .bk-sor { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto; }
+@media (max-width: 1256px) {
+  .bk-sor { grid-template-columns: minmax(0, 1fr); }
   .bk-bal { grid-row: 1; }
-
-  /* A figyelmeztetés a filmhez tartozik, ezért keskeny ablakban is közvetlenül
-     alatta marad — nem csúszik a belépési kártya alá, a lap aljára. */
   .jogszabaly-sav { grid-column: 1; grid-row: 2; }
   .bk-kartya { grid-column: 1; grid-row: 3; }
   .jogi-lablec { grid-column: 1; grid-row: 4; }
 }
 
-/* ── telefon: a film nem inline megy ──
-   1600x900-as vászon 390 px-en 0,24-es skálát jelentene: a 28 px-es felirat
-   6-7 px-re esne. Ezért kis kijelzőn indítókártya áll a film helyén, a film
-   pedig teljes képernyőn, álló tájolásban elforgatva játszódik le. */
+/* ── telefon (max 700 px) — desktop méreten egyik szabály sem fut ── */
 
 .bemutato-inditokartya {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  display: flex; flex-direction: column; align-items: flex-start;
   padding: 26px 22px 24px;
-  border: 1px solid #22394a;
-  border-radius: 16px;
+  border: 1px solid #22394a; border-radius: 16px;
   background: linear-gradient(160deg, rgba(54, 103, 133, 0.16), transparent 62%), #0e1c26;
 }
-
-.bemutato-inditokartya-cim {
-  margin: 0 0 8px;
-  color: #f5f9fb;
-  font-size: 19px;
-  font-weight: 650;
-  letter-spacing: -0.01em;
-}
-
-.bemutato-inditokartya-szoveg {
-  margin: 0 0 20px;
-  color: #a9bfcc;
-  font-size: 14.5px;
-  line-height: 1.55;
-  text-wrap: pretty;
-}
-
+.bemutato-inditokartya-cim { margin: 0 0 8px; color: #f5f9fb; font-size: 19px; font-weight: 650; }
+.bemutato-inditokartya-szoveg { margin: 0 0 20px; color: #a9bfcc; font-size: 14.5px; line-height: 1.55; }
 .bemutato-inditokartya-gomb {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  width: 100%;
-  min-height: 50px;
-  padding: 0 20px;
-  border: 1px solid #a46c48;
-  border-radius: 11px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; min-height: 50px; padding: 0 20px;
+  border: 1px solid #a46c48; border-radius: 11px;
   background: linear-gradient(115deg, #9a6544 0%, #7a4c33 52%, #5c3a28 100%);
-  color: #f3e7de;
-  font: inherit;
-  font-size: 15.5px;
-  font-weight: 650;
-  cursor: pointer;
+  color: #f3e7de; font: inherit; font-size: 15.5px; font-weight: 650; cursor: pointer;
 }
+.bemutato-inditokartya-sugo { margin: 12px 0 0; width: 100%; color: #6d8798; font-size: 12.5px; text-align: center; }
 
-.bemutato-inditokartya-sugo {
-  margin: 12px 0 0;
-  width: 100%;
-  color: #6d8798;
-  font-size: 12.5px;
-  text-align: center;
-}
-
-/* ── teljes képernyős film ── */
-
-.bemutato-teljes {
-  position: fixed;
-  inset: 0;
-  z-index: 90;
-  overflow: hidden;
-  background: #060e15;
-}
-
-/* A forgatás a bal felső sarok körül történik, ezért utána vissza kell tolni
-   a képernyőre: translateX a keret magasságával (= a kijelző szélessége). */
-.bemutato-forgatott {
-  position: absolute;
-  left: 0;
-  top: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transform-origin: 0 0;
-}
-
-.bemutato-forgatott .bemutato-keret {
-  border-radius: 12px;
-}
-
-/* Elforgatott nézetben szűkebb a vezérlősáv: minden képpont, amit nem visz el,
-   a filmre megy. */
+.bemutato-teljes { position: fixed; inset: 0; z-index: 90; overflow: hidden; background: #060e15; }
+.bemutato-forgatott { position: absolute; left: 0; top: 0; display: flex; align-items: center; justify-content: center; transform-origin: 0 0; }
+.bemutato-forgatott .bemutato-keret { border-radius: 12px; }
 .bemutato-forgatott .bemutato-vezerlo { padding: 10px 14px; gap: 12px; }
 .bemutato-forgatott .bemutato-gomb { padding: 8px 14px; }
-
 .bemutato-bezar {
-  position: absolute;
-  right: 10px;
-  top: 10px;
-  z-index: 2;
-  display: grid;
-  place-items: center;
-  width: 42px;
-  height: 42px;
-  border: 1px solid #294355;
-  border-radius: 11px;
-  background: rgba(11, 22, 32, 0.9);
-  color: #c2d1da;
-  font-size: 17px;
-  line-height: 1;
-  cursor: pointer;
+  position: absolute; right: 10px; top: 10px; z-index: 2;
+  display: grid; place-items: center; width: 42px; height: 42px;
+  border: 1px solid #294355; border-radius: 11px;
+  background: rgba(11, 22, 32, 0.9); color: #c2d1da; font-size: 17px; line-height: 1; cursor: pointer;
 }
-
-/* ── telefon: a belépési oldal szűkebb margókkal ── */
 
 @media (max-width: 700px) {
   .bk-keret { padding: 16px 14px 20px; }
@@ -512,7 +416,7 @@
   .bk-sor { gap: 14px; }
   .bk-kartya { padding: 26px 20px 24px; border-radius: 14px; }
   .bk-kartya h1 { margin-bottom: 24px; font-size: 27px; }
-  .jogszabaly-sav { padding: 14px 16px; font-size: 14.5px; text-align: left; }
+  .jogszabaly-sav { padding: 14px 16px; text-align: left; }
   .jogi-lablec { font-size: 12px; }
   .bk-fejlec { gap: 12px; }
   .bk-logo { height: 28px; }
