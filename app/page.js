@@ -94,8 +94,39 @@ export default function LoginPage() {
   const [message, setMessage] = useState("");
   const [loadingMode, setLoadingMode] = useState(null);
   const demoGombRef = useRef(null);
+  const belsoRef = useRef(null);
   const loading = Boolean(loadingMode);
   const t = COPY[lang];
+
+  // az egész belépési felület arányosan a nézetablak magasságához igazítva,
+  // hogy 100%-os böngészőnagyításnál se kelljen görgetni
+  useEffect(() => {
+    const igazit = () => {
+      const el = belsoRef.current;
+      if (!el) return;
+      const host = el.parentElement;
+      if (!host) return;
+      const cs = getComputedStyle(host);
+      const pad = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+      if (window.innerWidth < 760) { el.style.zoom = ""; return; }
+      const avail = window.innerHeight - pad - 3;
+      el.style.zoom = "1";
+      let z = Math.min(1, avail / Math.max(1, el.scrollHeight));
+      for (let i = 0; i < 3; i += 1) {
+        z = Math.max(0.66, Math.floor(z * 1000) / 1000);
+        el.style.zoom = z === 1 ? "" : String(z);
+        const shown = el.getBoundingClientRect().height;
+        if (shown <= avail || z <= 0.66) break;
+        z = z * (avail / shown);
+      }
+    };
+    igazit();
+    const idozito = setTimeout(igazit, 400);
+    const ro = typeof ResizeObserver !== "undefined" && belsoRef.current ? new ResizeObserver(() => { clearTimeout(ro._t); ro._t = setTimeout(igazit, 60); }) : null;
+    if (ro) ro.observe(belsoRef.current);
+    window.addEventListener("resize", igazit);
+    return () => { clearTimeout(idozito); if (ro) { clearTimeout(ro._t); ro.disconnect(); } window.removeEventListener("resize", igazit); };
+  }, []);
 
   useEffect(() => {
     const mentett = localStorage.getItem("aiact_lang");
@@ -190,7 +221,7 @@ export default function LoginPage() {
 
   return (
     <main className="bk-keret">
-      <div className="bk-belso">
+      <div className="bk-belso" ref={belsoRef}>
         <div className="bk-fejlec">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img className="bk-logo" src="/logo-ai-act-kontroll.png" alt="AI Act Kontroll" />
