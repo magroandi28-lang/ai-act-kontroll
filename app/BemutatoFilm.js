@@ -149,6 +149,8 @@ export default function BemutatoFilm({ lang = 'hu' }) {
           width: '1600px',
           height: '900px',
           border: 0,
+          background: '#0b1620',
+          colorScheme: 'dark',
           transform: 'translate(' + fit.left + 'px, ' + fit.top + 'px) scale(' + fit.scale + ')',
           transformOrigin: 'top left',
           opacity: kesz ? 1 : 0,
