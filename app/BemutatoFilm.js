@@ -21,7 +21,7 @@ export default function BemutatoFilm({ lang = 'hu' }) {
   const [fit, setFit] = useState({ scale: 0.6, top: 0, left: 0 });
   // a keret csak akkor jelenik meg, ha a film valódi mérete már megvan —
   // így nem ugrik egyet a kép a betöltés utáni átméretezéskor
-  const [kesz, setKesz] = useState(true);
+  const [kesz, setKesz] = useState(false);
 
   const stage = () => {
     const f = filmRef.current;
@@ -82,7 +82,8 @@ export default function BemutatoFilm({ lang = 'hu' }) {
         const st = fd && (fd.querySelector("[data-om-exportable-video-with-duration-secs]") || fd.body.firstElementChild);
         if (st) {
           const r = st.getBoundingClientRect();
-          if (r.width > 200 && r.height > 100) { cw = r.width; ch = r.height; cx = r.left; cy = r.top; }
+          // csak a film valódi mérete alapján méretezünk, hogy ne legyen utólagos ugrás
+          if (r.width > 200 && r.height > 100) { cw = r.width; ch = r.height; cx = r.left; cy = r.top; setKesz(true); }
         }
       } catch (e) {}
       const scale = Math.min(w / cw, h / ch) * 1.07;
@@ -91,11 +92,13 @@ export default function BemutatoFilm({ lang = 'hu' }) {
       setFit((prev) => (Math.abs(prev.scale - scale) > 0.002 || prev.top !== top || prev.left !== left ? { scale, top, left } : prev));
     };
     measure();
-    [120, 350, 800, 1600, 2600].forEach(function (ms) { setTimeout(measure, ms); });
+    [60, 120, 250, 400, 650, 900, 1400, 2200, 3000].forEach(function (ms) { setTimeout(measure, ms); });
+    // biztonsági háló: ha bármiért nem sikerül megmérni, 2 s után akkor is megjelenik
+    const halo = setTimeout(function () { setKesz(true); }, 2000);
     const ro = typeof ResizeObserver !== 'undefined' && boxRef.current ? new ResizeObserver(measure) : null;
     if (ro) ro.observe(boxRef.current);
     window.addEventListener('resize', measure);
-    return () => { if (ro) ro.disconnect(); window.removeEventListener('resize', measure); };
+    return () => { clearTimeout(halo); if (ro) ro.disconnect(); window.removeEventListener('resize', measure); };
   }, []);
 
   useEffect(() => {
