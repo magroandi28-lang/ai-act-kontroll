@@ -200,7 +200,7 @@
 
 .bk-kartya {
   grid-column: 2;
-  grid-row: 1;
+  grid-row: 1 / 4;
   align-self: stretch;
   display: flex;
   flex-direction: column;
@@ -262,7 +262,7 @@
 
 .bk-szem svg { width: 18px; height: 18px; }
 
-.bk-privacy {
+.bk-kartya .bk-privacy {
   display: flex;
   align-items: flex-start;
   gap: 12px;
@@ -273,7 +273,7 @@
   line-height: 1.5;
 }
 
-.bk-privacy input {
+.bk-kartya .bk-privacy input {
   width: 20px;
   height: 20px;
   flex: none;
@@ -286,13 +286,13 @@
 
 /* Ha valaki a nyilatkozat kipipálása nélkül indítja a belépést vagy a demót,
    itt kell látnia, miért nem történik semmi — nem a kártya alján. */
-.bk-privacy.is-hiba {
+.bk-kartya .bk-privacy.is-hiba {
   margin-bottom: 10px;
   color: #e6a992;
   animation: bk-rezzen 0.32s ease-in-out 2;
 }
 
-.bk-privacy.is-hiba input {
+.bk-kartya .bk-privacy.is-hiba input {
   outline: 2px solid #c95a3a;
   outline-offset: 2px;
 }
@@ -312,7 +312,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .bk-privacy.is-hiba { animation: none; }
+  .bk-kartya .bk-privacy.is-hiba { animation: none; }
 }
 
 .bk-fo-gomb {
