@@ -29,15 +29,31 @@
   gap: 20px;
 }
 
-.bk-logo { display: block; height: 34px; width: auto; }
+.bk-fejlec-bal {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.bk-logo { display: block; height: 34px; width: auto; flex: none; }
 
 .bk-fejlec-jobb { display: flex; align-items: center; gap: 18px; }
 
+/* A felirat a logó mellett, tőle egy vékony vonallal elválasztva:
+   ott olvassák, ahol a nevet is. */
 .bk-kicsi {
-  color: #607d91;
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  padding-left: 16px;
+  border-left: 1px solid #294355;
+  color: #9fb6c5;
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+@media (max-width: 560px) {
+  .bk-kicsi { display: none; }
 }
 
 .bk-lang {

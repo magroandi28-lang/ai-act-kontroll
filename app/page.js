@@ -192,10 +192,12 @@ export default function LoginPage() {
     <main className="bk-keret">
       <div className="bk-belso">
         <div className="bk-fejlec">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className="bk-logo" src="/logo-ai-act-kontroll.png" alt="AI Act Kontroll" />
-          <div className="bk-fejlec-jobb">
+          <div className="bk-fejlec-bal">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className="bk-logo" src="/logo-ai-act-kontroll.png" alt="AI Act Kontroll" />
             <span className="bk-kicsi">{t.kicsi}</span>
+          </div>
+          <div className="bk-fejlec-jobb">
             <LangSwitch lang={lang} onChange={valtNyelv} />
           </div>
         </div>
