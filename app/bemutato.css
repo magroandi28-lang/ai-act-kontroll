@@ -85,13 +85,14 @@
 .bk-sor {
   display: grid;
   grid-template-columns: minmax(700px, 1fr) 460px;
+  grid-template-rows: auto auto 1fr;
   gap: 16px 32px;
   align-items: stretch;
 }
 
 .bk-bal { grid-column: 1; grid-row: 1; display: flex; flex-direction: column; }
-.jogszabaly-sav { grid-column: 1; grid-row: 2; }
-.jogi-lablec { grid-column: 1; grid-row: 3; }
+.jogszabaly-sav { grid-column: 1; grid-row: 2; align-self: start; }
+.jogi-lablec { grid-column: 1; grid-row: 3; align-self: start; }
 
 /* ── a film doboza ──
    A vezérlősáv nem a filmre rétegződik, hanem alatta, saját csíkban ül:
@@ -387,7 +388,7 @@
    azaz 1256 px alatt már nem fér el. 1240-nél a rács túlcsordult. */
 
 @media (max-width: 1260px) {
-  .bk-sor { grid-template-columns: minmax(0, 1fr); }
+  .bk-sor { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto; }
   .bk-bal { grid-row: 1; }
 
   /* A figyelmeztetés a filmhez tartozik, ezért keskeny ablakban is közvetlenül
