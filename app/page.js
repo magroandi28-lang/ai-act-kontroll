@@ -93,11 +93,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
   const [loadingMode, setLoadingMode] = useState(null);
-  // A nyilatkozat hiánya nem a kártya aljára kerül, hanem a jelölőnégyzet mellé:
-  // onnan derül ki azonnal, miért nem indul el a belépés vagy a demó.
-  const [privacyHiba, setPrivacyHiba] = useState("");
   const demoGombRef = useRef(null);
-  const privacyRef = useRef(null);
   const loading = Boolean(loadingMode);
   const t = COPY[lang];
 
@@ -120,19 +116,13 @@ export default function LoginPage() {
     }
   }
 
-  function jelezdANyilatkozatot(szoveg) {
-    setPrivacyHiba(szoveg);
-    // a fókusz a négyzetre viszi a képernyőt is, és a felolvasó is kimondja
-    privacyRef.current?.focus();
-  }
-
   async function handleSubmit(event) {
     event.preventDefault();
     setMessage("");
     const data = new FormData(event.currentTarget);
 
     if (!data.get("privacy")) {
-      jelezdANyilatkozatot(t.errPrivacy);
+      setMessage(t.errPrivacy);
       return;
     }
 
@@ -158,7 +148,7 @@ export default function LoginPage() {
     setMessage("");
 
     if (!form?.elements?.privacy?.checked) {
-      jelezdANyilatkozatot(t.errPrivacyDemo);
+      setMessage(t.errPrivacyDemo);
       return;
     }
 
@@ -202,12 +192,10 @@ export default function LoginPage() {
     <main className="bk-keret">
       <div className="bk-belso">
         <div className="bk-fejlec">
-          <div className="bk-fejlec-bal">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className="bk-logo" src="/logo-ai-act-kontroll.png" alt="AI Act Kontroll" />
-            <span className="bk-kicsi">{t.kicsi}</span>
-          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="bk-logo" src="/logo-ai-act-kontroll.png" alt="AI Act Kontroll" />
           <div className="bk-fejlec-jobb">
+            <span className="bk-kicsi">{t.kicsi}</span>
             <LangSwitch lang={lang} onChange={valtNyelv} />
           </div>
         </div>
@@ -254,24 +242,12 @@ export default function LoginPage() {
               </button>
             </div>
 
-            <label className={"bk-privacy" + (privacyHiba ? " is-hiba" : "")}>
-              <input
-                ref={privacyRef}
-                name="privacy"
-                type="checkbox"
-                disabled={loading}
-                aria-invalid={privacyHiba ? "true" : undefined}
-                aria-describedby={privacyHiba ? "privacy-hiba" : undefined}
-                onChange={() => setPrivacyHiba("")}
-              />
+            <label className="bk-privacy">
+              <input name="privacy" type="checkbox" disabled={loading} />
               <span>
                 {t.privacyPre} <a href="/adatkezeles">{t.privacyLink}</a>
               </span>
             </label>
-
-            {privacyHiba && (
-              <p className="bk-privacy-hiba" id="privacy-hiba" role="alert">{privacyHiba}</p>
-            )}
 
             <button className="bk-fo-gomb" type="submit" disabled={loading}>
               {loadingMode === "login" ? t.loginBusy : t.loginBtn}
