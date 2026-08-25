@@ -396,3 +396,123 @@
   .bk-kartya { grid-column: 1; grid-row: 3; }
   .jogi-lablec { grid-column: 1; grid-row: 4; }
 }
+
+/* ── telefon: a film nem inline megy ──
+   1600x900-as vászon 390 px-en 0,24-es skálát jelentene: a 28 px-es felirat
+   6-7 px-re esne. Ezért kis kijelzőn indítókártya áll a film helyén, a film
+   pedig teljes képernyőn, álló tájolásban elforgatva játszódik le. */
+
+.bemutato-inditokartya {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 26px 22px 24px;
+  border: 1px solid #22394a;
+  border-radius: 16px;
+  background: linear-gradient(160deg, rgba(54, 103, 133, 0.16), transparent 62%), #0e1c26;
+}
+
+.bemutato-inditokartya-cim {
+  margin: 0 0 8px;
+  color: #f5f9fb;
+  font-size: 19px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.bemutato-inditokartya-szoveg {
+  margin: 0 0 20px;
+  color: #a9bfcc;
+  font-size: 14.5px;
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+.bemutato-inditokartya-gomb {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 50px;
+  padding: 0 20px;
+  border: 1px solid #a46c48;
+  border-radius: 11px;
+  background: linear-gradient(115deg, #9a6544 0%, #7a4c33 52%, #5c3a28 100%);
+  color: #f3e7de;
+  font: inherit;
+  font-size: 15.5px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.bemutato-inditokartya-sugo {
+  margin: 12px 0 0;
+  width: 100%;
+  color: #6d8798;
+  font-size: 12.5px;
+  text-align: center;
+}
+
+/* ── teljes képernyős film ── */
+
+.bemutato-teljes {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  overflow: hidden;
+  background: #060e15;
+}
+
+/* A forgatás a bal felső sarok körül történik, ezért utána vissza kell tolni
+   a képernyőre: translateX a keret magasságával (= a kijelző szélessége). */
+.bemutato-forgatott {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-origin: 0 0;
+}
+
+.bemutato-forgatott .bemutato-keret {
+  border-radius: 12px;
+}
+
+/* Elforgatott nézetben szűkebb a vezérlősáv: minden képpont, amit nem visz el,
+   a filmre megy. */
+.bemutato-forgatott .bemutato-vezerlo { padding: 10px 14px; gap: 12px; }
+.bemutato-forgatott .bemutato-gomb { padding: 8px 14px; }
+
+.bemutato-bezar {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid #294355;
+  border-radius: 11px;
+  background: rgba(11, 22, 32, 0.9);
+  color: #c2d1da;
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* ── telefon: a belépési oldal szűkebb margókkal ── */
+
+@media (max-width: 700px) {
+  .bk-keret { padding: 16px 14px 20px; }
+  .bk-belso { gap: 16px; }
+  .bk-sor { gap: 14px; }
+  .bk-kartya { padding: 26px 20px 24px; border-radius: 14px; }
+  .bk-kartya h1 { margin-bottom: 24px; font-size: 27px; }
+  .jogszabaly-sav { padding: 14px 16px; font-size: 14.5px; text-align: left; }
+  .jogi-lablec { font-size: 12px; }
+  .bk-fejlec { gap: 12px; }
+  .bk-logo { height: 28px; }
+}
