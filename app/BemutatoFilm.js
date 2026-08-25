@@ -19,6 +19,9 @@ export default function BemutatoFilm({ lang = 'hu' }) {
   const [playing, setPlaying] = useState(false);
   const [t, setT] = useState(0);
   const [fit, setFit] = useState({ scale: 0.6, top: 0, left: 0 });
+  // a keret csak akkor jelenik meg, ha a film valódi mérete már megvan —
+  // így nem ugrik egyet a kép a betöltés utáni átméretezéskor
+  const [kesz, setKesz] = useState(false);
 
   const stage = () => {
     const f = filmRef.current;
@@ -79,7 +82,7 @@ export default function BemutatoFilm({ lang = 'hu' }) {
         const st = fd && (fd.querySelector("[data-om-exportable-video-with-duration-secs]") || fd.body.firstElementChild);
         if (st) {
           const r = st.getBoundingClientRect();
-          if (r.width > 200 && r.height > 100) { cw = r.width; ch = r.height; cx = r.left; cy = r.top; }
+          if (r.width > 200 && r.height > 100) { cw = r.width; ch = r.height; cx = r.left; cy = r.top; setKesz(true); }
         }
       } catch (e) {}
       const scale = Math.min(w / cw, h / ch) * 1.07;
@@ -139,6 +142,8 @@ export default function BemutatoFilm({ lang = 'hu' }) {
           border: 0,
           transform: 'translate(' + fit.left + 'px, ' + fit.top + 'px) scale(' + fit.scale + ')',
           transformOrigin: 'top left',
+          opacity: kesz ? 1 : 0,
+          transition: 'opacity 220ms ease',
           pointerEvents: 'none',
         }}
       />
