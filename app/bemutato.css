@@ -155,6 +155,8 @@
 /* ── jogszabályi figyelmeztetés és jogi sor ── */
 
 .jogszabaly-sav {
+  order: 3;
+  flex: 1 1 100%;
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
@@ -188,6 +190,8 @@
 }
 
 .jogi-lablec {
+  order: 4;
+  flex: 1 1 100%;
   margin: 4px 0 0;
   color: #55707f;
   font-size: 11.5px;
