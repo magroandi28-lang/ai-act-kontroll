@@ -237,28 +237,26 @@ export default function LoginPage() {
           </div>
 
           <form className="bk-kartya" onSubmit={handleSubmit} noValidate>
-            <h1>{t.loginTitle}</h1>
+            <p className="bk-bevezeto">{t.loginTitle}</p>
 
-            <label htmlFor="email">{t.email}</label>
             <input
               id="email"
               name="email"
               type="email"
               className="bk-mezo"
-              placeholder="nev@vallalat.hu"
+              placeholder={t.email}
               autoComplete="email"
               required
               disabled={loading}
             />
 
-            <label htmlFor="password">{t.password}</label>
             <div className="bk-jelszo-sor">
               <input
                 id="password"
                 name="password"
                 type={showPassword ? "text" : "password"}
                 className="bk-mezo"
-                placeholder="••••••••"
+                placeholder={t.password}
                 autoComplete="current-password"
                 required
                 disabled={loading}
@@ -273,6 +271,10 @@ export default function LoginPage() {
               </button>
             </div>
 
+            <button className="bk-fo-gomb" type="submit" disabled={loading}>
+              {loadingMode === "login" ? t.loginBusy : t.loginBtn}<span aria-hidden="true">→</span>
+            </button>
+
             <label className="bk-privacy">
               <input name="privacy" type="checkbox" disabled={loading} />
               <span>
@@ -280,39 +282,26 @@ export default function LoginPage() {
               </span>
             </label>
 
-            <button className="bk-fo-gomb" type="submit" disabled={loading}>
-              {loadingMode === "login" ? t.loginBusy : t.loginBtn}
-            </button>
-
-            <a className="bk-elfelejtett" href="/jelszo">{t.forgot}</a>
-
-            <div className="bk-elvalaszto" aria-hidden="true" />
-
-            <button
-              ref={demoGombRef}
-              className="bk-demo-gomb"
-              type="button"
-              onClick={handleDemo}
-              disabled={loading}
-            >
-              {loadingMode === "demo" ? t.demoBusy : t.demoBtn}
-            </button>
-
-            <p className="bk-demo-sugo">{t.demoHelp}</p>
-
-            <p className="bk-regisztracio">
-              {t.registerPre}{" "}
+            <div className="bk-linkek">
+              <button
+                ref={demoGombRef}
+                className="bk-demo-gomb"
+                type="button"
+                onClick={handleDemo}
+                disabled={loading}
+              >
+                {loadingMode === "demo" ? t.demoBusy : t.demoBtn}<span aria-hidden="true">→</span>
+              </button>
               <a href="/regisztracio" onClick={rememberPrivacyChoice}>{t.register}</a>
-            </p>
+              <a href="/jelszo">{t.forgot}</a>
+            </div>
 
             {message && <p className="bk-uzenet" role="alert">{message}</p>}
           </form>
 
           <div className="jogszabaly-sav">
-            <span>
-              <strong>{t.figyelmeztetesDatum}</strong>
-              {t.figyelmeztetes}
-            </span>
+            <span className="jogszabaly-cimke">{t.figyelmeztetesDatum}</span>
+            <span className="jogszabaly-szoveg">{t.figyelmeztetes}</span>
           </div>
 
           <p className="jogi-lablec">{t.jogi}</p>

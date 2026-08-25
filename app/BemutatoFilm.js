@@ -73,12 +73,22 @@ export default function BemutatoFilm({ lang = 'hu' }) {
       const el = boxRef.current;
       if (!el) return;
       const w = el.clientWidth, h = el.clientHeight;
-      const scale = Math.min(w / 1600, h / 900);
-      const top = Math.round((h - 900 * scale) / 2);
-      const left = Math.round((w - 1600 * scale) / 2);
+      let cw = 1600, ch = 900, cx = 0, cy = 0;
+      try {
+        const fd = filmRef.current && filmRef.current.contentDocument;
+        const st = fd && (fd.querySelector("[data-om-exportable-video-with-duration-secs]") || fd.body.firstElementChild);
+        if (st) {
+          const r = st.getBoundingClientRect();
+          if (r.width > 200 && r.height > 100) { cw = r.width; ch = r.height; cx = r.left; cy = r.top; }
+        }
+      } catch (e) {}
+      const scale = Math.min(w / cw, h / ch) * 1.07;
+      const top = Math.round((h - ch * scale) / 2 - cy * scale);
+      const left = Math.round((w - cw * scale) / 2 - cx * scale);
       setFit((prev) => (Math.abs(prev.scale - scale) > 0.002 || prev.top !== top || prev.left !== left ? { scale, top, left } : prev));
     };
     measure();
+    [120, 350, 800, 1600, 2600].forEach(function (ms) { setTimeout(measure, ms); });
     const ro = typeof ResizeObserver !== 'undefined' && boxRef.current ? new ResizeObserver(measure) : null;
     if (ro) ro.observe(boxRef.current);
     window.addEventListener('resize', measure);
@@ -122,12 +132,12 @@ export default function BemutatoFilm({ lang = 'hu' }) {
         className="bemutato-film"
         style={{
           position: 'absolute',
-          left: fit.left + 'px',
-          top: fit.top + 'px',
+          left: '0px',
+          top: '0px',
           width: '1600px',
           height: '900px',
           border: 0,
-          transform: 'scale(' + fit.scale + ')',
+          transform: 'translate(' + fit.left + 'px, ' + fit.top + 'px) scale(' + fit.scale + ')',
           transformOrigin: 'top left',
           pointerEvents: 'none',
         }}
