@@ -21,7 +21,7 @@ export default function BemutatoFilm({ lang = 'hu' }) {
   const [fit, setFit] = useState({ scale: 0.6, top: 0, left: 0 });
   // a keret csak akkor jelenik meg, ha a film valódi mérete már megvan —
   // így nem ugrik egyet a kép a betöltés utáni átméretezéskor
-  const [kesz, setKesz] = useState(false);
+  const [kesz, setKesz] = useState(true);
 
   const stage = () => {
     const f = filmRef.current;
@@ -137,7 +137,8 @@ export default function BemutatoFilm({ lang = 'hu' }) {
           timeRef.current = 0;
           setT(0);
           seek(0);
-          setTimeout(() => { seek(0); setKesz(true); }, 60);
+          setTimeout(() => seek(0), 60);
+          setTimeout(() => seek(0), 250);
         }}
         title="Bemutató film"
         className="bemutato-film"
