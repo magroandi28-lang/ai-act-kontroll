@@ -82,7 +82,7 @@ export default function BemutatoFilm({ lang = 'hu' }) {
         const st = fd && (fd.querySelector("[data-om-exportable-video-with-duration-secs]") || fd.body.firstElementChild);
         if (st) {
           const r = st.getBoundingClientRect();
-          if (r.width > 200 && r.height > 100) { cw = r.width; ch = r.height; cx = r.left; cy = r.top; setKesz(true); }
+          if (r.width > 200 && r.height > 100) { cw = r.width; ch = r.height; cx = r.left; cy = r.top; }
         }
       } catch (e) {}
       const scale = Math.min(w / cw, h / ch) * 1.07;
@@ -131,6 +131,14 @@ export default function BemutatoFilm({ lang = 'hu' }) {
       <iframe
         ref={filmRef}
         src={'/bemutato.html?lang=' + lang}
+        onLoad={() => {
+          // a film a 0. másodpercnél áll meg, és csak utána válik láthatóvá,
+          // így nem villan fel egy köztes képkocka, és nem ugrik vissza az elejére
+          timeRef.current = 0;
+          setT(0);
+          seek(0);
+          setTimeout(() => { seek(0); setKesz(true); }, 60);
+        }}
         title="Bemutató film"
         className="bemutato-film"
         style={{
