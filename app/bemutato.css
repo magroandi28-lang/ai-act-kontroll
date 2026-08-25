@@ -339,5 +339,7 @@
       Telefonon a kártya teljes szélességet kap: ── */
 
 @media (max-width: 700px) {
-  .bk-kartya { max-width: 420px; flex-basis: 100%; }
+  .bk-kartya { max-width: 420px; flex-basis: 100%; max-height: none; }
+  /* a filmkeret a saját 16:9 arányát veszi fel, hogy ne maradjon üres sáv alatta */
+  .bemutato-doboz { min-height: 0; aspect-ratio: 16 / 9; }
 }
