@@ -1,319 +1,348 @@
-# AI Act Kontroll – Funkcionális specifikáció
+# AI Act Kontroll – végleges rendszer- és funkcionális specifikáció
 
-**Dokumentumazonosító:** AIC-FS-001  
-**Verzió:** 0.1  
-**Állapot:** Tervezet – tesztelési alap  
-**Dátum:** 2026-09-05  
-**Források:** alkalmazáskód, README_HU.md, meglévő követelmények, manuális tesztesetek és hibajegyzék
+**Dokumentumazonosító:** AIC-SPEC-001
+**Verzió:** 1.0
+**Állapot:** Végleges tesztalap
+**Dátum:** 2026-09-05
+**Vizsgálati alap:** a `335d8eb` Git-állapot teljes alkalmazáskódja, SQL-migrációi, dokumentációja és konfigurációja, valamint a terméktulajdonosi döntések
 
 ## 1. A dokumentum célja
 
-Ez a dokumentum meghatározza az AI Act Kontroll elvárt működését. A manuális és automata tesztek elvárt eredményeit ebből kell levezetni.
+Ez a dokumentum rögzíti, hogyan **kell** működnie az AI Act Kontroll alkalmazásnak. A manuális teszteseteket, az automata felületi és API-teszteket, valamint a CI/CD pipeline elfogadási feltételeit ebből kell levezetni.
 
-A forráskód azt mutatja meg, hogyan működik jelenleg az alkalmazás. Ez a specifikáció azt rögzíti, hogyan kell működnie. Ahol a kívánt működés nem dönthető el egyértelműen, a dokumentum **Tisztázandó** jelölést használ.
+A forráskód a jelenlegi megvalósítást mutatja. Ha a kód eltér ettől a specifikációtól, az eltérés hibajelölt; a hibás működést nem szabad követelménnyé tenni.
 
-## 2. A rendszer célja
+## 2. Hatókör
 
-Az AI Act Kontroll vállalati MI-rendszerek nyilvántartását, szabályozási vizsgálatát és megfelelőségi dokumentálását támogatja.
+Az AI Act Kontroll többfelhasználós, szervezeti webalkalmazás, amely:
 
-A rendszer fő feladatai:
+1. felhasználói és szervezeti hozzáférést kezel;
+2. MI-rendszereket rögzít, importál, módosít és archivál;
+3. működési jellemzőket és kockázati tényeket gyűjt;
+4. determinisztikusan kiválasztja az alkalmazandó szabályokat;
+5. verziózott megfelelőségi szabályzatot állít össze;
+6. támogatja a szabályzat felülvizsgálatát;
+7. kezeli és frissíti a Jogtár tartalmát;
+8. naplózza a lényeges adat- és állapotváltozásokat.
 
-1. felhasználói és szervezeti hozzáférés kezelése;
-2. MI-rendszerek egyedi vagy tömeges rögzítése;
-3. a rendszerek működési jellemzőinek strukturált felvétele;
-4. az alkalmazandó megfelelőségi szabályok determinisztikus meghatározása;
-5. verziózott szabályzatok összeállítása;
-6. jogalapok és jogszabályváltozások követése;
-7. szabályzatok felülvizsgálata és jóváhagyása.
+A rendszer döntéstámogató eszköz, nem jogi tanácsadás. A jogi tartalom szakmai helyességét meghívott jogásznak kell jóváhagynia.
 
-A rendszer döntéstámogató alkalmazás, nem minősül jogi tanácsadásnak.
+## 3. Rendszerfelépítés
 
-## 3. Szereplők és jogosultságok
-
-| Szereplő | Leírás |
+| Réteg | Elvárt feladat |
 |---|---|
-| Látogató | Nincs bejelentkezve; megtekintheti a belépési oldalt és a bemutatót. |
-| Demófelhasználó | Regisztráció nélkül, anonim munkamenetben próbálja ki az alkalmazást. |
-| Regisztrált felhasználó | Megerősített fiókkal jelentkezik be. |
-| Owner / Admin | Teljes szervezeti adminisztrációt végezhet. |
-| Compliance | MI-rendszereket és szabályzatokat kezelhet, jogtári jóváhagyást végezhet. |
-| Editor | MI-rendszereket rögzíthet és szerkeszthet. |
-| Viewer | Csak olvasási jogosultsággal rendelkezik. |
-| Ütemezett rendszerfolyamat | Hitelesített háttérfolyamatként jogforrás-frissítést végez. |
+| Next.js webalkalmazás | Felület, útvonalak, szerveroldali műveletek és egyedi HTTP API. |
+| Supabase Auth | Regisztráció, bejelentkezés, anonim demómunkamenet, e-mail-megerősítés és jelszó-helyreállítás. |
+| Supabase PostgreSQL | Szervezetek, tagságok, MI-rendszerek, katalógusok, szabályzatok, Jogtár és auditadatok tárolása. |
+| Supabase REST/RPC API | RLS-sel védett adatelérés és üzleti műveletek. |
+| Vercel Cron | A jogforrások heti frissítésének indítása. |
+| EUR-Lex és NJT | Külső hivatalos jogforrások. |
 
-## 4. Általános követelmények
+## 4. Szereplők és jogosultságok
+
+| Szereplő | Általános jogosultság | Jogtár |
+|---|---|---|
+| Látogató | Belépési oldal, adatkezelési tájékoztató és interaktív bemutató. | Nincs hozzáférés. |
+| Demófelhasználó | A kijelölt demókörnyezetben a fő folyamatok kipróbálása. | Csak olvasás. |
+| Owner | Szervezet, tagok, MI-rendszerek és szabályzatok kezelése. | Csak olvasás. |
+| Admin | Szervezet, tagok, MI-rendszerek és szabályzatok kezelése. | Csak olvasás. |
+| Compliance / meghívott jogász | MI-rendszerek és szabályzatok megfelelőségi kezelése. | Olvasás, módosítás és jóváhagyás. |
+| Editor | MI-rendszerek rögzítése és szerkesztése. | Csak olvasás. |
+| Ütemezett rendszerfolyamat | Hitelesített jogforrás-frissítés. | Gépi frissítés és naplózás. |
+
+**ROLE-REQ-001:** Jogtári módosításra és jóváhagyásra kizárólag a szervezetbe `compliance` szerepkörrel meghívott jogász jogosult. Az `owner`, `admin`, `editor` és demófelhasználó csak olvashatja a Jogtárat.
+**ROLE-REQ-002:** Minden jogosultságot szerveroldalon és adatbázis-szinten is ellenőrizni kell; a felületi gomb elrejtése önmagában nem védelem.
+**ROLE-REQ-003:** A rendszer nem alapozhat jogosultságot a felhasználó által módosítható `user_metadata` mezőre.
+
+## 5. Általános működési követelmények
 
 | Azonosító | Követelmény | Prioritás |
 |---|---|---|
-| GEN-REQ-001 | A védett oldalak kizárólag érvényes munkamenettel legyenek elérhetők. | Kritikus |
-| GEN-REQ-002 | A felhasználó csak a saját szervezetéhez tartozó adatokat érhesse el. | Kritikus |
+| GEN-REQ-001 | A védett oldalak csak érvényes munkamenettel érhetők el. | Kritikus |
+| GEN-REQ-002 | A felhasználó kizárólag a saját szervezete adatait érheti el. | Kritikus |
 | GEN-REQ-003 | Azonos bemenetből a szabálymotor azonos eredményt állítson elő. | Kritikus |
-| GEN-REQ-004 | A felhasználói műveletek eredményéről egyértelmű siker- vagy hibaüzenet jelenjen meg. | Magas |
-| GEN-REQ-005 | Feldolgozás alatt az ismételt elküldésre alkalmas vezérlők legyenek letiltva. | Magas |
-| GEN-REQ-006 | A szolgáltatás jogi korlátját jelző figyelmeztetés a releváns felületeken jelenjen meg. | Magas |
-| GEN-REQ-007 | A törlés archiválással történjen, ha történeti visszakereshetőség szükséges. | Kritikus |
+| GEN-REQ-004 | Minden művelet egyértelmű siker- vagy hibaüzenetet adjon. | Magas |
+| GEN-REQ-005 | Feldolgozás közben az ismételt elküldést meg kell akadályozni. | Magas |
+| GEN-REQ-006 | A jogi korlátozásra vonatkozó figyelmeztetés jelenjen meg a releváns oldalakon. | Magas |
+| GEN-REQ-007 | A felhasználói „törlés” minden üzleti adatnál archiválást jelent; történeti adat fizikailag nem törölhető a felületről. | Kritikus |
+| GEN-REQ-008 | Az Okosmérő és az AI Act Kontroll közös Supabase-projektben is logikailag és jogosultságilag elkülönüljön. | Kritikus |
 
-## 5. Belépési oldal és bemutató
-
-### 5.1 Megjelenés és nyelvválasztás
-
-| Azonosító | Követelmény | Prioritás |
-|---|---|---|
-| LOGIN-REQ-001 | A belépési oldal jelenítse meg az e-mail-mezőt, a jelszómezőt, a Belépés gombot, az adatkezelési jelölőnégyzetet, a demóbelépést, a regisztrációt és az elfelejtett jelszó hivatkozását. | Kritikus |
-| LOGIN-REQ-002 | Az e-mail- és jelszómező fogadja a felhasználó által megadott értéket. | Kritikus |
-| LOGIN-REQ-003 | A HU/EN kapcsoló váltsa át a belépési oldal szövegeit magyar és angol nyelv között. | Közepes |
-| LOGIN-REQ-004 | A kiválasztott nyelv maradjon meg az oldal újratöltése után. | Közepes |
-| LOGIN-REQ-005 | A jelszó láthatósági gomb váltson a rejtett és a látható jelszó között. | Magas |
-| LOGIN-REQ-006 | Az adatkezelési hivatkozás nyissa meg az adatkezelési tájékoztatót. | Kritikus |
-
-### 5.2 Regisztrált felhasználó belépése
+## 6. Belépési oldal és bemutató
 
 | Azonosító | Követelmény | Prioritás |
 |---|---|---|
-| AUTH-REQ-004 | A megerősített felhasználó helyes e-mail-címmel, helyes jelszóval és az adatkezelési nyilatkozat elfogadásával be tudjon jelentkezni. | Kritikus |
-| LOGIN-REQ-007 | Elfogadott adatkezelési nyilatkozat nélkül ne induljon el a bejelentkezés; jelenjen meg: „A belépéshez fogadd el az adatkezelési nyilatkozatot.” | Kritikus |
-| LOGIN-REQ-008 | Hibás e-mail-cím vagy jelszó esetén ne nyíljon védett munkamenet; jelenjen meg: „Hibás e-mail-cím vagy jelszó.” | Kritikus |
-| LOGIN-REQ-009 | Sikeres bejelentkezés után a rendszer irányítson a /vezerlopult oldalra. | Kritikus |
-| LOGIN-REQ-010 | A bejelentkezés feldolgozása alatt a mezők és műveleti gombok legyenek letiltva. | Magas |
+| LOGIN-REQ-001 | Jelenjen meg az e-mail, jelszó, Belépés, adatkezelési jelölőnégyzet, demóbelépés, Regisztráció és Elfelejtett jelszó vezérlő. | Kritikus |
+| LOGIN-REQ-002 | Az e-mail- és jelszómező legyen látható, engedélyezett és írható. | Kritikus |
+| LOGIN-REQ-003 | A HU/EN kapcsoló váltsa át a belépési oldal és a bemutató szövegét. | Közepes |
+| LOGIN-REQ-004 | A kiválasztott nyelv oldalfrissítés után is maradjon meg. | Közepes |
+| LOGIN-REQ-005 | A jelszó láthatósági gomb váltson rejtett és látható állapot között. | Magas |
+| LOGIN-REQ-006 | Az adatkezelési hivatkozás nyissa meg a tájékoztatót. | Kritikus |
+| LOGIN-REQ-007 | Nyilatkozat elfogadása nélkül a belépés álljon meg, és külön figyelmeztetés jelenjen meg. | Kritikus |
+| LOGIN-REQ-008 | Üres e-mail és üres jelszó esetén külön, mezőhöz kapcsolt hibaüzenet jelenjen meg. | Kritikus |
+| LOGIN-REQ-009 | Hibás hitelesítő adatokkal ne jöjjön létre munkamenet. | Kritikus |
+| LOGIN-REQ-010 | Sikeres belépés után a `/vezerlopult` nyíljon meg. | Kritikus |
+| LOGIN-REQ-011 | Feldolgozás alatt az érintett mezők és gombok legyenek letiltva. | Magas |
+| TOUR-REQ-001 | A 30 másodperces bemutató indítható, szüneteltethető és újraindítható legyen. | Magas |
+| TOUR-REQ-002 | A folyamatjelzővel lehessen a bemutató időpontját módosítani. | Közepes |
+| TOUR-REQ-003 | Az időjelző mutassa az eltelt és teljes időt. | Közepes |
 
-### 5.3 Demómód
-
-| Azonosító | Követelmény | Prioritás |
-|---|---|---|
-| DEMO-REQ-001 | A „Kipróbálom regisztráció nélkül” gomb legyen látható és használható. | Kritikus |
-| DEMO-REQ-002 | Elfogadott adatkezelési nyilatkozat nélkül ne induljon el a demómód; jelenjen meg: „A demó indításához fogadd el az adatkezelési nyilatkozatot.” | Kritikus |
-| DEMO-REQ-003 | Elfogadott nyilatkozat után jöjjön létre anonim demómunkamenet, majd nyíljon meg a /vezerlopult oldal. | Kritikus |
-| DEMO-REQ-004 | Demómódban jelenjen meg a „DEMÓ MÓD – Minden rögzítés próbaadat.” jelzés. | Kritikus |
-| DEMO-REQ-005 | A „Kilépés a demóból” művelet szüntesse meg a munkamenetet és irányítson vissza a belépési oldalra. | Kritikus |
-| DEMO-REQ-006 | A demóadatok ne sérthessék a regisztrált felhasználók és más projektek adatait. | Kritikus |
-
-### 5.4 Interaktív bemutató
+## 7. Demómód és adatizoláció
 
 | Azonosító | Követelmény | Prioritás |
 |---|---|---|
-| TOUR-REQ-001 | A belépési oldalon jelenjen meg a 30 másodperces interaktív bemutató. | Magas |
-| TOUR-REQ-002 | A bemutató indítható, szüneteltethető és újraindítható legyen. | Magas |
-| TOUR-REQ-003 | A folyamatjelzőn választva a bemutató időpontja módosítható legyen. | Közepes |
-| TOUR-REQ-004 | A bemutató órája mutassa az eltelt és a teljes időt. | Közepes |
-| TOUR-REQ-005 | Nyelvváltáskor a bemutató a kiválasztott nyelven, az elejéről induljon újra. | Közepes |
+| DEMO-REQ-001 | A demóbelépéshez kötelező legyen az adatkezelési nyilatkozat elfogadása. | Kritikus |
+| DEMO-REQ-002 | Sikeres indításkor anonim munkamenet jöjjön létre és a vezérlőpult nyíljon meg. | Kritikus |
+| DEMO-REQ-003 | Jól láthatóan jelenjen meg: „DEMÓ MÓD – Minden rögzítés próbaadat.” | Kritikus |
+| DEMO-REQ-004 | A demó közös, kizárólag erre kijelölt demószervezetet és közös alapadatokat használjon. | Kritikus |
+| DEMO-REQ-005 | A demófelhasználó soha ne kaphasson hozzáférést regisztrált ügyfél szervezetéhez vagy az Okosmérő adataihoz. | Kritikus |
+| DEMO-REQ-006 | A demóban létrehozott és módosított rekordok kizárólag a demókörnyezetbe kerüljenek, legyenek azonosíthatók és biztonságosan visszaállíthatók. | Kritikus |
+| DEMO-REQ-007 | A demóban az éles fő folyamatok kipróbálhatók, de a Jogtár módosítása/jóváhagyása és a szervezeti jogosultságkezelés tiltott. | Kritikus |
+| DEMO-REQ-008 | A demó alapadatait ütemezetten vissza kell állítani; a visszaállítás más adatot nem érinthet. | Magas |
+| DEMO-REQ-009 | A „Kilépés a demóból” szüntesse meg a munkamenetet és irányítson a belépési oldalra. | Kritikus |
 
-## 6. Regisztráció és e-mail-megerősítés
-
-| Azonosító | Követelmény | Prioritás |
-|---|---|---|
-| AUTH-REQ-001 | A még nem regisztrált felhasználó érvényes adatokkal és az adatkezelési nyilatkozat elfogadásával fiókot hozhasson létre. | Kritikus |
-| REG-REQ-001 | Kötelező adat a teljes név, a szervezet neve, az e-mail-cím, a jelszó és a jelszó megerősítése. | Kritikus |
-| REG-REQ-002 | Hiányzó kötelező adat esetén jelenjen meg: „Minden mező kitöltése kötelező.” | Kritikus |
-| REG-REQ-003 | A jelszó legalább 8 karakter hosszú legyen. | Kritikus |
-| REG-REQ-004 | A két megadott jelszónak egyeznie kell. | Kritikus |
-| REG-REQ-005 | A regisztrációhoz kötelező legyen az adatkezelési nyilatkozat elfogadása. | Kritikus |
-| REG-REQ-006 | Ha a nyilatkozatot a belépési oldalon már elfogadták, a regisztrációs oldal ugyanabban a munkamenetben ne kérje újra. | Magas |
-| AUTH-REQ-002 | Sikeres regisztráció után a rendszer küldjön megerősítő e-mailt. | Kritikus |
-| REG-REQ-007 | A felület mutassa, melyik e-mail-címre küldte a megerősítő levelet. | Magas |
-| REG-REQ-008 | A felhasználó kérhesse a megerősítő levél újraküldését. | Magas |
-| REG-REQ-009 | Túl gyakori újraküldés esetén jelenjen meg várakozásra felszólító üzenet. | Magas |
-| REG-REQ-010 | Már regisztrált e-mail-cím esetén a felület ajánlja fel a belépést vagy másik e-mail-cím használatát. | Magas |
-| AUTH-REQ-003 | Az érvényes megerősítő link aktiválja a fiókot, hozza létre az induló fiókadatokat, majd irányítson a vezérlőpultra. | Kritikus |
-| REG-REQ-011 | Hibás, lejárt vagy már felhasznált megerősítő link a /auth/hiba oldalra vezessen. | Kritikus |
-| REG-REQ-012 | A megerősítési hibaoldalon új megerősítő levél legyen kérhető. | Magas |
-| REG-REQ-013 | A továbbirányítás csak alkalmazáson belüli, biztonságos útvonalra történhessen. | Kritikus |
-
-## 7. Elfelejtett és új jelszó
+## 8. Regisztráció, megerősítés és jelszókezelés
 
 | Azonosító | Követelmény | Prioritás |
 |---|---|---|
-| PWD-REQ-001 | Az „Elfelejtett jelszó?” hivatkozás nyissa meg a /jelszo oldalt. | Kritikus |
-| PWD-REQ-002 | E-mail-cím nélkül a rendszer ne küldjön levelet, hanem kérje az e-mail-cím megadását. | Kritikus |
-| PWD-REQ-003 | Beküldés után a válasz ne árulja el, hogy az e-mail-címhez tartozik-e fiók. | Kritikus |
-| PWD-REQ-004 | Túl gyakori levélkérés esetén a rendszer kérjen várakozást. | Magas |
-| PWD-REQ-005 | Érvényes helyreállító link nyissa meg az új jelszó oldalát. | Kritikus |
-| PWD-REQ-006 | Lejárt vagy felhasznált linknél ne legyen módosítható a jelszó, és legyen kérhető új link. | Kritikus |
-| PWD-REQ-007 | Az új jelszó legalább 8 karakteres legyen, és a két beírt érték egyezzen. | Kritikus |
-| PWD-REQ-008 | Az új jelszó ne egyezhessen meg a régivel. | Magas |
-| PWD-REQ-009 | Sikeres jelszómódosítás után nyíljon meg a vezérlőpult. | Kritikus |
+| AUTH-REQ-001 | Teljes névvel, szervezetnévvel, e-maillel, két egyező jelszóval és adatkezelési elfogadással lehessen regisztrálni. | Kritikus |
+| AUTH-REQ-002 | A jelszó legalább 8 karakteres legyen. | Kritikus |
+| AUTH-REQ-003 | Sikeres regisztráció után megerősítő e-mail érkezzen. | Kritikus |
+| AUTH-REQ-004 | Az érvényes megerősítő link aktiválja a fiókot és hozza létre az induló profil-, szervezet- és tagsági adatokat. | Kritikus |
+| AUTH-REQ-005 | Hibás, lejárt vagy felhasznált link biztonságos hibaoldalra vezessen, ahonnan új levél kérhető. | Kritikus |
+| AUTH-REQ-006 | A megerősítő levél újraküldése legyen korlátozott, és a várakozási idő legyen jelezve. | Magas |
+| PWD-REQ-001 | A jelszó-helyreállítás válasza ne árulja el, hogy létezik-e az e-mail-cím. | Kritikus |
+| PWD-REQ-002 | Lejárt vagy felhasznált helyreállító linkkel ne lehessen jelszót módosítani. | Kritikus |
+| PWD-REQ-003 | Az új jelszó legalább 8 karakteres és a megerősítéssel azonos legyen. | Kritikus |
+| PWD-REQ-004 | Az új jelszó ne egyezhessen meg a régivel. | Magas |
+| SESSION-REQ-001 | Kijelentkezés után közvetlen URL-lel se legyen elérhető védett oldal. | Kritikus |
+| SESSION-REQ-002 | Érvénytelen munkamenet a belépési oldalra irányítson. | Kritikus |
+| PRIVACY-REQ-001 | Az `/adatkezeles` oldal bejelentkezés nélkül is megnyitható és olvasható legyen. | Kritikus |
+| PRIVACY-REQ-002 | Az adatkezelési oldalról biztonságosan vissza lehessen térni a belépési folyamathoz. | Magas |
 
-## 8. Kijelentkezés és munkamenetvédelem
-
-| Azonosító | Követelmény | Prioritás |
-|---|---|---|
-| AUTH-REQ-005 | A bejelentkezett felhasználó ki tudjon jelentkezni. | Kritikus |
-| SESSION-REQ-001 | Kijelentkezés után a védett oldalak közvetlen URL-lel se legyenek elérhetők. | Kritikus |
-| SESSION-REQ-002 | Érvénytelen munkamenet esetén a rendszer irányítson a belépési oldalra. | Kritikus |
-
-## 9. Vezérlőpult
+## 9. Vezérlőpult és navigáció
 
 | Azonosító | Követelmény | Prioritás |
 |---|---|---|
-| DASH-REQ-001 | Érvényes munkamenettel jelenjen meg a vezérlőpult és a felhasználói köszöntés. | Kritikus |
-| DASH-REQ-002 | Az „Új MI-rendszer vizsgálata” kártya nyissa meg a /rendszerek/uj oldalt. | Kritikus |
-| DASH-REQ-003 | A „Mentett MI-rendszerek” kártya nyissa meg a /rendszerek oldalt. | Kritikus |
-| DASH-REQ-004 | A „Jogtár” kártya nyissa meg a /jogtar oldalt, és jelezze a várakozó tételeket. | Magas |
-| DASH-REQ-005 | A „Tagok és szerepkörök” kártya nyissa meg a /szervezet oldalt. | Magas |
-| DASH-REQ-006 | Demófelhasználónál általános, regisztrált felhasználónál névre szóló köszöntés jelenjen meg. | Közepes |
+| DASH-REQ-001 | Jelenjen meg a köszöntés és a négy fő modul: új vizsgálat, mentett rendszerek, Jogtár, tagok és szerepkörök. | Kritikus |
+| DASH-REQ-002 | Minden kártya a hozzá tartozó oldalra navigáljon. | Kritikus |
+| DASH-REQ-003 | A Jogtár kártya mutassa a várakozó tételeket. | Magas |
+| DASH-REQ-004 | Demómódban általános, regisztrált módban névre szóló köszöntés jelenjen meg. | Közepes |
 
-## 10. Új MI-rendszer vezetett felvitele
+## 10. MI-rendszerek rögzítése és kezelése
 
 | Azonosító | Követelmény | Prioritás |
 |---|---|---|
-| CREATE-REQ-001 | A felvitel csak bejelentkezett, szervezethez kapcsolt felhasználónak legyen elérhető. | Kritikus |
-| CREATE-REQ-002 | A folyamat kérje be a rendszer nevét, iparágát és a szervezet egy vagy több szerepkörét. | Kritikus |
-| CREATE-REQ-003 | Üres rendszernévvel, iparág vagy szerepkör nélkül ne lehessen továbblépni. | Kritikus |
-| CREATE-REQ-004 | A rendszer az aktuális katalógusból töltse be a vizsgálandó funkciókat. | Kritikus |
-| CREATE-REQ-005 | Minden funkcióról Igen/Nem döntés legyen adható egérrel, érintéssel vagy billentyűzettel. | Magas |
-| CREATE-REQ-006 | Összetett funkciónál a szükséges részletek ugyanabban a folyamatban legyenek megadhatók. | Kritikus |
-| CREATE-REQ-007 | Csak a korábbi válaszok alapján szükséges pontosító kérdések jelenjenek meg. | Kritikus |
-| CREATE-REQ-008 | Hiányzó kötelező pontosítás esetén a mentés ne legyen elérhető. | Kritikus |
-| CREATE-REQ-009 | A felhasználó visszaléphessen és javíthassa az utolsó válaszát. | Magas |
-| CREATE-REQ-010 | Mentés előtt jelenjen meg az összegzés és a kapcsolódó Jogtár-szövegek listája. | Magas |
-| CREATE-REQ-011 | Sikeres mentés után nyíljon meg az új rendszer szabályzati oldala. | Kritikus |
-| CREATE-REQ-012 | Hiba esetén ne jöjjön létre hiányos rendszer, és jelenjen meg hibaüzenet. | Kritikus |
+| CREATE-REQ-001 | Új rendszer csak érvényes szervezeti tagsággal rögzíthető. | Kritikus |
+| CREATE-REQ-002 | Kötelező a rendszernév, iparág és legalább egy szervezeti szerepkör. | Kritikus |
+| CREATE-REQ-003 | A funkciók az aktuális katalógusból töltődjenek, és mindegyikről Igen/Nem döntés legyen adható. | Kritikus |
+| CREATE-REQ-004 | Csak a korábbi válaszok alapján szükséges pontosító kérdések jelenjenek meg. | Kritikus |
+| CREATE-REQ-005 | Hiányzó kötelező válasszal ne lehessen menteni. | Kritikus |
+| CREATE-REQ-006 | Mentés előtt összegzés és kapcsolódó Jogtár-hivatkozás jelenjen meg. | Magas |
+| CREATE-REQ-007 | A mentés tranzakciós legyen: hiba esetén ne maradjon hiányos rendszer. | Kritikus |
+| SYSTEM-REQ-001 | A lista kizárólag az aktuális szervezet aktív rendszereit mutassa. | Kritikus |
+| SYSTEM-REQ-002 | A keresés név, rendeltetés és rendszertípus alapján, ékezet- és kisbetűfüggetlenül működjön. | Magas |
+| SYSTEM-REQ-003 | Oldalanként legfeljebb 5 rendszer jelenjen meg, lapozással. | Magas |
+| SYSTEM-REQ-004 | A kiválasztott rendszerről a szerkesztés és a szabályzat legyen elérhető. | Kritikus |
+| SYSTEM-REQ-005 | Nem létező vagy nem engedélyezett rendszerazonosító ne fedjen fel adatot. | Kritikus |
+| SYSTEM-REQ-006 | A korábbi `/rendszerek/{id}/eredmeny` útvonal irányítson ugyanannak a rendszernek az adatlapjára. | Közepes |
+| EDIT-REQ-001 | A név, életciklus, funkciók és nyilatkozatok együtt, szerveroldali validációval legyenek módosíthatók. | Kritikus |
+| EDIT-REQ-002 | A rendszernév 1–160 karakter legyen, normalizált szóközökkel. | Magas |
+| EDIT-REQ-003 | Tiltott gyakorlat lehetőségénél jól látható jogi figyelmeztetés jelenjen meg. | Kritikus |
+| EDIT-REQ-004 | A „törlés” megerősítés után archiváljon; az előzményeket őrizze meg. | Kritikus |
 
-## 11. Mentett MI-rendszerek
-
-| Azonosító | Követelmény | Prioritás |
-|---|---|---|
-| SYSTEM-REQ-001 | A lista csak az aktuális szervezet aktív MI-rendszereit jelenítse meg. | Kritikus |
-| SYSTEM-REQ-002 | A lista mutassa a rendszerek számát, nevét, típusát és rendeltetését. | Magas |
-| SYSTEM-REQ-003 | Oldalanként legfeljebb 5 rendszer jelenjen meg; a további rekordok legyenek lapozhatók. | Magas |
-| SYSTEM-REQ-004 | A kereső név, rendeltetés és rendszertípus alapján, kis- és nagybetűtől és ékezetektől függetlenül keressen. | Magas |
-| SYSTEM-REQ-005 | Találat kiválasztásakor csak a kiválasztott rendszer panelje jelenjen meg. | Magas |
-| SYSTEM-REQ-006 | A kereső törlése állítsa vissza a teljes listát és lapozást. | Magas |
-| SYSTEM-REQ-007 | A panelről elérhető legyen a szerkesztés és a szabályzat elkészítése vagy megnyitása. | Kritikus |
-| SYSTEM-REQ-008 | Üres lista esetén jelenjen meg tájékoztatás és új rendszer rögzítésére szolgáló hivatkozás. | Közepes |
-| SYSTEM-REQ-009 | Létrehozás, importálás, módosítás és archiválás után jelenjen meg megfelelő sikerüzenet. | Magas |
-
-## 12. MI-rendszer szerkesztése és archiválása
+## 11. Tömeges import
 
 | Azonosító | Követelmény | Prioritás |
 |---|---|---|
-| EDIT-REQ-001 | A szerkesztőoldal töltse be a rendszer aktuális nevét, életciklusát, funkcióit és nyilatkozatait. | Kritikus |
-| EDIT-REQ-002 | A rendszernév nem lehet üres, legfeljebb 160 karakter lehet, és a felesleges szóközök normalizálódjanak. | Magas |
-| EDIT-REQ-003 | Az életciklus a támogatott állapotok egyikére legyen módosítható. | Magas |
-| EDIT-REQ-004 | A funkciók és kapcsolódó nyilatkozatok együtt legyenek menthetők. | Kritikus |
-| EDIT-REQ-005 | Tiltott gyakorlat lehetősége esetén jól látható jogi figyelmeztetés jelenjen meg. | Kritikus |
-| EDIT-REQ-006 | Szabályozott termékbe épülés csak szolgáltatói szerepkörnél legyen megadható. | Magas |
-| EDIT-REQ-007 | Sikeres mentés után ugyanannak a rendszernek a kiválasztott panelje jelenjen meg. | Magas |
-| EDIT-REQ-008 | A „Rendszer törlése” művelet kérjen külön megerősítést. | Kritikus |
-| EDIT-REQ-009 | Megerősített törléskor a rendszer kerüljön ki az aktív listából, előzményei maradjanak meg. | Kritikus |
-| EDIT-REQ-010 | A „Mégsem” művelet szakítsa meg a törlést adatváltozás nélkül. | Kritikus |
+| IMPORT-REQ-001 | Letölthető, aktuális importsablon álljon rendelkezésre. | Kritikus |
+| IMPORT-REQ-002 | CSV és XLSX fájl legyen támogatott. | Kritikus |
+| IMPORT-REQ-003 | A fájl legfeljebb 2 MB és 100 adatsor lehet. | Magas |
+| IMPORT-REQ-004 | Ellenőrizni kell a fejlécet, kötelező adatokat, törzsadatokat, duplikációkat, funkciófüggőségeket és nyilatkozatokat. | Kritikus |
+| IMPORT-REQ-005 | Az előnézet soronként mutassa az érvényességet és a pontos hibákat. | Kritikus |
+| IMPORT-REQ-006 | Egyetlen hibás sor esetén se indulhasson el az adatbázisba írás. | Kritikus |
+| IMPORT-REQ-007 | A sikeres import tranzakciós legyen és ugyanazt a szabálymotort használja, mint az egyedi felvitel. | Kritikus |
 
-## 13. Tömeges import
+## 12. Szabálymotor és szabályzat
 
 | Azonosító | Követelmény | Prioritás |
 |---|---|---|
-| IMPORT-REQ-001 | A felhasználó letölthesse az aktuális katalógushoz tartozó importsablont. | Kritikus |
-| IMPORT-REQ-002 | A fájl ellenőrzése előtt ne kerüljön rendszeradat az adatbázisba. | Kritikus |
-| IMPORT-REQ-003 | A rendszer legfeljebb 2 MB-os és legfeljebb 100 adatsort tartalmazó fájlt fogadjon. | Magas |
-| IMPORT-REQ-004 | A rendszer ellenőrizze a kötelező oszlopokat, törzsadatokat, duplikált neveket, funkciófüggőségeket és nyilatkozatokat. | Kritikus |
-| IMPORT-REQ-005 | Az előnézet soronként mutassa az érvényességet és a pontos hibaüzeneteket. | Kritikus |
-| IMPORT-REQ-006 | Hibás sor jelenlétekor az importálás ne legyen végrehajtható. | Kritikus |
-| IMPORT-REQ-007 | Hibátlan előnézet után a felhasználó erősítse meg az adatok valódiságát. | Kritikus |
-| IMPORT-REQ-008 | Sikeres import után minden megfelelő rendszer kerüljön az adatbázisba, és jelenjen meg a darabszám. | Kritikus |
-| IMPORT-REQ-009 | A tömeges import ugyanazt a központi szabály- és profilkezelést használja, mint az egyedi felvitel. | Kritikus |
+| RULE-REQ-001 | A szabálymotor kizárólag verziózott katalógus-, rendszer- és használatiprofil-adatokból dolgozzon. | Kritikus |
+| RULE-REQ-002 | A kiválasztott szabályokhoz visszakövethető legyen a kiváltó tény és jogalap. | Kritikus |
+| POLICY-REQ-001 | Szabályzat csak aktív, teljes és érvényes rendszeradatból készülhessen. | Kritikus |
+| POLICY-REQ-002 | Változatlan forrásadat ne hozzon létre új verziót. | Kritikus |
+| POLICY-REQ-003 | Releváns változás új verziót hozzon létre a korábbi megőrzésével. | Kritikus |
+| POLICY-REQ-004 | A dokumentum tartalmazza a rendszeradatokat, verziót, állapotot, összefoglalót, tartalomjegyzéket, fejezeteket és jogalapokat. | Kritikus |
+| POLICY-REQ-005 | A dokumentumban lehessen keresni, nyomtatni és böngészőből PDF-be menteni. | Magas |
+| POLICY-REQ-006 | Frissítési hiba esetén a legutóbbi mentett verzió jelenjen meg figyelmeztetéssel. | Magas |
 
-## 14. Szabályzat létrehozása és megjelenítése
-
-| Azonosító | Követelmény | Prioritás |
-|---|---|---|
-| POLICY-REQ-001 | Szabályzat csak aktív, érvényes profillal és megfelelő rendszertényekkel rendelkező rendszerhez készülhessen. | Kritikus |
-| POLICY-REQ-002 | Érvénytelen vagy hiányzó profilnál ne készüljön dokumentum, és jelenjen meg egyértelmű hibaüzenet. | Kritikus |
-| POLICY-REQ-003 | A szabályzat az aktív funkciókhoz és alkalmazási adatokhoz tartozó jóváhagyott modulokból épüljön fel. | Kritikus |
-| POLICY-REQ-004 | Változatlan forrásadatok ismételt megnyitása ne hozzon létre felesleges új verziót. | Kritikus |
-| POLICY-REQ-005 | Releváns változás esetén új verzió készülhessen, a korábbi verzió megőrzésével. | Kritikus |
-| POLICY-REQ-006 | A dokumentum mutassa a rendszer adatait, verziót, állapotot, összefoglalót, tartalomjegyzéket és fejezeteket. | Magas |
-| POLICY-REQ-007 | Minden követelményhez jelenjen meg a modul típusa és a kapcsolódó jogalap. | Kritikus |
-| POLICY-REQ-008 | A hivatalos jogforrás hivatkozása új böngészőlapon nyíljon meg. | Magas |
-| POLICY-REQ-009 | A dokumentumban lehessen keresni, és jelenjen meg a találatok száma. | Magas |
-| POLICY-REQ-010 | A dokumentum nyomtatható és PDF-ként menthető legyen. | Magas |
-| POLICY-REQ-011 | Frissítési hiba esetén a legutóbbi mentett verzió jelenjen meg figyelmeztetéssel, ha elérhető. | Magas |
-| POLICY-REQ-012 | A szabályzatból ugyanannak a kiválasztott rendszernek a paneljére lehessen visszatérni. | Magas |
-
-## 15. Szabályzat-felülvizsgálat
+## 13. Szabályzat-felülvizsgálat
 
 | Azonosító | Követelmény | Prioritás |
 |---|---|---|
-| REVIEW-REQ-001 | A szabályzatlista legyen szűrhető felülvizsgálati állapot szerint. | Magas |
-| REVIEW-REQ-002 | A felülvizsgáló lássa a verziót, fejezetszámot, állapotot és megjegyzéseket. | Magas |
-| REVIEW-REQ-003 | A fejezet címe és szövege szerkeszthető, majd visszaállítható legyen. | Magas |
-| REVIEW-REQ-004 | A felülvizsgáló egyenként jóváhagyhassa a szabályokat és megtekinthesse jogalapjukat. | Kritikus |
-| REVIEW-REQ-005 | Hiányzó, katalógusban elérhető modul beilleszthető legyen. | Magas |
+| REVIEW-REQ-001 | A lista felülvizsgálati állapot szerint szűrhető legyen. | Magas |
+| REVIEW-REQ-002 | A verzió, fejezetek, állapotok és megjegyzések legyenek láthatók. | Magas |
+| REVIEW-REQ-003 | A fejezet címe és szövege szerkeszthető és visszaállítható legyen. | Magas |
+| REVIEW-REQ-004 | A szabályok egyenként legyenek jóváhagyhatók, jogalapjuk megtekintésével. | Kritikus |
+| REVIEW-REQ-005 | Hiányzó katalógusmodul beilleszthető legyen. | Magas |
 | REVIEW-REQ-006 | A teljes dokumentum csak minden szükséges fejezet jóváhagyása után legyen lezárható. | Kritikus |
-| REVIEW-REQ-007 | A dokumentum jóváhagyható vagy megjegyzéssel javításra visszaküldhető legyen. | Kritikus |
+| REVIEW-REQ-007 | A dokumentum jóváhagyható vagy indoklással javításra visszaküldhető legyen. | Kritikus |
 
-## 16. Jogtár
-
-| Azonosító | Követelmény | Prioritás |
-|---|---|---|
-| LEGAL-REQ-001 | A Jogtár csak bejelentkezett, megfelelő jogosultságú felhasználónak legyen elérhető. | Kritikus |
-| LEGAL-REQ-002 | A szabályok legyenek kereshetők cím, jogszabályhely és szöveg alapján. | Magas |
-| LEGAL-REQ-003 | A lista legyen szűrhető szabályréteg, szerepkör és állapot szerint. | Magas |
-| LEGAL-REQ-004 | Külön jelenjen meg a jóváhagyásra váró, felülvizsgálandó és jóváhagyott állapot. | Magas |
-| LEGAL-REQ-005 | A kiválasztott szabály szövege, jogalapjai és kapcsolódó moduljai legyenek megtekinthetők. | Kritikus |
-| LEGAL-REQ-006 | A jogosult felhasználó módosíthassa és jóváhagyhassa a szabályt, vagy menthesse jóváhagyás nélkül. | Kritikus |
-| LEGAL-REQ-007 | Jóváhagyás után frissüljön az állapot és a számlálók. | Magas |
-
-## 17. Szervezet, tagok és szerepkörök
+## 14. Jogtár
 
 | Azonosító | Követelmény | Prioritás |
 |---|---|---|
-| ORG-REQ-001 | A szervezeti oldal jelenítse meg a felhasználó szervezetét és tagságát. | Kritikus |
-| ORG-REQ-002 | A jogosult felhasználó új tagot hívhasson meg névvel, e-mail-címmel és szerepkörrel. | Kritikus |
-| ORG-REQ-003 | A tag szerepköre a támogatott szerepkörök egyikére módosítható legyen. | Kritikus |
-| ORG-REQ-004 | Jogosultság nélküli felhasználó ne módosíthassa a tagságot vagy szerepköröket. | Kritikus |
-| ORG-REQ-005 | Sikertelen adatbetöltés vagy művelet esetén egyértelmű hibaüzenet jelenjen meg. | Magas |
+| LEGAL-REQ-001 | A Jogtár csak bejelentkezett felhasználónak legyen elérhető. | Kritikus |
+| LEGAL-REQ-002 | A szabályok cím, jogszabályhely és szöveg szerint kereshetők legyenek. | Magas |
+| LEGAL-REQ-003 | A lista legyen szűrhető réteg, szerepkör és állapot szerint. | Magas |
+| LEGAL-REQ-004 | A kiválasztott szabály szövege, jogalapjai és kapcsolódó moduljai legyenek láthatók. | Kritikus |
+| LEGAL-REQ-005 | Csak a meghívott jogász módosíthasson, menthessen és hagyhasson jóvá szabályt. | Kritikus |
+| LEGAL-REQ-006 | Jóváhagyás után az állapot, időpont, jóváhagyó és számlálók frissüljenek. | Kritikus |
+| LEGAL-REQ-007 | Minden tartalmi változás legyen verziózott és auditálható. | Kritikus |
 
-## 18. Jogszabályváltozás-figyelés
-
-| Azonosító | Követelmény | Prioritás |
-|---|---|---|
-| UPDATE-REQ-001 | Az ütemezett végpont csak érvényes CRON_SECRET használatával legyen meghívható. | Kritikus |
-| UPDATE-REQ-002 | A rendszer hetente ellenőrizze a támogatott EUR-Lex és NJT jogforrásokat. | Magas |
-| UPDATE-REQ-003 | A változatlan tartalom ne hozzon létre felesleges változásbejegyzést. | Magas |
-| UPDATE-REQ-004 | Eltéréskor a rendszer naplózza a változást, és jelölje felülvizsgálandónak az érintett elemeket. | Kritikus |
-| UPDATE-REQ-005 | A frissítési eredmény és hiba legyen auditálható. | Kritikus |
-
-## 19. Biztonsági és adatvédelmi követelmények
+## 15. Szervezet és tagok
 
 | Azonosító | Követelmény | Prioritás |
 |---|---|---|
-| SEC-REQ-001 | Minden aic_* táblán legyen aktív Row Level Security. | Kritikus |
-| SEC-REQ-002 | A kliens ne tartalmazza és ne érhesse el a SUPABASE_SERVICE_ROLE_KEY értékét. | Kritikus |
-| SEC-REQ-003 | Jogosultságot módosító művelet előtt szerveroldali felhasználó- és szerepkör-ellenőrzés történjen. | Kritikus |
-| SEC-REQ-004 | A jelszó-helyreállítás válasza ne tegye lehetővé regisztrált e-mail-címek felderítését. | Kritikus |
-| SEC-REQ-005 | Külső címre mutató, felhasználó által befolyásolható nyílt átirányítás ne legyen lehetséges. | Kritikus |
-| SEC-REQ-006 | Archivált vagy más szervezethez tartozó rendszer közvetlen azonosítóval se legyen jogosulatlanul elérhető. | Kritikus |
+| ORG-REQ-001 | A felhasználó csak saját szervezeteit és tagságait lássa. | Kritikus |
+| ORG-REQ-002 | Owner vagy admin névvel, e-maillel és engedélyezett szerepkörrel hívhasson meg tagot. | Kritikus |
+| ORG-REQ-003 | A szerepkör módosítása és tagság archiválása jogosultság-ellenőrzött legyen. | Kritikus |
+| ORG-REQ-004 | Demófelhasználó ne kezelhessen tagokat vagy szerepköröket. | Kritikus |
+| ORG-REQ-005 | Az utolsó aktív owner eltávolítása vagy lefokozása legyen tiltott. | Kritikus |
 
-## 20. Automatizálhatósági követelmények
+## 16. Adatmodell és adatmegőrzés
+
+A logikai adatmodell legalább az alábbi területeket tartalmazza:
+
+| Terület | Fő adatok |
+|---|---|
+| Felhasználó és adatvédelem | profilok, adatkezelési elfogadások |
+| Szervezet | szervezetek, tagságok, szerepkörök |
+| MI-rendszer | rendszerek, funkciók, használati profilok, életciklus, változásnapló |
+| Katalógus | iparágak, rendszer-típus sablonok, funkciók, függőségek, kérdéscsoportok, triggerek |
+| Szabályzat | generált szabályzatok, modulok, jóváhagyások, kézi beillesztések |
+| Jogtár | jogi szövegek, források, változások és frissítési futások |
+
+**DATA-REQ-001:** Minden szervezeti rekord egyértelműen kapcsolódjon szervezethez.
+**DATA-REQ-002:** Az archivált rekord megőrizze az azonosítót, előzményeket, létrehozási és módosítási adatokat.
+**DATA-REQ-003:** Idegen kulcsokkal, egyedi kulcsokkal és ellenőrző feltételekkel kell megakadályozni az érvénytelen állapotot.
+**DATA-REQ-004:** A teljes séma, függvények, RLS-szabályok, jogosultságok és seedek verziózott migrációként kerüljenek a repóba.
+**DATA-REQ-005:** Egy üres Supabase-projekt a repóból reprodukálható legyen kézi SQL-módosítás nélkül.
+
+## 17. API- és RPC-követelmények
+
+Az alkalmazás API-ja három részből áll: Supabase Auth, RLS-sel védett közvetlen táblaelérés, valamint PostgreSQL RPC-k. Ezen kívül egy saját HTTP-végpont végzi a jogforrás-frissítést.
+
+| Terület | Elvárt szerződés |
+|---|---|
+| Auth API | Regisztráció, belépés, anonim belépés, megerősítés, kijelentkezés és jelszó-helyreállítás. |
+| Szervezeti RPC | Szervezetek/tagok lekérdezése, meghívás, szerepkörváltás és archiválás. |
+| MI-rendszer RPC | Katalógus, előnézet, mentés, módosítás, archiválás és tömeges import. |
+| Szabályzat RPC | Generálás, újragenerálás, fejezetszerkesztés, modulbeillesztés, jóváhagyás és visszaküldés. |
+| Jogtár RPC | Lista, részlet, mentés és jóváhagyás. |
+| Frissítési API | `GET /api/jogszabaly-frissites`, kizárólag érvényes Bearer `CRON_SECRET` mellett. |
+
+**API-REQ-001:** Minden RPC paraméterezése és visszatérési típusa legyen verziózott és egyezzen a frontend hívásával.
+**API-REQ-002:** Hibás, hiányzó vagy jogosulatlan kérés ne módosítson adatot, és stabil hibakódot/hibaüzenetet adjon.
+**API-REQ-003:** A több rekordot módosító RPC tranzakcióban fusson.
+**API-REQ-004:** Az API ne bízzon meg a kliens által küldött szervezet- vagy szerepköradatban ellenőrzés nélkül.
+**API-REQ-005:** A service role kulcs kizárólag szerveroldali folyamatban használható és nem kerülhet klienskódba, naplóba vagy tesztartefaktumba.
+**API-REQ-006:** A jogforrás-frissítés változatlan tartalomnál ne készítsen változásbejegyzést; eltérésnél naplózza a futást és jelölje az érintett tételeket felülvizsgálandónak.
+
+## 18. Supabase RLS és biztonság
 
 | Azonosító | Követelmény | Prioritás |
 |---|---|---|
-| TEST-REQ-001 | Minden automata teszt dokumentált követelményhez és manuális tesztesethez kapcsolódjon. | Kritikus |
-| TEST-REQ-002 | A kritikus vezérlők rendelkezzenek stabil, egyedi azonosítóval vagy data-testid attribútummal. | Magas |
-| TEST-REQ-003 | A tesztek egymástól függetlenül, tetszőleges sorrendben legyenek futtathatók. | Kritikus |
-| TEST-REQ-004 | Az automata teszt csak saját, egyedileg azonosítható tesztadatot hozhasson létre és módosíthasson. | Kritikus |
-| TEST-REQ-005 | A takarítás nem törölhet más felhasználóhoz, az Okosmérőhöz vagy éles működéshez tartozó adatot. | Kritikus |
-| TEST-REQ-006 | Az alap URL legyen konfigurálható helyi, előnézeti és kijelölt tesztkörnyezethez. | Magas |
-| TEST-REQ-007 | Sikertelen pipeline őrizze meg a JUnit-riportot, a hibaüzenetet és lehetőség szerint képernyőképet. | Magas |
-| TEST-REQ-008 | Automatikus újrapróbálás nem fedhet el ismert instabilitást; a hibás teszt okát ki kell vizsgálni. | Magas |
+| SEC-REQ-001 | Minden kliensből elérhető `aic_*` táblán legyen bekapcsolt és tesztelt RLS. | Kritikus |
+| SEC-REQ-002 | A SELECT/INSERT/UPDATE/DELETE policy a felhasználó tényleges szervezeti tagságát és szerepkörét vizsgálja. | Kritikus |
+| SEC-REQ-003 | UPDATE policy tartalmazzon megfelelő `USING` és `WITH CHECK` feltételt is. | Kritikus |
+| SEC-REQ-004 | A demó anon felhasználó csak a kijelölt demóadatokat érhesse el. | Kritikus |
+| SEC-REQ-005 | A két, közös Supabase-projektben futó alkalmazás táblái, RPC-i és Storage-objektumai ne legyenek keresztben elérhetők. | Kritikus |
+| SEC-REQ-006 | Minden `SECURITY DEFINER` függvény ellenőrizze az `auth.uid()` értéket, használjon rögzített `search_path`-ot, és kapjon minimális explicit EXECUTE jogosultságot. | Kritikus |
+| SEC-REQ-007 | A veszélyes függvények alapértelmezett PUBLIC/anon végrehajtási joga legyen visszavonva. | Kritikus |
+| SEC-REQ-008 | A service role kulcs ne legyen `NEXT_PUBLIC_*` változó és ne kerüljön a böngészőbe. | Kritikus |
+| SEC-REQ-009 | Közvetlen azonosítóval se legyen olvasható vagy módosítható más szervezet vagy archivált rendszer adata. | Kritikus |
+| SEC-REQ-010 | Külső címre irányuló, felhasználó által befolyásolható nyílt átirányítás legyen tiltott. | Kritikus |
 
-## 21. Tisztázandó kérdések
+## 19. Jogszabályváltozás-figyelés
 
-| Azonosító | Kérdés | Miért szükséges? |
+| Azonosító | Követelmény | Prioritás |
 |---|---|---|
-| OPEN-001 | A demófelhasználók közös próbaszervezetet használnak, vagy minden munkamenet külön adatállományt kap? | Meghatározza az adatizolációs és takarítási teszteket. |
-| OPEN-002 | A tömeges import kizárólag XLSX-et támogat, vagy CSV-t is? | A felület XLSX és CSV fájlt jelez, a feldolgozó jelenleg csak XLSX-kiterjesztést fogad el. |
-| OPEN-003 | Üres e-mail- vagy jelszómezővel történő belépéskor külön mezőhiba vagy az általános hibaüzenet az elvárt? | A negatív bejelentkezési teszthez kell. |
-| OPEN-004 | A „törlés” kifejezést minden felületen archiválásként kell értelmezni? | A megnevezés és adatmegőrzés egységesítéséhez kell. |
-| OPEN-005 | Demómódban engedélyezett-e minden módosító művelet, vagy bizonyos műveleteket tiltani kell? | A produkciós adatok védelme és a tesztek hatóköre miatt kell. |
+| UPDATE-REQ-001 | A frissítési végpont csak érvényes `CRON_SECRET` mellett fusson. | Kritikus |
+| UPDATE-REQ-002 | A támogatott EUR-Lex és NJT forrásokat hetente, hétfőn 04:00 UTC-kor ellenőrizze. | Magas |
+| UPDATE-REQ-003 | A feldolgozás determinisztikus és újrafuttatható legyen. | Kritikus |
+| UPDATE-REQ-004 | Minden futás forrásonként rögzítse az állapotot, darabszámokat és hibát. | Kritikus |
+| UPDATE-REQ-005 | A forrásfeldolgozás részleges hibája ne maradjon észrevétlen és ne jelentsen hamis sikert. | Kritikus |
 
-## 22. Kapcsolódó tesztdokumentumok
+## 20. Nem funkcionális követelmények
 
-- `docs/kovetelmenyek.md` – tömör követelményjegyzék;
-- `docs/manualis-tesztesetek.md` – manuális tesztesetek;
+| Azonosító | Követelmény | Prioritás |
+|---|---|---|
+| NFR-001 | A felület a támogatott modern Chrome és Firefox böngészőben működjön. | Magas |
+| NFR-002 | A lényeges vezérlők billentyűzettel elérhetők és látható fókuszállapotúak legyenek. | Magas |
+| NFR-003 | Az űrlapmezőknek programozott címkéjük, a státuszüzeneteknek megfelelő akadálymentes jelzésük legyen. | Magas |
+| NFR-004 | Titok, jelszó vagy személyes adat ne kerüljön kliensnaplóba és pipeline-artefaktumba. | Kritikus |
+| NFR-005 | A produkciós függőségek között ne legyen ismert kritikus vagy magas sebezhetőség. | Kritikus |
+| NFR-006 | A build reprodukálható legyen rögzített lock fájlból. | Magas |
+
+## 21. Tesztelhetőség és CI/CD pipeline
+
+| Azonosító | Követelmény | Prioritás |
+|---|---|---|
+| TEST-REQ-001 | Minden teszt kapcsolódjon követelményazonosítóhoz. | Kritikus |
+| TEST-REQ-002 | A kritikus vezérlők kapjanak stabil `id` vagy `data-testid` azonosítót. | Magas |
+| TEST-REQ-003 | A tesztek egymástól függetlenül és tetszőleges sorrendben fussanak. | Kritikus |
+| TEST-REQ-004 | Az automata teszt csak saját, egyedileg jelölt tesztadatot módosíthat. | Kritikus |
+| TEST-REQ-005 | Takarítás nem törölhet felhasználói, más teszthez vagy az Okosmérőhöz tartozó adatot. | Kritikus |
+| TEST-REQ-006 | Az alap URL és a Supabase tesztprojekt konfigurációból legyen megadható. | Magas |
+| TEST-REQ-007 | A pipeline futtasson formázás/lint, build, egység-, API/RPC/RLS- és Selenium végponttól végpontig teszteket. | Kritikus |
+| TEST-REQ-008 | Sikertelen futás őrizze meg a JUnit XML-riportot, böngészőnaplót és képernyőképet. | Magas |
+| TEST-REQ-009 | A pipeline ne használjon éles service role kulcsot és ne fusson éles ügyféladaton. | Kritikus |
+| TEST-REQ-010 | Merge/deploy csak a kötelező tesztek sikeres futása után legyen engedélyezett. | Kritikus |
+
+## 22. Elfogadási feltételek
+
+Az alkalmazás kiadásra és stabil automata pipeline-ra akkor alkalmas, ha:
+
+1. minden kritikus követelményhez van legalább egy pozitív és szükség szerint negatív teszt;
+2. nincs nyitott kritikus vagy magas súlyosságú funkcionális/biztonsági hiba;
+3. a teljes Supabase-séma és RLS reprodukálható a repóból;
+4. az API/RPC szerződések egyeznek a klienshívásokkal;
+5. a demó- és szervezeti adatizoláció RLS-teszttel bizonyított;
+6. a Jogtár módosítását kizárólag meghívott jogász tudja végrehajtani;
+7. a build és az összes kötelező automata teszt zöld;
+8. a sikertelen tesztekhez visszakereshető riport és hibajegy készül.
+
+## 23. Repóvizsgálat során feltárt megvalósítási eltérések
+
+Ezek nem elvárt működések, hanem javítandó vagy élő környezetben igazolandó tételek.
+
+| Azonosító | Megállapítás | Súlyosság |
+|---|---|---|
+| AUDIT-001 | A repó nem tartalmazza a teljes élő Supabase-alapsémát, minden RLS policyt és minden aktuális RPC-definíciót; üres projekt nem építhető fel belőle bizonyíthatóan. | Kritikus blokkoló |
+| AUDIT-002 | A frontend több Jogtár-RPC-t más paraméterekkel hív, mint amit a repóban található SQL definiál; az élő adatbázis valószínűleg nem verziózott újabb változatot használ. | Kritikus blokkoló |
+| AUDIT-003 | A jelenlegi demócsatlakozás meglévő szervezetet választhat és `owner` tagságot adhat; ez nem felel meg a kötelező demóizolációnak. | Kritikus |
+| AUDIT-004 | A jelenlegi Jogtár-felület és SQL az `owner` számára is engedhet döntést, miközben az elvárt szabály szerint csak a meghívott jogász módosíthat/jóváhagyhat. | Kritikus |
+| AUDIT-005 | A jogszabály-frissítő útvonal a `cikkek` változót annak hatókörén kívül használja, ezért a feldolgozás után hibás forrásállapotot rögzíthet. | Magas |
+| AUDIT-006 | A repóban nincs alkalmazáskódhoz tartozó automata teszt és nincs `.github/workflows` pipeline. | Magas |
+| AUDIT-007 | A produkciós függőségek auditja 2 magas és 2 közepes sebezhetőséget jelez a jelenlegi függőségi fában. | Magas |
+| AUDIT-008 | A Next.js alkalmazás dummy környezeti változókkal sikeresen buildel; ez a fordíthatóságot igazolja, az élő Supabase/RLS működést nem. | Információ |
+
+## 24. Jóváhagyott termékdöntések
+
+1. A demómód kijelölt közös demóadatokat használ, de semmilyen más szervezet adatát nem érheti el.
+2. A demóban a fő üzleti funkciók kipróbálhatók; a Jogtár módosítása/jóváhagyása kizárólag meghívott jogászé.
+3. A tömeges import CSV- és XLSX-fájlt támogat.
+4. Az üres e-mail- és jelszómező külön hibaüzenetet kap.
+5. A felületi törlés minden esetben archiválást jelent.
+6. A Jogtárban a meghívott jogászon kívül minden szereplő csak olvasási jogosultságú.
+
+## 25. Kapcsolódó tesztdokumentumok
+
+- `docs/manualis-tesztesetek.md` – a követelményekből levezetett manuális tesztesetek;
+- `docs/hibajegyzek.md` – feltárt eltérések és újratesztelésük;
 - `docs/tesztfuttatasok.md` – végrehajtott tesztfuttatások;
-- `docs/hibajegyzek.md` – feltárt hibák és újratesztelésük;
-- tervezett: `docs/automatizalasi-matrix.md` – követelmény, manuális és automata teszt összerendelése.
+- tervezett `docs/automatizalasi-matrix.md` – követelmény, manuális és automata teszt összerendelése.
 
-## 23. Jóváhagyás
+## 26. Auditkorlát
 
-A specifikáció a **Tisztázandó kérdések** megválaszolása és a modulonkénti tulajdonosi ellenőrzés után tekinthető végleges tesztalapnak. Addig a dokumentum 0.1-es tervezet.
+A repó teljes tartalma átvizsgálható volt. Az élő Supabase-adatbázis tényleges táblái, aktuális RPC-függvényei, RLS policyjai, Auth-beállításai és adatai azonban nem mind szerepelnek a repóban, ezért azok teljes igazolásához biztonságos sémaexport vagy közvetlen, csak olvasási Supabase-vizsgálat szükséges. Ez nem a specifikáció hiánya, hanem a megvalósítás ellenőrzésének jelenlegi korlátja.
